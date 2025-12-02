@@ -1225,7 +1225,11 @@
             );
 
             // Open Outlook with pre-filled email
-            window.location.href = `mailto:?subject=${subject}&body=${body}`;
+            const to = 'whoever@yourcompany.com';
+            const mailtoUrl = `mailto:${to}?subject=${subject}&body=${body}`;
+
+            console.log('Navigating to:', mailtoUrl);
+            window.location.href = mailtoUrl;
         }
 
         function exportToTeams() {
