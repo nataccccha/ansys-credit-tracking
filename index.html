@@ -126,7 +126,7 @@
             background: var(--bg-card);
             border: 2px dashed var(--border);
             border-radius: 16px;
-            padding: 30px;
+            padding: 20px;
             text-align: center;
             transition: all 0.3s ease;
         }
@@ -149,8 +149,8 @@
         }
 
         .upload-section h3 {
-            font-size: 1.5rem;
-            margin-bottom: 12px;
+            font-size: 1.2rem;
+            margin-bottom: 8px;
         }
 
         .upload-label {
@@ -178,8 +178,8 @@
             background: linear-gradient(135deg, var(--accent-info), var(--accent-success));
             color: white;
             border: none;
-            padding: 14px 32px;
-            font-size: 0.95rem;
+            padding: 10px 24px;
+            font-size: 0.9rem;
             font-weight: 600;
             border-radius: 12px;
             cursor: pointer;
@@ -614,7 +614,7 @@
             <div class="upload-section" id="historicalUploadSection">
                 <span class="upload-label historical">Historical Data</span>
                 <h3>Last Year Usage</h3>
-                <p style="color: var(--text-secondary); margin-bottom: 20px; font-size: 0.9rem;">
+                <p style="color: var(--text-secondary); margin-bottom: 12px; font-size: 0.85rem;">
                     Upload CSV with full year of historical data
                 </p>
                 <input type="file" id="historicalFile" accept=".csv">
@@ -627,7 +627,7 @@
             <div class="upload-section" id="recentUploadSection">
                 <span class="upload-label">Recent Data</span>
                 <h3>Last Week Usage</h3>
-                <p style="color: var(--text-secondary); margin-bottom: 20px; font-size: 0.9rem;">
+                <p style="color: var(--text-secondary); margin-bottom: 12px; font-size: 0.85rem;">
                     Upload CSV with most recent week of data
                 </p>
                 <input type="file" id="recentFile" accept=".csv">
@@ -744,7 +744,7 @@
                 </p>
                 <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
                     <button class="purchase-btn pulse" onclick="requestPurchase()">
-                        Request AEC Purchase
+                        Request AEC purchase
                     </button>
                     <button class="purchase-btn" style="background: linear-gradient(135deg, var(--accent-purple), var(--accent-info)); box-shadow: 0 4px 16px rgba(147, 51, 234, 0.3);" onclick="exportToTeams()">
                         Export to Teams
@@ -1247,31 +1247,34 @@
             const alerts = Array.from(document.querySelectorAll('.alert-card')).slice(0, 3);
             let topUsersText = '';
             if (alerts.length > 0) {
-                topUsersText = '\n\n**High Usage Users:**\n';
+                topUsersText = '\n\nHIGH USAGE USERS:\n';
                 alerts.forEach(alert => {
                     const userName = alert.querySelector('.alert-user').textContent;
                     const level = alert.querySelector('.alert-badge').textContent;
-                    topUsersText += `- ${userName} (${level})\n`;
+                    topUsersText += `  • ${userName} (${level})\n`;
                 });
             }
 
-            const message = `**ANSYS AEC Usage Status Update** ${statusEmoji}\n\n` +
-                `**Overall Status:** ${statusText}\n\n` +
-                `**Current Metrics:**\n` +
-                `- Current Balance: ${currentBalance.toFixed(1)} AEC\n` +
-                `- Burn Rate: ${recentWeekly.toFixed(1)} AEC/week\n` +
-                `- Projected Monthly: ${projectedMonthly.toFixed(1)} AEC/month\n` +
-                `- Historical Average: ${historicalAvg.toFixed(1)} AEC/month\n` +
-                `- Trend: ${projectedMonthly > historicalAvg ? '↑' : '↓'} ${Math.abs(((projectedMonthly - historicalAvg) / historicalAvg) * 100).toFixed(0)}%\n\n` +
-                `**Runway:**\n` +
-                `- Time Remaining: ${runwayWeeks.toFixed(1)} weeks (${runway.toFixed(1)} months)\n` +
-                `- Projected Depletion: ${document.getElementById('depletionWarning').textContent}\n\n` +
-                `**Thresholds:**\n` +
-                `- Critical Rate: ${calculatedThresholds.criticalWeekly.toFixed(1)} AEC/week\n` +
-                `- Warning Rate: ${calculatedThresholds.warningWeekly.toFixed(1)} AEC/week\n` +
-                `- Safe Rate: ${calculatedThresholds.safeWeekly.toFixed(1)} AEC/week${topUsersText}\n\n` +
-                `${alertCount > 0 ? `⚠️ ${alertCount} user(s) flagged for high usage\n\n` : ''}` +
-                `_Updated: ${new Date().toLocaleString()}_`;
+            const message = `═══════════════════════════════════════\n` +
+                `ANSYS AEC USAGE STATUS UPDATE ${statusEmoji}\n` +
+                `═══════════════════════════════════════\n\n` +
+                `OVERALL STATUS: ${statusText}\n\n` +
+                `CURRENT METRICS:\n` +
+                `  • Current Balance: ${currentBalance.toFixed(1)} AEC\n` +
+                `  • Burn Rate: ${recentWeekly.toFixed(1)} AEC/week\n` +
+                `  • Projected Monthly: ${projectedMonthly.toFixed(1)} AEC/month\n` +
+                `  • Historical Average: ${historicalAvg.toFixed(1)} AEC/month\n` +
+                `  • Trend: ${projectedMonthly > historicalAvg ? '↑' : '↓'} ${Math.abs(((projectedMonthly - historicalAvg) / historicalAvg) * 100).toFixed(0)}%\n\n` +
+                `RUNWAY:\n` +
+                `  • Time Remaining: ${runwayWeeks.toFixed(1)} weeks (${runway.toFixed(1)} months)\n` +
+                `  • Projected Depletion: ${document.getElementById('depletionWarning').textContent}\n\n` +
+                `THRESHOLDS:\n` +
+                `  • Critical Rate: ${calculatedThresholds.criticalWeekly.toFixed(1)} AEC/week\n` +
+                `  • Warning Rate: ${calculatedThresholds.warningWeekly.toFixed(1)} AEC/week\n` +
+                `  • Safe Rate: ${calculatedThresholds.safeWeekly.toFixed(1)} AEC/week${topUsersText}\n\n` +
+                `${alertCount > 0 ? `⚠️  ${alertCount} user(s) flagged for high usage\n\n` : ''}` +
+                `Updated: ${new Date().toLocaleString()}\n` +
+                `═══════════════════════════════════════`;
 
             // Copy to clipboard
             navigator.clipboard.writeText(message).then(() => {
