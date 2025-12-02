@@ -739,7 +739,8 @@
                 <h2 style="margin-bottom: 16px; font-size: 2rem;">Running Low on Credits?</h2>
                 <p style="color: var(--text-secondary); margin-bottom: 24px; font-size: 1.1rem;">
                     Current balance: <strong id="balanceWarning" style="color: var(--accent-warning);">0 AEC</strong><br>
-                    Projected depletion: <strong id="depletionWarning" style="color: var(--accent-danger);"></strong>
+                    Projected depletion: <strong id="depletionWarning" style="color: var(--accent-danger);"></strong><br>
+                    <span id="depletionWeeks" style="font-size: 0.95rem;"></span>
                 </p>
                 <button class="purchase-btn pulse" onclick="requestPurchase()">
                     🚀 Request 5,000 AEC Purchase
@@ -937,8 +938,21 @@
                 const today = new Date();
                 const depletionDate = new Date(today.getTime() + (runwayMonths * 30.44 * 24 * 60 * 60 * 1000));
                 document.getElementById('depletionWarning').textContent = `~${depletionDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}`;
+                
+                // Add weeks display
+                const weeksText = runwayWeeks < 1 
+                    ? `(⚠️ Less than 1 week remaining!)` 
+                    : `(~${runwayWeeks.toFixed(1)} weeks remaining)`;
+                document.getElementById('depletionWeeks').innerHTML = weeksText;
+                document.getElementById('depletionWeeks').style.color = runwayWeeks <= settings.leadTimeWeeks 
+                    ? 'var(--accent-danger)' 
+                    : runwayWeeks <= settings.leadTimeWeeks * 2 
+                    ? 'var(--accent-warning)' 
+                    : 'var(--text-secondary)';
             } else {
                 document.getElementById('depletionWarning').textContent = '12+ months';
+                document.getElementById('depletionWeeks').innerHTML = '(52+ weeks remaining)';
+                document.getElementById('depletionWeeks').style.color = 'var(--accent-success)';
             }
 
             // Show purchase section if we're in warning or critical zone
@@ -1167,7 +1181,7 @@
                     <thead>
                         <tr>
                             <th>User</th>
-                            <th style="text-align: right;">Projected</th>
+                            <th style="text-align: right;">Projected/Month</th>
                             <th style="text-align: right;">vs Avg</th>
                         </tr>
                     </thead>
@@ -1175,7 +1189,7 @@
                         ${recentUsers.map(({user, projected, change}) => `
                             <tr>
                                 <td style="font-weight: 600;">${user}</td>
-                                <td style="text-align: right; font-weight: 600; color: var(--accent-info);">${projected.toFixed(1)}</td>
+                                <td style="text-align: right; font-weight: 600; color: var(--accent-info);">${projected.toFixed(1)} AEC</td>
                                 <td style="text-align: right; font-weight: 600; color: ${change > 20 ? 'var(--accent-danger)' : change < -20 ? 'var(--accent-success)' : 'var(--text-secondary)'};">
                                     ${change === 999 ? 'NEW' : (change > 0 ? '+' : '') + change.toFixed(0) + '%'}
                                 </td>
