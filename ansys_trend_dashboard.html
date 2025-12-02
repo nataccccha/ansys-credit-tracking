@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ANSYS AEC Trend Analysis</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Bricolage+Grotesque:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #f8f9fc;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --accent-danger: #dc2626;
+            --accent-warning: #ea580c;
+            --accent-success: #059669;
+            --accent-info: #0284c7;
+            --accent-purple: #9333ea;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --glow-danger: rgba(220, 38, 38, 0.2);
+            --glow-warning: rgba(234, 88, 12, 0.2);
+            --glow-success: rgba(5, 150, 105, 0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Bricolage Grotesque', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .dashboard-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            position: relative;
+        }
+
+        .bg-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(var(--border) 1px, transparent 1px),
+                linear-gradient(90deg, var(--border) 1px, transparent 1px);
+            background-size: 50px 50px;
+            opacity: 0.4;
+            z-index: 0;
+            animation: gridPulse 20s ease-in-out infinite;
+        }
+
+        @keyframes gridPulse {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 0.25; }
+        }
+
+        header {
+            position: relative;
+            z-index: 1;
+            margin-bottom: 50px;
+            animation: slideDown 0.8s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, var(--accent-info) 0%, var(--accent-purple) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.02em;
+        }
+
+        .subtitle {
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .upload-grid {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 40px;
+            animation: fadeIn 1s ease-out 0.2s both;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .upload-section {
+            background: var(--bg-card);
+            border: 2px dashed var(--border);
+            border-radius: 16px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .upload-section:hover {
+            border-color: var(--accent-info);
+            background: rgba(2, 132, 199, 0.05);
+        }
+
+        .upload-section.dragover {
+            border-color: var(--accent-success);
+            background: rgba(5, 150, 105, 0.05);
+            transform: scale(1.02);
+        }
+
+        .upload-section.loaded {
+            border-color: var(--accent-success);
+            border-style: solid;
+            background: rgba(5, 150, 105, 0.05);
+        }
+
+        .upload-section h3 {
+            font-size: 1.5rem;
+            margin-bottom: 12px;
+        }
+
+        .upload-label {
+            display: inline-block;
+            padding: 4px 12px;
+            background: var(--accent-info);
+            color: white;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 12px;
+        }
+
+        .upload-label.historical {
+            background: var(--accent-purple);
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .upload-btn {
+            background: linear-gradient(135deg, var(--accent-info), var(--accent-success));
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            font-family: 'Bricolage Grotesque', sans-serif;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(2, 132, 199, 0.35);
+        }
+
+        .upload-btn.historical {
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-info));
+        }
+
+        .file-status {
+            margin-top: 16px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            min-height: 20px;
+        }
+
+        .settings-section {
+            position: relative;
+            z-index: 1;
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 40px;
+            border: 1px solid var(--border);
+            animation: fadeIn 1s ease-out 0.4s both;
+        }
+
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+            margin-top: 20px;
+        }
+
+        .setting-item label {
+            display: block;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .setting-item input {
+            width: 100%;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: 'JetBrains Mono', monospace;
+            transition: all 0.3s ease;
+        }
+
+        .setting-item input:focus {
+            outline: none;
+            border-color: var(--accent-info);
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);
+        }
+
+        .stats-grid {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+            animation: fadeIn 1s ease-out 0.6s both;
+        }
+
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-info), var(--accent-purple));
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+        }
+
+        .stat-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .stat-subtext {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .trend-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        .trend-indicator.up {
+            background: rgba(220, 38, 38, 0.15);
+            color: var(--accent-danger);
+        }
+
+        .trend-indicator.down {
+            background: rgba(5, 150, 105, 0.15);
+            color: var(--accent-success);
+        }
+
+        .trend-indicator.stable {
+            background: rgba(100, 116, 139, 0.15);
+            color: var(--text-secondary);
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .comparison-section {
+            position: relative;
+            z-index: 1;
+            margin-bottom: 40px;
+            animation: fadeIn 1s ease-out 0.8s both;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .comparison-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 30px;
+        }
+
+        .comparison-card h3 {
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .period-badge {
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .period-badge.historical {
+            background: rgba(147, 51, 234, 0.15);
+            color: var(--accent-purple);
+        }
+
+        .period-badge.recent {
+            background: rgba(2, 132, 199, 0.15);
+            color: var(--accent-info);
+        }
+
+        .alerts-section {
+            position: relative;
+            z-index: 1;
+            margin-bottom: 40px;
+            animation: fadeIn 1s ease-out 1s both;
+        }
+
+        .alert-card {
+            background: var(--bg-card);
+            border-left: 4px solid var(--accent-danger);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .alert-card.critical {
+            animation: alertPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes alertPulse {
+            0%, 100% { box-shadow: 0 0 20px var(--glow-danger); }
+            50% { box-shadow: 0 0 40px var(--glow-danger); }
+        }
+
+        .alert-card.warning {
+            border-left-color: var(--accent-warning);
+            animation: warningPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes warningPulse {
+            0%, 100% { box-shadow: 0 0 20px var(--glow-warning); }
+            50% { box-shadow: 0 0 40px var(--glow-warning); }
+        }
+
+        .alert-card.accelerating {
+            border-left-color: var(--accent-purple);
+            animation: accelPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes accelPulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(168, 85, 247, 0.3); }
+            50% { box-shadow: 0 0 40px rgba(168, 85, 247, 0.3); }
+        }
+
+        .alert-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .alert-user {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .alert-badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .alert-badge.critical {
+            background: var(--accent-danger);
+            color: white;
+        }
+
+        .alert-badge.high {
+            background: var(--accent-warning);
+            color: white;
+        }
+
+        .alert-badge.accelerating {
+            background: var(--accent-purple);
+            color: white;
+        }
+
+        .alert-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .alert-metric {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+        }
+
+        .alert-metric-label {
+            color: var(--text-secondary);
+        }
+
+        .alert-metric-value {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-top: 4px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+        }
+
+        th {
+            text-align: left;
+            padding: 16px;
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 0.75rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        td {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+            transition: background 0.2s ease;
+        }
+
+        tr:hover td {
+            background: rgba(2, 132, 199, 0.05);
+        }
+
+        .usage-bar {
+            height: 8px;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .usage-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-info), var(--accent-success));
+            transition: width 1s ease;
+        }
+
+        .usage-bar-fill.high {
+            background: linear-gradient(90deg, var(--accent-warning), var(--accent-danger));
+        }
+
+        .purchase-section {
+            position: relative;
+            z-index: 1;
+            background: linear-gradient(135deg, rgba(2, 132, 199, 0.08), rgba(147, 51, 234, 0.08));
+            border: 2px solid var(--accent-info);
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            animation: fadeIn 1s ease-out 1.2s both;
+        }
+
+        .purchase-btn {
+            background: linear-gradient(135deg, var(--accent-danger), var(--accent-warning));
+            color: white;
+            border: none;
+            padding: 20px 50px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            font-family: 'Bricolage Grotesque', sans-serif;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 16px rgba(220, 38, 38, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .purchase-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(220, 38, 38, 0.4);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .pulse {
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @media (max-width: 1024px) {
+            .upload-grid,
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+    
+    <div class="dashboard-container">
+        <header>
+            <h1>ANSYS AEC Trend Analysis</h1>
+            <p class="subtitle">Historical vs Recent Usage Comparison</p>
+        </header>
+
+        <div class="upload-grid">
+            <div class="upload-section" id="historicalUploadSection">
+                <span class="upload-label historical">Historical Data</span>
+                <h3>Last Year Usage</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 20px; font-size: 0.9rem;">
+                    Upload CSV with full year of historical data
+                </p>
+                <input type="file" id="historicalFile" accept=".csv">
+                <button class="upload-btn historical" onclick="document.getElementById('historicalFile').click()">
+                    Choose Historical CSV
+                </button>
+                <p id="historicalStatus" class="file-status"></p>
+            </div>
+
+            <div class="upload-section" id="recentUploadSection">
+                <span class="upload-label">Recent Data</span>
+                <h3>Last Week Usage</h3>
+                <p style="color: var(--text-secondary); margin-bottom: 20px; font-size: 0.9rem;">
+                    Upload CSV with most recent week of data
+                </p>
+                <input type="file" id="recentFile" accept=".csv">
+                <button class="upload-btn" onclick="document.getElementById('recentFile').click()">
+                    Choose Recent CSV
+                </button>
+                <p id="recentStatus" class="file-status"></p>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <h2 class="section-title">Alert Settings</h2>
+            <div class="settings-grid">
+                <div class="setting-item">
+                    <label>Available Balance (AEC)</label>
+                    <input type="number" id="availableBalance" value="5000" min="0">
+                </div>
+                <div class="setting-item">
+                    <label>Procurement Lead Time (weeks)</label>
+                    <input type="number" id="leadTimeWeeks" value="2" min="0" step="0.5">
+                    <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px;">Time required to receive new credits</p>
+                </div>
+                <div class="setting-item">
+                    <label>Purchase Order Amount (AEC)</label>
+                    <input type="number" id="purchaseAmount" value="5000" min="0">
+                </div>
+                <div class="setting-item">
+                    <label>Acceleration Alert (%)</label>
+                    <input type="number" id="accelThreshold" value="50" min="0">
+                    <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px;">Alert if recent usage is X% higher than average</p>
+                </div>
+            </div>
+            <div id="calculatedThresholds" style="margin-top: 24px; padding: 20px; background: var(--bg-secondary); border-radius: 12px; border: 1px solid var(--border);">
+                <h3 style="font-size: 1.1rem; margin-bottom: 12px; color: var(--text-primary);">📊 Calculated Thresholds</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                    <div>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary); font-family: 'JetBrains Mono', monospace;">Critical Weekly Rate</div>
+                        <div id="criticalWeeklyRate" style="font-size: 1.4rem; font-weight: 600; color: var(--accent-danger); margin-top: 4px;">-</div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px;">Users above this need immediate attention</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary); font-family: 'JetBrains Mono', monospace;">Warning Weekly Rate</div>
+                        <div id="warningWeeklyRate" style="font-size: 1.4rem; font-weight: 600; color: var(--accent-warning); margin-top: 4px;">-</div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px;">Buffer zone - monitor closely</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary); font-family: 'JetBrains Mono', monospace;">Safe Weekly Rate</div>
+                        <div id="safeWeeklyRate" style="font-size: 1.4rem; font-weight: 600; color: var(--accent-success); margin-top: 4px;">-</div>
+                        <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px;">Sustainable consumption level</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="dashboardContent" class="hidden">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Historical Avg/Month</div>
+                    <div class="stat-value" id="historicalAvg" style="color: var(--accent-purple);">0</div>
+                    <div class="stat-subtext">AEC per month (yearly avg)</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Recent Weekly Usage</div>
+                    <div class="stat-value" id="recentWeekly" style="color: var(--accent-info);">0</div>
+                    <div class="stat-subtext">AEC in last week</div>
+                    <div id="weeklyTrend"></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Projected Monthly</div>
+                    <div class="stat-value" id="projectedMonthly" style="color: var(--accent-warning);">0</div>
+                    <div class="stat-subtext">Based on recent pace</div>
+                    <div id="projectionTrend"></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Balance Runway</div>
+                    <div class="stat-value" id="runwayMonths" style="color: var(--accent-success);">0</div>
+                    <div class="stat-subtext">months remaining</div>
+                </div>
+            </div>
+
+            <div class="alerts-section">
+                <h2 class="section-title">
+                    <span>⚡ Usage Alerts</span>
+                </h2>
+                <div id="alertsList"></div>
+            </div>
+
+            <div class="comparison-section">
+                <h2 class="section-title">User Comparison</h2>
+                <div class="comparison-grid">
+                    <div class="comparison-card">
+                        <h3>
+                            <span class="period-badge historical">Historical</span>
+                            Average Usage
+                        </h3>
+                        <div id="historicalUserTable"></div>
+                    </div>
+                    <div class="comparison-card">
+                        <h3>
+                            <span class="period-badge recent">Recent Week</span>
+                            Current Usage
+                        </h3>
+                        <div id="recentUserTable"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="purchase-section" id="purchaseSection">
+                <h2 style="margin-bottom: 16px; font-size: 2rem;">Running Low on Credits?</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 24px; font-size: 1.1rem;">
+                    Current balance: <strong id="balanceWarning" style="color: var(--accent-warning);">0 AEC</strong><br>
+                    Projected depletion: <strong id="depletionWarning" style="color: var(--accent-danger);"></strong>
+                </p>
+                <button class="purchase-btn pulse" onclick="requestPurchase()">
+                    🚀 Request 5,000 AEC Purchase
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let historicalData = [];
+        let recentData = [];
+        let settings = {
+            leadTimeWeeks: 2,
+            accelThreshold: 50,
+            availableBalance: 5000,
+            purchaseAmount: 5000
+        };
+        let calculatedThresholds = {
+            criticalWeekly: 0,
+            warningWeekly: 0,
+            safeWeekly: 0
+        };
+
+        // File upload handlers
+        document.getElementById('historicalFile').addEventListener('change', function(e) {
+            handleFileUpload(e.target.files[0], 'historical');
+        });
+
+        document.getElementById('recentFile').addEventListener('change', function(e) {
+            handleFileUpload(e.target.files[0], 'recent');
+        });
+
+        // Drag and drop
+        setupDragDrop('historicalUploadSection', 'historicalFile');
+        setupDragDrop('recentUploadSection', 'recentFile');
+
+        function setupDragDrop(sectionId, fileInputId) {
+            const section = document.getElementById(sectionId);
+            section.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                section.classList.add('dragover');
+            });
+            section.addEventListener('dragleave', () => {
+                section.classList.remove('dragover');
+            });
+            section.addEventListener('drop', (e) => {
+                e.preventDefault();
+                section.classList.remove('dragover');
+                const file = e.dataTransfer.files[0];
+                if (file && file.name.endsWith('.csv')) {
+                    document.getElementById(fileInputId).files = e.dataTransfer.files;
+                    handleFileUpload(file, fileInputId === 'historicalFile' ? 'historical' : 'recent');
+                }
+            });
+        }
+
+        // Settings change handlers
+        ['leadTimeWeeks', 'accelThreshold', 'availableBalance', 'purchaseAmount'].forEach(id => {
+            document.getElementById(id).addEventListener('change', function() {
+                settings[id] = parseFloat(this.value);
+                if (historicalData.length > 0 && recentData.length > 0) {
+                    updateDashboard();
+                }
+            });
+        });
+
+        function handleFileUpload(file, type) {
+            if (!file) return;
+            
+            const statusId = type === 'historical' ? 'historicalStatus' : 'recentStatus';
+            const sectionId = type === 'historical' ? 'historicalUploadSection' : 'recentUploadSection';
+            
+            document.getElementById(statusId).innerHTML = `<span style="color: var(--accent-info);">Loading: ${file.name}</span>`;
+            
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const data = parseCSV(event.target.result);
+                
+                if (type === 'historical') {
+                    historicalData = data;
+                } else {
+                    recentData = data;
+                }
+                
+                document.getElementById(statusId).innerHTML = `<span style="color: var(--accent-success);">✓ Loaded: ${file.name}</span>`;
+                document.getElementById(sectionId).classList.add('loaded');
+                
+                if (historicalData.length > 0 && recentData.length > 0) {
+                    setTimeout(() => {
+                        document.getElementById('dashboardContent').classList.remove('hidden');
+                        updateDashboard();
+                    }, 300);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function parseCSV(text) {
+            const lines = text.trim().split('\n');
+            const headers = lines[0].split(',').map(h => h.trim());
+            
+            return lines.slice(1).map(line => {
+                const values = line.split(',');
+                const row = {};
+                headers.forEach((header, i) => {
+                    row[header] = values[i] ? values[i].trim() : '';
+                });
+                return row;
+            });
+        }
+
+        function updateDashboard() {
+            // Calculate recent metrics first
+            const recentTotal = recentData.reduce((sum, row) => sum + parseFloat(row['Cost'] || 0), 0);
+            const totalUsers = new Set(recentData.map(row => row['Username'])).size;
+            
+            // Calculate dynamic thresholds based on burn rate and lead time
+            // Critical: If we continue at this rate, will we run out before new credits arrive?
+            // We need enough buffer for lead time + some safety margin
+            const leadTimeBuffer = settings.leadTimeWeeks * 1.5; // 1.5x safety factor
+            const warningBuffer = settings.leadTimeWeeks * 2; // 2x for early warning
+            const safeBuffer = settings.leadTimeWeeks * 3; // 3x for comfortable operation
+            
+            // Calculate weekly rates based on available balance
+            calculatedThresholds.criticalWeekly = settings.availableBalance / leadTimeBuffer;
+            calculatedThresholds.warningWeekly = settings.availableBalance / warningBuffer;
+            calculatedThresholds.safeWeekly = settings.availableBalance / safeBuffer;
+            
+            // Update threshold display
+            document.getElementById('criticalWeeklyRate').textContent = `${calculatedThresholds.criticalWeekly.toFixed(1)} AEC/week`;
+            document.getElementById('warningWeeklyRate').textContent = `${calculatedThresholds.warningWeekly.toFixed(1)} AEC/week`;
+            document.getElementById('safeWeeklyRate').textContent = `${calculatedThresholds.safeWeekly.toFixed(1)} AEC/week`;
+            
+            // Calculate historical metrics
+            const historicalByMonth = {};
+            historicalData.forEach(row => {
+                const startTime = row['Start Time'];
+                if (startTime) {
+                    const month = startTime.substring(0, 7);
+                    const cost = parseFloat(row['Cost'] || 0);
+                    historicalByMonth[month] = (historicalByMonth[month] || 0) + cost;
+                }
+            });
+
+            const historicalMonthlyValues = Object.values(historicalByMonth);
+            const historicalAvgMonthly = historicalMonthlyValues.length > 0 
+                ? historicalMonthlyValues.reduce((a, b) => a + b, 0) / historicalMonthlyValues.length 
+                : 0;
+
+            const projectedMonthly = recentTotal * 4.33; // weeks to month conversion
+
+            // Calculate runway
+            const runwayWeeks = recentTotal > 0 ? settings.availableBalance / recentTotal : 999;
+            const runwayMonths = runwayWeeks / 4.33;
+
+            // Update stats
+            document.getElementById('historicalAvg').textContent = historicalAvgMonthly.toFixed(1);
+            document.getElementById('recentWeekly').textContent = recentTotal.toFixed(1);
+            document.getElementById('projectedMonthly').textContent = projectedMonthly.toFixed(1);
+            document.getElementById('runwayMonths').textContent = runwayMonths.toFixed(1);
+
+            // Add trend indicators
+            const weeklyChange = ((projectedMonthly - historicalAvgMonthly) / historicalAvgMonthly) * 100;
+            const weeklyTrendHTML = getTrendHTML(weeklyChange);
+            document.getElementById('weeklyTrend').innerHTML = weeklyTrendHTML;
+            document.getElementById('projectionTrend').innerHTML = weeklyTrendHTML;
+
+            // Add burn rate status
+            let burnRateStatus = '';
+            if (recentTotal > calculatedThresholds.criticalWeekly) {
+                burnRateStatus = '<div class="trend-indicator up" style="margin-top: 8px;">🔥 Critical burn rate</div>';
+            } else if (recentTotal > calculatedThresholds.warningWeekly) {
+                burnRateStatus = '<div class="trend-indicator" style="margin-top: 8px; background: rgba(234, 88, 12, 0.15); color: var(--accent-warning);">⚠️ Elevated burn rate</div>';
+            } else {
+                burnRateStatus = '<div class="trend-indicator down" style="margin-top: 8px;">✓ Sustainable rate</div>';
+            }
+            document.getElementById('weeklyTrend').innerHTML += burnRateStatus;
+
+            // Calculate user metrics
+            const historicalByUser = calculateUserMetrics(historicalData);
+            const recentByUser = calculateUserMetrics(recentData);
+
+            // Generate alerts with dynamic thresholds
+            const alerts = generateAlerts(historicalByUser, recentByUser, historicalAvgMonthly, projectedMonthly);
+            renderAlerts(alerts);
+
+            // Render comparison tables
+            renderUserComparison(historicalByUser, recentByUser);
+
+            // Update purchase section
+            const currentBalance = settings.availableBalance;
+            document.getElementById('balanceWarning').textContent = `${currentBalance.toFixed(1)} AEC`;
+            
+            if (runwayMonths < 12) {
+                const today = new Date();
+                const depletionDate = new Date(today.getTime() + (runwayMonths * 30.44 * 24 * 60 * 60 * 1000));
+                document.getElementById('depletionWarning').textContent = `~${depletionDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}`;
+            } else {
+                document.getElementById('depletionWarning').textContent = '12+ months';
+            }
+
+            // Show purchase section if we're in warning or critical zone
+            if (recentTotal > calculatedThresholds.warningWeekly || runwayWeeks <= settings.leadTimeWeeks * 2) {
+                document.getElementById('purchaseSection').style.display = 'block';
+            }
+        }
+
+        function getTrendHTML(changePercent) {
+            if (Math.abs(changePercent) < 10) {
+                return `<span class="trend-indicator stable">≈ ${Math.abs(changePercent).toFixed(0)}% stable</span>`;
+            } else if (changePercent > 0) {
+                return `<span class="trend-indicator up">↑ ${changePercent.toFixed(0)}% higher</span>`;
+            } else {
+                return `<span class="trend-indicator down">↓ ${Math.abs(changePercent).toFixed(0)}% lower</span>`;
+            }
+        }
+
+        function calculateUserMetrics(data) {
+            const userByMonth = {};
+            
+            data.forEach(row => {
+                const user = row['Username'];
+                const startTime = row['Start Time'];
+                if (user && startTime) {
+                    if (!userByMonth[user]) {
+                        userByMonth[user] = {};
+                    }
+                    const month = startTime.substring(0, 7);
+                    const cost = parseFloat(row['Cost'] || 0);
+                    userByMonth[user][month] = (userByMonth[user][month] || 0) + cost;
+                }
+            });
+
+            const userMetrics = {};
+            Object.keys(userByMonth).forEach(user => {
+                const monthlyValues = Object.values(userByMonth[user]);
+                const total = monthlyValues.reduce((a, b) => a + b, 0);
+                const avg = total / monthlyValues.length;
+                const max = Math.max(...monthlyValues);
+                
+                userMetrics[user] = {
+                    total,
+                    avgMonthly: avg,
+                    maxMonthly: max,
+                    months: monthlyValues.length
+                };
+            });
+
+            return userMetrics;
+        }
+
+        function generateAlerts(historicalByUser, recentByUser, historicalAvgMonthly, projectedMonthly) {
+            const alerts = [];
+
+            // Check each user in recent data
+            Object.keys(recentByUser).forEach(user => {
+                const recentWeekly = recentByUser[user].total;
+                const recentProjected = recentWeekly * 4.33;
+                
+                const historical = historicalByUser[user];
+                
+                if (!historical) {
+                    // New user - check against critical weekly threshold
+                    if (recentWeekly >= calculatedThresholds.criticalWeekly) {
+                        alerts.push({
+                            user,
+                            level: 'critical',
+                            type: 'new-critical',
+                            recentWeekly,
+                            recentProjected,
+                            historicalAvg: 0,
+                            change: 999,
+                            reason: `New user consuming ${recentWeekly.toFixed(1)} AEC/week (critical threshold: ${calculatedThresholds.criticalWeekly.toFixed(1)} AEC/week)`
+                        });
+                    } else if (recentWeekly >= calculatedThresholds.warningWeekly) {
+                        alerts.push({
+                            user,
+                            level: 'high',
+                            type: 'new-warning',
+                            recentWeekly,
+                            recentProjected,
+                            historicalAvg: 0,
+                            change: 999,
+                            reason: `New user with elevated usage: ${recentWeekly.toFixed(1)} AEC/week`
+                        });
+                    }
+                } else {
+                    const historicalAvg = historical.avgMonthly;
+                    const historicalWeekly = historicalAvg / 4.33;
+                    const change = ((recentWeekly - historicalWeekly) / historicalWeekly) * 100;
+                    
+                    // Critical: User's weekly rate exceeds critical threshold
+                    if (recentWeekly >= calculatedThresholds.criticalWeekly) {
+                        alerts.push({
+                            user,
+                            level: 'critical',
+                            type: 'burn-rate',
+                            recentWeekly,
+                            recentProjected,
+                            historicalAvg,
+                            change,
+                            reason: `Weekly rate ${recentWeekly.toFixed(1)} AEC exceeds critical threshold ${calculatedThresholds.criticalWeekly.toFixed(1)} AEC. At this rate, balance depletes before new credits arrive.`
+                        });
+                    }
+                    // Warning: User's weekly rate exceeds warning threshold
+                    else if (recentWeekly >= calculatedThresholds.warningWeekly) {
+                        alerts.push({
+                            user,
+                            level: 'high',
+                            type: 'burn-rate',
+                            recentWeekly,
+                            recentProjected,
+                            historicalAvg,
+                            change,
+                            reason: `Weekly rate ${recentWeekly.toFixed(1)} AEC exceeds warning threshold ${calculatedThresholds.warningWeekly.toFixed(1)} AEC`
+                        });
+                    }
+                    // Acceleration alert: Usage increased significantly vs historical
+                    else if (change >= settings.accelThreshold) {
+                        alerts.push({
+                            user,
+                            level: 'accelerating',
+                            type: 'acceleration',
+                            recentWeekly,
+                            recentProjected,
+                            historicalAvg,
+                            change,
+                            reason: `Usage accelerating: ${change.toFixed(0)}% above historical average`
+                        });
+                    }
+                }
+            });
+
+            return alerts.sort((a, b) => {
+                const levelOrder = { critical: 0, high: 1, accelerating: 2 };
+                return levelOrder[a.level] - levelOrder[b.level];
+            });
+        }
+
+        function renderAlerts(alerts) {
+            const alertsList = document.getElementById('alertsList');
+            
+            if (alerts.length === 0) {
+                alertsList.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 40px;">✓ No alerts. All users are within safe consumption rates.</p>';
+                return;
+            }
+
+            alertsList.innerHTML = alerts.map(alert => {
+                const description = alert.reason || 'Usage requires attention';
+
+                return `
+                    <div class="alert-card ${alert.level}">
+                        <div class="alert-header">
+                            <div class="alert-user">${alert.user}</div>
+                            <div class="alert-badge ${alert.level}">${alert.level}</div>
+                        </div>
+                        <p style="color: var(--text-secondary); margin-bottom: 16px; line-height: 1.5;">${description}</p>
+                        <div class="alert-details">
+                            <div class="alert-metric">
+                                <div class="alert-metric-label">Recent Week</div>
+                                <div class="alert-metric-value" style="color: var(--accent-info);">${alert.recentWeekly.toFixed(1)} AEC</div>
+                            </div>
+                            <div class="alert-metric">
+                                <div class="alert-metric-label">Projected/Month</div>
+                                <div class="alert-metric-value" style="color: var(--accent-danger);">${alert.recentProjected.toFixed(1)} AEC</div>
+                            </div>
+                            <div class="alert-metric">
+                                <div class="alert-metric-label">Historical Avg</div>
+                                <div class="alert-metric-value" style="color: var(--accent-purple);">${alert.historicalAvg.toFixed(1)} AEC</div>
+                            </div>
+                            <div class="alert-metric">
+                                <div class="alert-metric-label">Change</div>
+                                <div class="alert-metric-value" style="color: ${alert.change > 0 ? 'var(--accent-danger)' : 'var(--accent-success)'};">
+                                    ${alert.change > 0 ? '+' : ''}${alert.change === 999 ? 'NEW' : alert.change.toFixed(0) + '%'}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderUserComparison(historicalByUser, recentByUser) {
+            // Historical table
+            const historicalUsers = Object.entries(historicalByUser)
+                .sort((a, b) => b[1].avgMonthly - a[1].avgMonthly)
+                .slice(0, 10);
+
+            const historicalHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th style="text-align: right;">Avg/Month</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${historicalUsers.map(([user, metrics]) => `
+                            <tr>
+                                <td style="font-weight: 600;">${user}</td>
+                                <td style="text-align: right; font-weight: 600; color: var(--accent-purple);">${metrics.avgMonthly.toFixed(1)}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            document.getElementById('historicalUserTable').innerHTML = historicalHTML;
+
+            // Recent table with comparison
+            const recentUsers = Object.entries(recentByUser)
+                .map(([user, metrics]) => {
+                    const historical = historicalByUser[user];
+                    const projected = metrics.total * 4.33;
+                    const change = historical 
+                        ? ((projected - historical.avgMonthly) / historical.avgMonthly) * 100
+                        : 999;
+                    
+                    return { user, projected, change };
+                })
+                .sort((a, b) => b.projected - a.projected)
+                .slice(0, 10);
+
+            const recentHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th style="text-align: right;">Projected</th>
+                            <th style="text-align: right;">vs Avg</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${recentUsers.map(({user, projected, change}) => `
+                            <tr>
+                                <td style="font-weight: 600;">${user}</td>
+                                <td style="text-align: right; font-weight: 600; color: var(--accent-info);">${projected.toFixed(1)}</td>
+                                <td style="text-align: right; font-weight: 600; color: ${change > 20 ? 'var(--accent-danger)' : change < -20 ? 'var(--accent-success)' : 'var(--text-secondary)'};">
+                                    ${change === 999 ? 'NEW' : (change > 0 ? '+' : '') + change.toFixed(0) + '%'}
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            document.getElementById('recentUserTable').innerHTML = recentHTML;
+        }
+
+        function requestPurchase() {
+            const historicalAvg = parseFloat(document.getElementById('historicalAvg').textContent);
+            const recentWeekly = parseFloat(document.getElementById('recentWeekly').textContent);
+            const projectedMonthly = parseFloat(document.getElementById('projectedMonthly').textContent);
+            const currentBalance = parseFloat(document.getElementById('balanceWarning').textContent);
+            const runway = parseFloat(document.getElementById('runwayMonths').textContent);
+            const runwayWeeks = runway * 4.33;
+            const alertCount = document.querySelectorAll('.alert-card').length;
+
+            const message = `
+📋 ANSYS AEC PURCHASE REQUEST
+
+USAGE ANALYSIS:
+• Historical Average: ${historicalAvg.toFixed(1)} AEC/month
+• Current Weekly Rate: ${recentWeekly.toFixed(1)} AEC/week
+• Projected Monthly: ${projectedMonthly.toFixed(1)} AEC/month
+• Trend: ${projectedMonthly > historicalAvg ? '↑' : '↓'} ${Math.abs(((projectedMonthly - historicalAvg) / historicalAvg) * 100).toFixed(0)}%
+
+BURN RATE THRESHOLDS:
+• Critical Rate: ${calculatedThresholds.criticalWeekly.toFixed(1)} AEC/week
+• Warning Rate: ${calculatedThresholds.warningWeekly.toFixed(1)} AEC/week
+• Safe Rate: ${calculatedThresholds.safeWeekly.toFixed(1)} AEC/week
+• Current Status: ${recentWeekly > calculatedThresholds.criticalWeekly ? '🔥 CRITICAL' : recentWeekly > calculatedThresholds.warningWeekly ? '⚠️ WARNING' : '✓ Safe'}
+
+BALANCE STATUS:
+• Current Balance: ${currentBalance.toFixed(1)} AEC
+• Runway: ${runway.toFixed(1)} months (${runwayWeeks.toFixed(1)} weeks)
+• Procurement Lead Time: ${settings.leadTimeWeeks} weeks
+• High Usage Alerts: ${alertCount}
+${runwayWeeks <= settings.leadTimeWeeks ? '\n⚠️ URGENT: Balance will deplete before new credits arrive!' : ''}
+
+REQUEST:
+• Amount: ${settings.purchaseAmount.toFixed(0)} AEC
+• New Balance: ${(currentBalance + settings.purchaseAmount).toFixed(1)} AEC
+• New Runway: ~${((currentBalance + settings.purchaseAmount) / recentWeekly).toFixed(1)} weeks
+
+JUSTIFICATION:
+${recentWeekly > calculatedThresholds.criticalWeekly ? 
+'Current burn rate exceeds critical threshold. Immediate replenishment required to avoid service interruption.' : 
+runwayWeeks <= settings.leadTimeWeeks * 2 ?
+'Balance approaching critical level. Ordering now to account for procurement lead time.' :
+'Proactive replenishment to maintain operational buffer and prevent future shortages.'}
+
+Date: ${new Date().toLocaleString()}
+
+Please approve this purchase request to maintain adequate credit levels.
+            `.trim();
+
+            navigator.clipboard.writeText(message).then(() => {
+                alert('✅ Purchase request copied to clipboard!\n\nYou can now paste this into your procurement system or email.');
+            }).catch(() => {
+                alert(message);
+            });
+        }
+    </script>
+</body>
+</html>
