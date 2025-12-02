@@ -4,23 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ANSYS AEC Trend Analysis</title>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Bricolage+Grotesque:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-primary: #f8f9fc;
-            --bg-secondary: #ffffff;
-            --bg-card: #ffffff;
-            --accent-danger: #dc2626;
-            --accent-warning: #ea580c;
-            --accent-success: #059669;
-            --accent-info: #0284c7;
-            --accent-purple: #9333ea;
-            --text-primary: #1e293b;
-            --text-secondary: #64748b;
-            --border: #e2e8f0;
-            --glow-danger: rgba(220, 38, 38, 0.2);
-            --glow-warning: rgba(234, 88, 12, 0.2);
-            --glow-success: rgba(5, 150, 105, 0.2);
+            --bg-primary: #ffffff;
+            --bg-secondary: #f5f5f7;
+            --bg-card: #fbfbfd;
+            --accent-danger: #ff3b30;
+            --accent-warning: #ff9500;
+            --accent-success: #34c759;
+            --accent-info: #007aff;
+            --accent-purple: #af52de;
+            --text-primary: #1d1d1f;
+            --text-secondary: #86868b;
+            --border: #d2d2d7;
+            --glow-danger: rgba(255, 59, 48, 0.15);
+            --glow-warning: rgba(255, 149, 0, 0.15);
+            --glow-success: rgba(52, 199, 89, 0.15);
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
         }
 
         * {
@@ -30,11 +32,15 @@
         }
 
         body {
-            font-family: 'Bricolage Grotesque', sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
-            line-height: 1.6;
+            line-height: 1.47059;
+            font-weight: 400;
+            letter-spacing: -0.022em;
             overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         .dashboard-container {
@@ -45,23 +51,7 @@
         }
 
         .bg-grid {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                linear-gradient(var(--border) 1px, transparent 1px),
-                linear-gradient(90deg, var(--border) 1px, transparent 1px);
-            background-size: 50px 50px;
-            opacity: 0.4;
-            z-index: 0;
-            animation: gridPulse 20s ease-in-out infinite;
-        }
-
-        @keyframes gridPulse {
-            0%, 100% { opacity: 0.4; }
-            50% { opacity: 0.25; }
+            display: none;
         }
 
         header {
@@ -84,21 +74,18 @@
 
         h1 {
             font-size: 3.5rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-            background: linear-gradient(135deg, var(--accent-info) 0%, var(--accent-purple) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            letter-spacing: -0.02em;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+            letter-spacing: -0.015em;
+            line-height: 1.05;
         }
 
         .subtitle {
-            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.0625rem;
             color: var(--text-secondary);
-            font-size: 0.95rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
+            font-weight: 400;
+            letter-spacing: -0.01em;
         }
 
         .upload-grid {
@@ -124,33 +111,36 @@
 
         .upload-section {
             background: var(--bg-card);
-            border: 2px dashed var(--border);
-            border-radius: 16px;
-            padding: 20px;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 32px;
             text-align: center;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            box-shadow: var(--shadow-sm);
         }
 
         .upload-section:hover {
             border-color: var(--accent-info);
-            background: rgba(2, 132, 199, 0.05);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
         }
 
         .upload-section.dragover {
             border-color: var(--accent-success);
-            background: rgba(5, 150, 105, 0.05);
-            transform: scale(1.02);
+            background: rgba(52, 199, 89, 0.03);
+            transform: scale(1.01);
         }
 
         .upload-section.loaded {
             border-color: var(--accent-success);
-            border-style: solid;
-            background: rgba(5, 150, 105, 0.05);
+            background: rgba(52, 199, 89, 0.03);
         }
 
         .upload-section h3 {
-            font-size: 1.2rem;
+            font-size: 1.375rem;
             margin-bottom: 8px;
+            font-weight: 600;
+            letter-spacing: -0.01em;
         }
 
         .upload-label {
@@ -158,11 +148,10 @@
             padding: 4px 12px;
             background: var(--accent-info);
             color: white;
-            border-radius: 6px;
-            font-size: 0.75rem;
+            border-radius: 12px;
+            font-size: 0.6875rem;
             font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
+            letter-spacing: -0.01em;
             margin-bottom: 12px;
         }
 
@@ -175,43 +164,52 @@
         }
 
         .upload-btn {
-            background: linear-gradient(135deg, var(--accent-info), var(--accent-success));
+            background: var(--accent-info);
             color: white;
             border: none;
-            padding: 10px 24px;
-            font-size: 0.9rem;
-            font-weight: 600;
+            padding: 12px 28px;
+            font-size: 1.0625rem;
+            font-weight: 500;
             border-radius: 12px;
             cursor: pointer;
-            font-family: 'Bricolage Grotesque', sans-serif;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
+            transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
         }
 
         .upload-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(2, 132, 199, 0.35);
+            transform: scale(1.02);
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+        }
+
+        .upload-btn:active {
+            transform: scale(0.98);
         }
 
         .upload-btn.historical {
-            background: linear-gradient(135deg, var(--accent-purple), var(--accent-info));
+            background: var(--accent-purple);
+        }
+
+        .upload-btn.historical:hover {
+            box-shadow: 0 4px 12px rgba(175, 82, 222, 0.3);
         }
 
         .file-status {
             margin-top: 16px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.85rem;
+            font-size: 0.9375rem;
             min-height: 20px;
+            font-weight: 400;
+            letter-spacing: -0.01em;
         }
 
         .settings-section {
             position: relative;
             z-index: 1;
             background: var(--bg-card);
-            border-radius: 16px;
-            padding: 30px;
+            border-radius: 18px;
+            padding: 40px;
             margin-bottom: 40px;
             border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
             animation: fadeIn 1s ease-out 0.4s both;
         }
 
@@ -224,11 +222,10 @@
 
         .setting-item label {
             display: block;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--text-secondary);
+            font-size: 0.9375rem;
+            font-weight: 500;
+            letter-spacing: -0.01em;
+            color: var(--text-primary);
             margin-bottom: 8px;
         }
 
@@ -237,17 +234,18 @@
             background: var(--bg-secondary);
             border: 1px solid var(--border);
             color: var(--text-primary);
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-family: 'JetBrains Mono', monospace;
-            transition: all 0.3s ease;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 1.0625rem;
+            font-weight: 400;
+            letter-spacing: -0.01em;
+            transition: all 0.2s ease;
         }
 
         .setting-item input:focus {
             outline: none;
             border-color: var(--accent-info);
-            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);
+            box-shadow: 0 0 0 4px rgba(0, 122, 255, 0.1);
         }
 
         .stats-grid {
@@ -263,46 +261,44 @@
         .stat-card {
             background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 28px;
-            transition: all 0.3s ease;
+            border-radius: 18px;
+            padding: 32px;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             position: relative;
             overflow: hidden;
+            box-shadow: var(--shadow-sm);
         }
 
         .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: linear-gradient(90deg, var(--accent-info), var(--accent-purple));
+            display: none;
         }
 
         .stat-card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--accent-info);
         }
 
         .stat-label {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
+            font-size: 0.9375rem;
+            font-weight: 500;
+            letter-spacing: -0.01em;
             color: var(--text-secondary);
-            margin-bottom: 8px;
+            margin-bottom: 12px;
         }
 
         .stat-value {
-            font-size: 2.5rem;
-            font-weight: 700;
+            font-size: 3rem;
+            font-weight: 600;
             margin-bottom: 8px;
+            letter-spacing: -0.02em;
         }
 
         .stat-subtext {
-            font-size: 0.9rem;
+            font-size: 0.9375rem;
             color: var(--text-secondary);
+            font-weight: 400;
+            letter-spacing: -0.01em;
         }
 
         .trend-indicator {
@@ -332,12 +328,13 @@
         }
 
         .section-title {
-            font-size: 1.8rem;
+            font-size: 2.125rem;
             font-weight: 600;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
             display: flex;
             align-items: center;
             gap: 12px;
+            letter-spacing: -0.015em;
         }
 
         .comparison-section {
@@ -356,34 +353,36 @@
         .comparison-card {
             background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 30px;
+            border-radius: 18px;
+            padding: 32px;
+            box-shadow: var(--shadow-sm);
         }
 
         .comparison-card h3 {
-            font-size: 1.4rem;
-            margin-bottom: 20px;
+            font-size: 1.5rem;
+            margin-bottom: 24px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+            font-weight: 600;
+            letter-spacing: -0.01em;
         }
 
         .period-badge {
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 0.75rem;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8125rem;
             font-weight: 600;
-            text-transform: uppercase;
-            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: -0.01em;
         }
 
         .period-badge.historical {
-            background: rgba(147, 51, 234, 0.15);
+            background: rgba(175, 82, 222, 0.12);
             color: var(--accent-purple);
         }
 
         .period-badge.recent {
-            background: rgba(2, 132, 199, 0.15);
+            background: rgba(0, 122, 255, 0.12);
             color: var(--accent-info);
         }
 
@@ -396,11 +395,18 @@
 
         .alert-card {
             background: var(--bg-card);
-            border-left: 4px solid var(--accent-danger);
-            border-radius: 12px;
+            border-left: 3px solid var(--accent-danger);
+            border-radius: 14px;
             padding: 24px;
             margin-bottom: 16px;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .alert-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateX(4px);
         }
 
         .alert-card.critical {
@@ -446,12 +452,10 @@
 
         .alert-badge {
             padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 0.75rem;
+            border-radius: 12px;
+            font-size: 0.8125rem;
             font-weight: 600;
-            font-family: 'JetBrains Mono', monospace;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
+            letter-spacing: -0.01em;
         }
 
         .alert-badge.critical {
@@ -477,37 +481,37 @@
         }
 
         .alert-metric {
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.85rem;
+            font-size: 0.9375rem;
         }
 
         .alert-metric-label {
             color: var(--text-secondary);
+            font-weight: 400;
+            letter-spacing: -0.01em;
         }
 
         .alert-metric-value {
             font-weight: 600;
-            font-size: 1.1rem;
+            font-size: 1.25rem;
             margin-top: 4px;
+            letter-spacing: -0.015em;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.9rem;
+            font-size: 0.9375rem;
         }
 
         th {
             text-align: left;
             padding: 16px;
-            background: var(--bg-secondary);
+            background: transparent;
             color: var(--text-secondary);
             font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            font-size: 0.75rem;
-            border-bottom: 2px solid var(--border);
+            letter-spacing: -0.01em;
+            font-size: 0.8125rem;
+            border-bottom: 1px solid var(--border);
         }
 
         td {
@@ -517,57 +521,61 @@
         }
 
         tr:hover td {
-            background: rgba(2, 132, 199, 0.05);
+            background: var(--bg-secondary);
         }
 
         .usage-bar {
-            height: 8px;
+            height: 6px;
             background: var(--bg-secondary);
-            border-radius: 4px;
+            border-radius: 6px;
             overflow: hidden;
             margin-top: 8px;
         }
 
         .usage-bar-fill {
             height: 100%;
-            background: linear-gradient(90deg, var(--accent-info), var(--accent-success));
-            transition: width 1s ease;
+            background: var(--accent-info);
+            transition: width 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            border-radius: 6px;
         }
 
         .usage-bar-fill.high {
-            background: linear-gradient(90deg, var(--accent-warning), var(--accent-danger));
+            background: var(--accent-danger);
         }
 
         .purchase-section {
             position: relative;
             z-index: 1;
-            background: linear-gradient(135deg, rgba(2, 132, 199, 0.08), rgba(147, 51, 234, 0.08));
-            border: 2px solid var(--accent-info);
-            border-radius: 16px;
-            padding: 40px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 48px;
             text-align: center;
             animation: fadeIn 1s ease-out 1.2s both;
+            box-shadow: var(--shadow-md);
         }
 
         .purchase-btn {
-            background: linear-gradient(135deg, var(--accent-danger), var(--accent-warning));
+            background: var(--accent-info);
             color: white;
             border: none;
-            padding: 20px 50px;
-            font-size: 1.2rem;
-            font-weight: 700;
+            padding: 16px 48px;
+            font-size: 1.0625rem;
+            font-weight: 500;
             border-radius: 12px;
             cursor: pointer;
-            font-family: 'Bricolage Grotesque', sans-serif;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 16px rgba(220, 38, 38, 0.3);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
+            transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
+            letter-spacing: -0.01em;
         }
 
         .purchase-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 24px rgba(220, 38, 38, 0.4);
+            transform: scale(1.02);
+            box-shadow: 0 4px 16px rgba(0, 122, 255, 0.4);
+        }
+
+        .purchase-btn:active {
+            transform: scale(0.98);
         }
 
         .hidden {
@@ -664,17 +672,17 @@
                 <h3 style="font-size: 1.1rem; margin-bottom: 12px; color: var(--text-primary);">📊 Calculated Thresholds</h3>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
                     <div>
-                        <div style="font-size: 0.85rem; color: var(--text-secondary); font-family: 'JetBrains Mono', monospace;">Critical Weekly Rate</div>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary); font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', sans-serif;">Critical Weekly Rate</div>
                         <div id="criticalWeeklyRate" style="font-size: 1.4rem; font-weight: 600; color: var(--accent-danger); margin-top: 4px;">-</div>
                         <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px;">Users above this need immediate attention</div>
                     </div>
                     <div>
-                        <div style="font-size: 0.85rem; color: var(--text-secondary); font-family: 'JetBrains Mono', monospace;">Warning Weekly Rate</div>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary); font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', sans-serif;">Warning Weekly Rate</div>
                         <div id="warningWeeklyRate" style="font-size: 1.4rem; font-weight: 600; color: var(--accent-warning); margin-top: 4px;">-</div>
                         <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px;">Buffer zone - monitor closely</div>
                     </div>
                     <div>
-                        <div style="font-size: 0.85rem; color: var(--text-secondary); font-family: 'JetBrains Mono', monospace;">Safe Weekly Rate</div>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary); font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', sans-serif;">Safe Weekly Rate</div>
                         <div id="safeWeeklyRate" style="font-size: 1.4rem; font-weight: 600; color: var(--accent-success); margin-top: 4px;">-</div>
                         <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 2px;">Sustainable consumption level</div>
                     </div>
