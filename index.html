@@ -742,9 +742,14 @@
                     Projected depletion: <strong id="depletionWarning" style="color: var(--accent-danger);"></strong><br>
                     <span id="depletionWeeks" style="font-size: 0.95rem;"></span>
                 </p>
-                <button class="purchase-btn pulse" onclick="requestPurchase()">
-                    🚀 Request 5,000 AEC Purchase
-                </button>
+                <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+                    <button class="purchase-btn pulse" onclick="requestPurchase()">
+                        Request AEC Purchase
+                    </button>
+                    <button class="purchase-btn" style="background: linear-gradient(135deg, var(--accent-purple), var(--accent-info)); box-shadow: 0 4px 16px rgba(147, 51, 234, 0.3);" onclick="exportToTeams()">
+                        Export to Teams
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -1202,6 +1207,20 @@
         }
 
         function requestPurchase() {
+            const recentWeekly = parseFloat(document.getElementById('recentWeekly').textContent);
+            const runway = parseFloat(document.getElementById('runwayMonths').textContent);
+            const runwayWeeks = runway * 4.33;
+
+            const subject = encodeURIComponent('ANSYS AEC Purchase Request');
+            const body = encodeURIComponent(
+                `Hello,\n\nOur burn rate has been ${recentWeekly.toFixed(1)} AEC/week, with a prediction that these credits will last us ${runwayWeeks.toFixed(1)} weeks. Can you assist in putting in an order for ${settings.purchaseAmount.toFixed(0)} AECs?\n\nBest,\nNatacha`
+            );
+
+            // Open Outlook with pre-filled email
+            window.location.href = `mailto:?subject=${subject}&body=${body}`;
+        }
+
+        function exportToTeams() {
             const historicalAvg = parseFloat(document.getElementById('historicalAvg').textContent);
             const recentWeekly = parseFloat(document.getElementById('recentWeekly').textContent);
             const projectedMonthly = parseFloat(document.getElementById('projectedMonthly').textContent);
@@ -1210,49 +1229,62 @@
             const runwayWeeks = runway * 4.33;
             const alertCount = document.querySelectorAll('.alert-card').length;
 
-            const message = `
-📋 ANSYS AEC PURCHASE REQUEST
+            // Determine status emoji
+            let statusEmoji = '✅';
+            let statusText = 'Good';
+            if (recentWeekly > calculatedThresholds.criticalWeekly) {
+                statusEmoji = '🔴';
+                statusText = 'Critical';
+            } else if (recentWeekly > calculatedThresholds.warningWeekly) {
+                statusEmoji = '🟡';
+                statusText = 'Warning';
+            } else if (runwayWeeks <= settings.leadTimeWeeks * 2) {
+                statusEmoji = '🟠';
+                statusText = 'Monitor';
+            }
 
-USAGE ANALYSIS:
-• Historical Average: ${historicalAvg.toFixed(1)} AEC/month
-• Current Weekly Rate: ${recentWeekly.toFixed(1)} AEC/week
-• Projected Monthly: ${projectedMonthly.toFixed(1)} AEC/month
-• Trend: ${projectedMonthly > historicalAvg ? '↑' : '↓'} ${Math.abs(((projectedMonthly - historicalAvg) / historicalAvg) * 100).toFixed(0)}%
+            // Get top 3 users from alerts or recent usage
+            const alerts = Array.from(document.querySelectorAll('.alert-card')).slice(0, 3);
+            let topUsersText = '';
+            if (alerts.length > 0) {
+                topUsersText = '\n\n**High Usage Users:**\n';
+                alerts.forEach(alert => {
+                    const userName = alert.querySelector('.alert-user').textContent;
+                    const level = alert.querySelector('.alert-badge').textContent;
+                    topUsersText += `- ${userName} (${level})\n`;
+                });
+            }
 
-BURN RATE THRESHOLDS:
-• Critical Rate: ${calculatedThresholds.criticalWeekly.toFixed(1)} AEC/week
-• Warning Rate: ${calculatedThresholds.warningWeekly.toFixed(1)} AEC/week
-• Safe Rate: ${calculatedThresholds.safeWeekly.toFixed(1)} AEC/week
-• Current Status: ${recentWeekly > calculatedThresholds.criticalWeekly ? '🔥 CRITICAL' : recentWeekly > calculatedThresholds.warningWeekly ? '⚠️ WARNING' : '✓ Safe'}
+            const message = `**ANSYS AEC Usage Status Update** ${statusEmoji}\n\n` +
+                `**Overall Status:** ${statusText}\n\n` +
+                `**Current Metrics:**\n` +
+                `- Current Balance: ${currentBalance.toFixed(1)} AEC\n` +
+                `- Burn Rate: ${recentWeekly.toFixed(1)} AEC/week\n` +
+                `- Projected Monthly: ${projectedMonthly.toFixed(1)} AEC/month\n` +
+                `- Historical Average: ${historicalAvg.toFixed(1)} AEC/month\n` +
+                `- Trend: ${projectedMonthly > historicalAvg ? '↑' : '↓'} ${Math.abs(((projectedMonthly - historicalAvg) / historicalAvg) * 100).toFixed(0)}%\n\n` +
+                `**Runway:**\n` +
+                `- Time Remaining: ${runwayWeeks.toFixed(1)} weeks (${runway.toFixed(1)} months)\n` +
+                `- Projected Depletion: ${document.getElementById('depletionWarning').textContent}\n\n` +
+                `**Thresholds:**\n` +
+                `- Critical Rate: ${calculatedThresholds.criticalWeekly.toFixed(1)} AEC/week\n` +
+                `- Warning Rate: ${calculatedThresholds.warningWeekly.toFixed(1)} AEC/week\n` +
+                `- Safe Rate: ${calculatedThresholds.safeWeekly.toFixed(1)} AEC/week${topUsersText}\n\n` +
+                `${alertCount > 0 ? `⚠️ ${alertCount} user(s) flagged for high usage\n\n` : ''}` +
+                `_Updated: ${new Date().toLocaleString()}_`;
 
-BALANCE STATUS:
-• Current Balance: ${currentBalance.toFixed(1)} AEC
-• Runway: ${runway.toFixed(1)} months (${runwayWeeks.toFixed(1)} weeks)
-• Procurement Lead Time: ${settings.leadTimeWeeks} weeks
-• High Usage Alerts: ${alertCount}
-${runwayWeeks <= settings.leadTimeWeeks ? '\n⚠️ URGENT: Balance will deplete before new credits arrive!' : ''}
-
-REQUEST:
-• Amount: ${settings.purchaseAmount.toFixed(0)} AEC
-• New Balance: ${(currentBalance + settings.purchaseAmount).toFixed(1)} AEC
-• New Runway: ~${((currentBalance + settings.purchaseAmount) / recentWeekly).toFixed(1)} weeks
-
-JUSTIFICATION:
-${recentWeekly > calculatedThresholds.criticalWeekly ? 
-'Current burn rate exceeds critical threshold. Immediate replenishment required to avoid service interruption.' : 
-runwayWeeks <= settings.leadTimeWeeks * 2 ?
-'Balance approaching critical level. Ordering now to account for procurement lead time.' :
-'Proactive replenishment to maintain operational buffer and prevent future shortages.'}
-
-Date: ${new Date().toLocaleString()}
-
-Please approve this purchase request to maintain adequate credit levels.
-            `.trim();
-
+            // Copy to clipboard
             navigator.clipboard.writeText(message).then(() => {
-                alert('✅ Purchase request copied to clipboard!\n\nYou can now paste this into your procurement system or email.');
+                alert('✅ Status update copied to clipboard!\n\nYou can now paste this into your Teams channel.');
             }).catch(() => {
-                alert(message);
+                // Fallback if clipboard fails
+                const textarea = document.createElement('textarea');
+                textarea.value = message;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                alert('✅ Status update copied to clipboard!\n\nYou can now paste this into your Teams channel.');
             });
         }
     </script>
