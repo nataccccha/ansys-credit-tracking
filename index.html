@@ -2092,7 +2092,7 @@
 
             const historicalMonthlyValues = Object.values(historicalByMonth);
             const historicalAvgMonthly = historicalMonthlyValues.length > 0 
-                ? historicalMonthlyValues.reduce((a, b) => a + b, 0) / historicalMonthlyValues.length 
+                ? historicalMonthlyValues.reduce((a, b) => a + b, 0) / 12 // historicalMonthlyValues.length 
                 : 0;
 
             const projectedMonthly = recentTotal * 4.33; // weeks to month conversion
