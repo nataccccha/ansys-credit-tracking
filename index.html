@@ -2903,7 +2903,7 @@ Natacha`;
             
             sortedSoftware.forEach(([software, hours]) => {
                 const percentage = ((hours / userData.totalHours) * 100).toFixed(1);
-                softwareList += `    • ${software}: ${hours.toFixed(1)} hours (${percentage}%)\n`;
+                softwareList += `• ${software}: ${hours.toFixed(1)} hours (${percentage}%)\n`;
             });
             
             const body = `Hello ${username},
@@ -2912,24 +2912,15 @@ This is your ANSYS usage summary for ${month}.
 
 USAGE SUMMARY
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Total Hours: ${userData.totalHours.toFixed(1)} hours
+Total Hours: ${userData.totalHours.toFixed(1)}
 Total Cost: ${userData.totalAEC.toFixed(1)} AEC ($${userData.totalAEC.toFixed(2)} USD)
 
 SOFTWARE BREAKDOWN
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ${softwareList}
+Please provide the breakdown and charge numbers for this usage.
 
-NOTES
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-• Exchange Rate: 1 AEC = $1.00 USD
-• These statistics are for tracking and budgeting purposes
-• If you have questions about your usage, please contact the ANSYS administrator
-
-Thank you for using our ANSYS resources responsibly!
-
-Best regards,
-ANSYS License Administrator
-Arete Associates`;
+Thanks!`;
 
             return body;
         }
