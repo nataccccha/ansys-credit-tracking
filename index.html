@@ -1362,12 +1362,14 @@
                 <div id="alertMessage"></div>
             </div>
 
-            <button class="purchase-btn" onclick="calculateUsage()" style="margin-top: 10px; width: 100%; padding: 8px; font-size: 0.875rem;">
-                Calculate
-            </button>
-            <button class="purchase-btn" onclick="exportQuoteToPDF()" style="margin-top: 8px; width: 100%; padding: 8px; font-size: 0.875rem; background: linear-gradient(135deg, var(--accent-purple), var(--accent-info));">
-                📄 Export Quote to PDF
-            </button>
+            <div style="display: flex; gap: 8px; margin-top: 10px;">
+                <button class="purchase-btn" onclick="calculateUsage()" style="flex: 1; padding: 8px; font-size: 0.875rem;">
+                    Calculate
+                </button>
+                <button class="purchase-btn" onclick="exportQuoteToPDF()" style="padding: 8px 16px; font-size: 0.8125rem; background: linear-gradient(135deg, var(--accent-purple), var(--accent-info)); white-space: nowrap;">
+                    📄 Export as Quote
+                </button>
+            </div>
             </div>
         </div>
             </div>
@@ -2657,161 +2659,146 @@ ${body}`;
                 return;
             }
             
-            // Calculate totals
-            const totalWeeks = Math.max(...usageData.map(d => d.weeks));
-            const weeklyBurnRate = totalCredits / totalWeeks;
+            const proposalNumber = `ANSYS-${Date.now().toString().slice(-8)}`;
             
-            // PDF Styling
-            const primaryColor = [0, 122, 255]; // Blue
-            const accentColor = [147, 51, 234]; // Purple
-            const darkGray = [60, 60, 67];
-            const lightGray = [142, 142, 147];
+            // Colors matching Arete template
+            const darkText = [0, 0, 0];
+            const lightGray = [128, 128, 128];
+            const tealColor = [0, 128, 128];
             
-            let yPos = 20;
+            let yPos = 40;
             
-            // Header
-            doc.setFillColor(...primaryColor);
-            doc.rect(0, 0, 210, 35, 'F');
-            
-            doc.setTextColor(255, 255, 255);
-            doc.setFontSize(24);
-            doc.setFont(undefined, 'bold');
-            doc.text('ANSYS Simulation Cost Quote', 105, 18, { align: 'center' });
-            
+            // Header - "Arete Associates" style centered text
             doc.setFontSize(11);
+            doc.setTextColor(...darkText);
             doc.setFont(undefined, 'normal');
-            doc.text('AEC Credit Usage Estimate', 105, 27, { align: 'center' });
+            doc.text('Arete Proposal No:', 105, yPos, { align: 'center' });
             
-            yPos = 45;
-            
-            // Document Info
-            doc.setTextColor(...darkGray);
-            doc.setFontSize(10);
-            doc.text(`Date: ${dateStr}`, 20, yPos);
-            doc.text(`Quote ID: Q-${Date.now().toString().slice(-8)}`, 150, yPos);
+            yPos += 5;
+            doc.text('Submitted by: Arete Associates', 105, yPos, { align: 'center' });
             
             yPos += 15;
+            doc.text('Submitted to:', 105, yPos, { align: 'center' });
+            yPos += 5;
+            doc.text('Contract Action Type:', 105, yPos, { align: 'center' });
+            yPos += 5;
+            doc.text(`Date of Submission: ${dateStr}`, 105, yPos, { align: 'center' });
             
-            // Summary Box
-            doc.setDrawColor(...primaryColor);
+            yPos += 15;
+            doc.text('Arete Associates Points of Contact:', 105, yPos, { align: 'center' });
+            
+            // Contact table (empty boxes)
+            yPos += 8;
             doc.setLineWidth(0.5);
-            doc.roundedRect(20, yPos, 170, 25, 2, 2);
+            doc.rect(30, yPos, 75, 8); // Left box
+            doc.rect(105, yPos, 75, 8); // Right box
             
-            yPos += 8;
-            doc.setFontSize(11);
-            doc.setFont(undefined, 'bold');
-            doc.text('Cost Summary', 25, yPos);
+            yPos += 20;
             
-            yPos += 7;
-            doc.setFont(undefined, 'normal');
+            // Main table header
+            doc.setFillColor(255, 255, 255);
+            doc.setDrawColor(0, 0, 0);
+            doc.setLineWidth(0.5);
+            
+            // Table header row
+            const startX = 15;
+            const lineWidth = 15;
+            const descWidth = 90;
+            const rateWidth = 25;
+            const hoursWidth = 20;
+            const weeksWidth = 20;
+            const totalWidth = 25;
+            
+            doc.rect(startX, yPos, lineWidth, 8);
+            doc.rect(startX + lineWidth, yPos, descWidth, 8);
+            doc.rect(startX + lineWidth + descWidth, yPos, rateWidth, 8);
+            doc.rect(startX + lineWidth + descWidth + rateWidth, yPos, hoursWidth, 8);
+            doc.rect(startX + lineWidth + descWidth + rateWidth + hoursWidth, yPos, weeksWidth, 8);
+            doc.rect(startX + lineWidth + descWidth + rateWidth + hoursWidth + weeksWidth, yPos, totalWidth, 8);
+            
             doc.setFontSize(10);
-            doc.text(`Total AEC Credits Required: ${totalCredits.toFixed(1)} AEC`, 25, yPos);
-            
-            yPos += 6;
-            doc.text(`Duration: ${totalWeeks} week${totalWeeks > 1 ? 's' : ''}`, 25, yPos);
-            doc.text(`Average Weekly Burn Rate: ${weeklyBurnRate.toFixed(1)} AEC/week`, 110, yPos);
-            
-            yPos += 15;
-            
-            // Software Breakdown Header
-            doc.setFontSize(13);
             doc.setFont(undefined, 'bold');
-            doc.setTextColor(...accentColor);
-            doc.text('Software Breakdown', 20, yPos);
+            doc.text('Line', startX + lineWidth/2, yPos + 5.5, { align: 'center' });
+            doc.text('Description', startX + lineWidth + descWidth/2, yPos + 5.5, { align: 'center' });
+            doc.text('Rate ($/hr)', startX + lineWidth + descWidth + rateWidth/2, yPos + 5.5, { align: 'center' });
+            doc.text('Hours', startX + lineWidth + descWidth + rateWidth + hoursWidth/2, yPos + 5.5, { align: 'center' });
+            doc.text('Weeks', startX + lineWidth + descWidth + rateWidth + hoursWidth + weeksWidth/2, yPos + 5.5, { align: 'center' });
+            doc.text('Total', startX + lineWidth + descWidth + rateWidth + hoursWidth + weeksWidth + totalWidth/2, yPos + 5.5, { align: 'center' });
             
             yPos += 8;
             
-            // Table Header
-            doc.setFillColor(245, 245, 247);
-            doc.rect(20, yPos - 5, 170, 8, 'F');
-            
-            doc.setFontSize(9);
-            doc.setFont(undefined, 'bold');
-            doc.setTextColor(...darkGray);
-            doc.text('Software', 22, yPos);
-            doc.text('Rate', 95, yPos);
-            doc.text('Hours', 120, yPos);
-            doc.text('Weeks', 145, yPos);
-            doc.text('Total AEC', 170, yPos);
-            
-            yPos += 8;
-            
-            // Table Rows
+            // Table data rows
             doc.setFont(undefined, 'normal');
             doc.setFontSize(9);
             
             usageData.forEach((item, index) => {
-                if (yPos > 270) {
+                const lineNum = index + 1;
+                const rowHeight = 8;
+                
+                if (yPos > 250) {
                     doc.addPage();
                     yPos = 20;
                 }
                 
-                // Alternating row colors
-                if (index % 2 === 0) {
-                    doc.setFillColor(250, 250, 250);
-                    doc.rect(20, yPos - 5, 170, 7, 'F');
-                }
+                // Draw row boxes
+                doc.rect(startX, yPos, lineWidth, rowHeight);
+                doc.rect(startX + lineWidth, yPos, descWidth, rowHeight);
+                doc.rect(startX + lineWidth + descWidth, yPos, rateWidth, rowHeight);
+                doc.rect(startX + lineWidth + descWidth + rateWidth, yPos, hoursWidth, rowHeight);
+                doc.rect(startX + lineWidth + descWidth + rateWidth + hoursWidth, yPos, weeksWidth, rowHeight);
+                doc.rect(startX + lineWidth + descWidth + rateWidth + hoursWidth + weeksWidth, yPos, totalWidth, rowHeight);
                 
-                doc.setTextColor(...darkGray);
-                doc.text(item.software, 22, yPos);
-                doc.text(`${item.rate} AEC/hr`, 95, yPos);
-                doc.text(`${item.hours}`, 120, yPos);
-                doc.text(`${item.weeks}`, 145, yPos);
-                doc.text(`${item.credits.toFixed(1)}`, 170, yPos);
+                // Fill in data
+                doc.text(`${lineNum}`, startX + lineWidth/2, yPos + 5.5, { align: 'center' });
+                doc.text(item.software, startX + lineWidth + 2, yPos + 5.5);
+                doc.text(`$${item.rate.toFixed(2)}`, startX + lineWidth + descWidth + rateWidth/2, yPos + 5.5, { align: 'center' });
+                doc.text(`${item.hours}`, startX + lineWidth + descWidth + rateWidth + hoursWidth/2, yPos + 5.5, { align: 'center' });
+                doc.text(`${item.weeks}`, startX + lineWidth + descWidth + rateWidth + hoursWidth + weeksWidth/2, yPos + 5.5, { align: 'center' });
+                doc.text(`$${item.credits.toFixed(2)}`, startX + lineWidth + descWidth + rateWidth + hoursWidth + weeksWidth + totalWidth - 2, yPos + 5.5, { align: 'right' });
                 
-                yPos += 7;
+                yPos += rowHeight;
             });
             
-            // Total Line
-            yPos += 3;
-            doc.setLineWidth(0.5);
-            doc.setDrawColor(...darkGray);
-            doc.line(20, yPos, 190, yPos);
-            
-            yPos += 7;
-            doc.setFontSize(11);
+            // Total row
+            const totalRowHeight = 10;
             doc.setFont(undefined, 'bold');
-            doc.setTextColor(...primaryColor);
-            doc.text('TOTAL', 22, yPos);
-            doc.text(`${totalCredits.toFixed(1)} AEC`, 170, yPos);
+            doc.setFontSize(10);
             
-            yPos += 15;
+            doc.rect(startX, yPos, lineWidth + descWidth + rateWidth + hoursWidth + weeksWidth, totalRowHeight);
+            doc.rect(startX + lineWidth + descWidth + rateWidth + hoursWidth + weeksWidth, yPos, totalWidth, totalRowHeight);
             
-            // Recommendations Section (if there's space)
-            if (yPos < 240) {
-                doc.setFontSize(11);
-                doc.setFont(undefined, 'bold');
-                doc.setTextColor(...accentColor);
-                doc.text('Recommendations', 20, yPos);
-                
-                yPos += 7;
-                doc.setFontSize(9);
-                doc.setFont(undefined, 'normal');
-                doc.setTextColor(...darkGray);
-                
-                const leadTime = settings.leadTimeWeeks || 2;
-                const bufferNeeded = weeklyBurnRate * leadTime * 1.5;
-                
-                doc.text(`• Ensure available balance exceeds ${totalCredits.toFixed(1)} AEC before starting`, 22, yPos);
-                yPos += 6;
-                doc.text(`• Maintain buffer of ${bufferNeeded.toFixed(1)} AEC for ${(leadTime * 1.5).toFixed(1)}-week lead time`, 22, yPos);
-                yPos += 6;
-                doc.text(`• Monitor weekly consumption to stay within ${weeklyBurnRate.toFixed(1)} AEC/week estimate`, 22, yPos);
-            }
+            doc.text('TOTAL', startX + lineWidth + descWidth + rateWidth + hoursWidth + weeksWidth - 2, yPos + 7, { align: 'right' });
+            doc.text(`$${totalCredits.toFixed(2)}`, startX + lineWidth + descWidth + rateWidth + hoursWidth + weeksWidth + totalWidth - 2, yPos + 7, { align: 'right' });
+            
+            yPos += totalRowHeight + 15;
+            
+            // Quote Validity section
+            doc.setFont(undefined, 'bold');
+            doc.setFontSize(10);
+            doc.text('Quote Validity', startX, yPos);
+            
+            yPos += 6;
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(9);
+            const validityText = 'This quote is valid for a period of 180 days from the date of submittal. Unless accepted in its entirety by or before the end of this validity period, Arete reserves the right to revise or rescind this proposal.';
+            const splitText = doc.splitTextToSize(validityText, 180);
+            doc.text(splitText, startX, yPos);
+            
+            yPos += splitText.length * 5 + 10;
+            
+            // Exchange rate note
+            doc.setFontSize(8);
+            doc.setTextColor(...lightGray);
+            doc.text('* Exchange Rate: 1 AEC = $1.00 USD', startX, yPos);
             
             // Footer
-            const pageCount = doc.internal.getNumberOfPages();
-            for (let i = 1; i <= pageCount; i++) {
-                doc.setPage(i);
-                doc.setFontSize(8);
-                doc.setTextColor(...lightGray);
-                doc.text('ANSYS AEC Credit Usage Quote', 105, 290, { align: 'center' });
-                doc.text(`Page ${i} of ${pageCount}`, 190, 290, { align: 'right' });
-                doc.text(`Generated: ${today.toLocaleString()}`, 20, 290);
-            }
+            doc.setFontSize(8);
+            doc.setTextColor(...tealColor);
+            doc.text('9301 Corbin Ave, Suite 2000 | Northridge, CA 91324 | Tel: 818.885.2200 | www.arete.com', 105, 285, { align: 'center' });
+            doc.text('ALABAMA | ARIZONA | CALIFORNIA | COLORADO | FLORIDA | VIRGINIA', 105, 290, { align: 'center' });
             
             // Save PDF
-            const filename = `ANSYS_Quote_${today.getFullYear()}${(today.getMonth()+1).toString().padStart(2,'0')}${today.getDate().toString().padStart(2,'0')}.pdf`;
+            const filename = `Arete_Quote_ANSYS_${today.getFullYear()}${(today.getMonth()+1).toString().padStart(2,'0')}${today.getDate().toString().padStart(2,'0')}.pdf`;
             doc.save(filename);
         }
     </script>
