@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ANSYS AEC Trend Analysis</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         :root {
             --bg-primary: #ffffff;
@@ -1356,10 +1357,6 @@
                     <span class="result-label">Remaining After Usage</span>
                     <span class="result-value" id="remainingCredits">5,000.0 AEC</span>
                 </div>
-                <div class="result-row">
-                    <span class="result-label">Lead Time with Buffer (×1.5)</span>
-                    <span class="result-value" id="leadTimeBuffer">2 weeks</span>
-                </div>
                 <div id="alertMessage"></div>
             </div>
 
@@ -1550,6 +1547,26 @@
                     <button class="purchase-btn" style="background: linear-gradient(135deg, var(--accent-teal), var(--accent-info)); box-shadow: 0 4px 16px rgba(0, 91, 127, 0.3); padding: 8px 16px; font-size: 0.8125rem;" onclick="exportToTeams()">
                         Update the Team
                     </button>
+                </div>
+            </div>
+
+            <!-- Previous Month Software Usage by User -->
+            <div id="monthlyPieChartsSection" style="background: var(--bg-card); padding: 20px; border-radius: 12px; box-shadow: var(--shadow-sm); margin-top: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 12px;">
+                    <div>
+                        <h2 style="margin-bottom: 4px; font-size: 1rem; font-weight: 600; color: var(--accent-teal);">
+                            📊 Previous Month Usage Report
+                        </h2>
+                        <p style="color: var(--text-secondary); font-size: 0.8125rem;">
+                            Software usage breakdown by user for <strong id="monthlyReportMonth"></strong>
+                        </p>
+                    </div>
+                    <button class="purchase-btn" onclick="emailAllUsers()" style="padding: 8px 16px; font-size: 0.8125rem; background: linear-gradient(135deg, var(--accent-teal), var(--accent-info)); white-space: nowrap;">
+                        📧 Email Each User
+                    </button>
+                </div>
+                <div id="monthlyPieChartsContainer" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; margin-top: 16px;">
+                    <!-- Pie charts will be inserted here -->
                 </div>
             </div>
 
@@ -1772,18 +1789,48 @@
 
             // Get current balance from settings or default
             const currentBalance = settings.availableBalance || 5000;
-            const leadTime = settings.leadTimeWeeks || 2;
             const remaining = currentBalance - totalCredits;
 
-            // Calculate safe threshold based on WEEKLY burn rate
-            const criticalThreshold = weeklyBurnRate * leadTime * 1.5; // Need 1.5x lead time buffer based on weekly rate
-            const warningThreshold = weeklyBurnRate * leadTime * 2; // Warning at 2x lead time buffer
+            // Simple check: Does planned usage exceed current balance?
+            // Critical: If usage exceeds current balance
+            const isCritical = totalCredits > currentBalance;
+            
+            // Warning: If usage is close to current balance (within 85%)
+            const isWarning = !isCritical && totalCredits > (currentBalance * 0.85);
+            
+            // Additional warnings
+            const highBurnRate = weeklyBurnRate > 750; // Warning if burning more than 750 AEC/week
+            const lowRemaining = remaining < 1500 && remaining > 0; // Warning if remaining drops below 1500 AEC
 
             // Update display
             document.getElementById('totalCredits').textContent = totalCredits.toFixed(1) + ' AEC';
             document.getElementById('currentBalance').textContent = currentBalance.toLocaleString('en-US', {minimumFractionDigits: 1, maximumFractionDigits: 1}) + ' AEC';
             document.getElementById('remainingCredits').textContent = remaining.toLocaleString('en-US', {minimumFractionDigits: 1, maximumFractionDigits: 1}) + ' AEC';
-            document.getElementById('leadTimeBuffer').textContent = (leadTime * 1.5).toFixed(1) + ' weeks';
+            
+            // Build additional warnings
+            let additionalWarnings = '';
+            if (highBurnRate) {
+                additionalWarnings += `
+                    <div class="alert-box warning" style="margin-top: 12px;">
+                        <span class="alert-icon">⚡</span>
+                        <div>
+                            <strong>HIGH BURN RATE:</strong> Your weekly usage rate (${weeklyBurnRate.toFixed(1)} AEC/week) exceeds 750 AEC/week. 
+                            Please contact Natacha at <a href="mailto:nramioulle@arete.com" style="color: var(--accent-teal);">nramioulle@arete.com</a> to discuss credit planning.
+                        </div>
+                    </div>
+                `;
+            }
+            if (lowRemaining && !isCritical) {
+                additionalWarnings += `
+                    <div class="alert-box warning" style="margin-top: 12px;">
+                        <span class="alert-icon">📉</span>
+                        <div>
+                            <strong>LOW BALANCE ALERT:</strong> After this usage, your remaining balance (${remaining.toFixed(1)} AEC) will be below 1,500 AEC. 
+                            Please contact Natacha at <a href="mailto:nramioulle@arete.com" style="color: var(--accent-teal);">nramioulle@arete.com</a> to order more credits.
+                        </div>
+                    </div>
+                `;
+            }
 
             // Determine alert level
             const alertDiv = document.getElementById('alertMessage');
@@ -1798,27 +1845,35 @@
                 </div>`;
             }
             
-            // Determine alert based on remaining credits vs weekly burn rate thresholds
-            if (remaining < criticalThreshold) {
+            // Determine alert based on whether usage exceeds balance
+            if (isCritical) {
                 alertDiv.innerHTML = `
                     <div class="alert-box critical">
                         <span class="alert-icon">🚨</span>
                         <div>
-                            <strong>ALERT REQUIRED:</strong> After this ${totalWeeks > 1 ? totalWeeks + '-week' : ''} usage (${totalCredits.toFixed(1)} AEC), remaining balance will be below critical threshold. 
-                            With ${leadTime} week lead time and ${weeklyBurnRate.toFixed(1)} AEC/week burn rate, you need at least ${criticalThreshold.toFixed(1)} AEC buffer remaining. 
-                            Please notify the administrator immediately to order more credits.
+                            <strong>ALERT REQUIRED:</strong> Your planned usage (${totalCredits.toFixed(1)} AEC) exceeds your current balance (${currentBalance.toFixed(1)} AEC). 
+                            You are short by ${(totalCredits - currentBalance).toFixed(1)} AEC.
                         </div>
+                        <button onclick="sendAlertEmail('critical', ${totalCredits.toFixed(1)}, ${currentBalance.toFixed(1)}, ${remaining.toFixed(1)}, ${weeklyBurnRate.toFixed(1)}, ${totalWeeks})" 
+                            style="margin-top: 12px; padding: 8px 16px; background: white; color: var(--accent-danger); border: none; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                            📧 Notify Natacha
+                        </button>
                     </div>
                     ${activeUsersNote}
+                    ${additionalWarnings}
                 `;
-            } else if (remaining < warningThreshold) {
+            } else if (isWarning || highBurnRate || lowRemaining) {
                 alertDiv.innerHTML = `
                     <div class="alert-box warning">
                         <span class="alert-icon">⚠️</span>
                         <div>
-                            <strong>CAUTION:</strong> After this usage, remaining balance (${remaining.toFixed(1)} AEC) will be approaching the warning threshold. 
-                            At ${weeklyBurnRate.toFixed(1)} AEC/week burn rate, consider notifying the administrator if you plan to continue at this rate.
+                            <strong>CAUTION:</strong> ${highBurnRate ? `High burn rate (${weeklyBurnRate.toFixed(1)} AEC/week). ` : ''}${lowRemaining ? `Remaining balance (${remaining.toFixed(1)} AEC) will be below 1,500 AEC. ` : ''}${isWarning ? `Planned usage will consume most of your balance. ` : ''}
+                            Planned: ${totalCredits.toFixed(1)} AEC | Balance: ${currentBalance.toFixed(1)} AEC | Remaining: ${remaining.toFixed(1)} AEC.
                         </div>
+                        <button onclick="sendAlertEmail('warning', ${totalCredits.toFixed(1)}, ${currentBalance.toFixed(1)}, ${remaining.toFixed(1)}, ${weeklyBurnRate.toFixed(1)}, ${totalWeeks})" 
+                            style="margin-top: 12px; padding: 8px 16px; background: white; color: var(--accent-warning); border: none; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                            📧 Notify Natacha
+                        </button>
                     </div>
                     ${activeUsersNote}
                 `;
@@ -1827,14 +1882,75 @@
                     <div class="alert-box safe">
                         <span class="alert-icon">✅</span>
                         <div>
-                            <strong>SAFE:</strong> Your planned usage is within safe limits. 
-                            After this usage, you'll have ${remaining.toFixed(1)} AEC remaining (${(remaining / weeklyBurnRate).toFixed(1)} weeks at current rate). 
-                            No action needed at this time.
+                            <strong>SAFE:</strong> Your planned usage is within available balance. 
+                            Planned: ${totalCredits.toFixed(1)} AEC | Balance: ${currentBalance.toFixed(1)} AEC | Remaining: ${remaining.toFixed(1)} AEC (${(remaining / weeklyBurnRate).toFixed(1)} weeks at current rate). 
+                            No action needed.
                         </div>
                     </div>
                     ${activeUsersNote}
                 `;
             }
+        }
+        
+        // Generate and send alert email
+        function sendAlertEmail(alertType, plannedUsage, currentBalance, remaining, weeklyRate, weeks) {
+            const subject = alertType === 'critical' 
+                ? 'URGENT: ANSYS AEC Credit Request - Balance Exceeded'
+                : 'ANSYS AEC Credit Alert - Low Balance Warning';
+            
+            // Get software list from calculator
+            const rows = document.querySelectorAll('.software-row');
+            let softwareList = '';
+            rows.forEach(row => {
+                const software = row.querySelector('.software-select').selectedOptions[0]?.text;
+                const hours = row.querySelector('.hours-input').value;
+                const weeksVal = row.querySelector('.weeks-input').value;
+                if (software && hours > 0) {
+                    softwareList += `  • ${software}: ${hours} hrs/week × ${weeksVal} week(s)\n`;
+                }
+            });
+            
+            const body = `Hi Natacha,
+
+I am planning to run ANSYS simulations and wanted to notify you about our credit situation.
+
+PLANNED USAGE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${softwareList}
+Total Duration: ${weeks} week(s)
+Weekly Burn Rate: ${weeklyRate} AEC/week
+Total AEC Required: ${plannedUsage} AEC
+
+CURRENT STATUS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Current Balance: ${currentBalance} AEC
+Remaining After Usage: ${remaining} AEC
+${alertType === 'critical' ? `Shortfall: ${(plannedUsage - currentBalance).toFixed(1)} AEC` : ''}
+
+${alertType === 'critical' 
+    ? 'ACTION NEEDED: We need additional credits to proceed with this simulation. Please advise on next steps.'
+    : 'HEADS UP: Our balance will be running low after this usage. We may need to order more credits soon.'}
+
+Please let me know if you have any questions.
+
+Thanks,
+[Your Name]`;
+
+            // Create .eml file for download
+            const emlContent = `To: nramioulle@arete.com
+Subject: ${subject}
+Content-Type: text/plain; charset=utf-8
+X-Unsent: 1
+
+${body}`;
+            
+            const blob = new Blob([emlContent], { type: 'message/rfc822' });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `ANSYS_Credit_Alert_${new Date().toISOString().split('T')[0]}.eml`;
+            link.click();
+            window.URL.revokeObjectURL(url);
         }
 
         // Load CSV from URL
@@ -2182,6 +2298,9 @@
 
             // Generate pivot table
             generatePivotTable();
+            
+            // Generate monthly pie charts (only shows on 31st)
+            generateMonthlyPieCharts();
         }
 
         function generatePivotTable() {
@@ -2547,6 +2666,316 @@ ${body}`;
                 document.body.removeChild(textarea);
                 alert('✅ Email content copied to clipboard!\n\nYou can now paste this into Outlook.');
             });
+        }
+
+        // Store monthly user data for email generation
+        let monthlyUserData = {};
+
+        // Generate monthly pie charts by user (shows previous month)
+        function generateMonthlyPieCharts() {
+            const today = new Date();
+            
+            // Get previous month
+            const previousMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+            const targetMonth = previousMonth.getMonth();
+            const targetYear = previousMonth.getFullYear();
+            
+            // Set the month name
+            const monthName = previousMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            document.getElementById('monthlyReportMonth').textContent = monthName;
+            
+            if (!historicalData || historicalData.length === 0) {
+                document.getElementById('monthlyPieChartsContainer').innerHTML = 
+                    '<p style="color: var(--text-secondary); text-align: center;">No data available. Please upload historical CSV data.</p>';
+                return;
+            }
+            
+            // Get previous month's data
+            const monthlyData = historicalData.filter(row => {
+                const rowDate = new Date(row.Date || row['Start Time']);
+                return rowDate.getMonth() === targetMonth && rowDate.getFullYear() === targetYear;
+            });
+            
+            if (monthlyData.length === 0) {
+                document.getElementById('monthlyPieChartsContainer').innerHTML = 
+                    '<p style="color: var(--text-secondary); text-align: center;">No usage data found for previous month.</p>';
+                return;
+            }
+            
+            // Group by user and software
+            const userSoftwareHours = {};
+            const userTotalAEC = {};
+            
+            monthlyData.forEach(row => {
+                const user = row.Username || 'Unknown';
+                const software = row.Product || row['Job Name'] || row.Software || 'Unknown';
+                const hours = parseFloat(row.Hours) || 0;
+                const cost = parseFloat(row.Cost) || 0;
+                
+                if (!userSoftwareHours[user]) {
+                    userSoftwareHours[user] = {};
+                    userTotalAEC[user] = 0;
+                }
+                
+                if (!userSoftwareHours[user][software]) {
+                    userSoftwareHours[user][software] = 0;
+                }
+                
+                userSoftwareHours[user][software] += hours;
+                userTotalAEC[user] += cost;
+            });
+            
+            // Store for email function
+            monthlyUserData = {
+                month: monthName,
+                users: {}
+            };
+            
+            // Generate a pie chart for each user
+            const container = document.getElementById('monthlyPieChartsContainer');
+            container.innerHTML = '';
+            
+            // Color palette for software
+            const colors = [
+                '#005B7F', // Arete teal
+                '#007aff', // Blue
+                '#34c759', // Green
+                '#ff9500', // Orange
+                '#ff3b30', // Red
+                '#af52de', // Purple
+                '#00C7BE', // Cyan
+                '#FF2D92', // Pink
+                '#FFD60A', // Yellow
+                '#BF5AF2'  // Light purple
+            ];
+            
+            Object.keys(userSoftwareHours).sort().forEach((user, userIndex) => {
+                const softwareData = userSoftwareHours[user];
+                const totalHours = Object.values(softwareData).reduce((a, b) => a + b, 0);
+                const totalAEC = userTotalAEC[user];
+                
+                // Store user data for email
+                monthlyUserData.users[user] = {
+                    totalHours: totalHours,
+                    totalAEC: totalAEC,
+                    software: softwareData
+                };
+                
+                // Create card for this user
+                const card = document.createElement('div');
+                card.style.cssText = 'background: var(--bg-secondary); padding: 20px; border-radius: 12px; box-shadow: var(--shadow-sm);';
+                
+                // User header
+                const header = document.createElement('div');
+                header.style.cssText = 'margin-bottom: 16px;';
+                header.innerHTML = `
+                    <h3 style="font-size: 0.9375rem; font-weight: 600; margin-bottom: 4px; color: var(--text-primary);">${user}</h3>
+                    <p style="font-size: 0.75rem; color: var(--text-secondary);">Total: ${totalHours.toFixed(1)} hours | ${totalAEC.toFixed(1)} AEC</p>
+                `;
+                card.appendChild(header);
+                
+                // Create canvas for pie chart
+                const canvas = document.createElement('canvas');
+                canvas.id = `pieChart-${userIndex}`;
+                canvas.style.cssText = 'max-height: 250px;';
+                card.appendChild(canvas);
+                
+                // Legend
+                const legend = document.createElement('div');
+                legend.style.cssText = 'margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px; font-size: 0.75rem;';
+                
+                Object.keys(softwareData).sort((a, b) => softwareData[b] - softwareData[a]).forEach((software, index) => {
+                    const hours = softwareData[software];
+                    const percentage = ((hours / totalHours) * 100).toFixed(1);
+                    const color = colors[index % colors.length];
+                    
+                    const legendItem = document.createElement('div');
+                    legendItem.style.cssText = 'display: flex; align-items: center; gap: 6px;';
+                    legendItem.innerHTML = `
+                        <div style="width: 12px; height: 12px; border-radius: 2px; background: ${color};"></div>
+                        <span style="color: var(--text-secondary);">${software}: ${percentage}%</span>
+                    `;
+                    legend.appendChild(legendItem);
+                });
+                
+                card.appendChild(legend);
+                container.appendChild(card);
+                
+                // Draw pie chart
+                const ctx = canvas.getContext('2d');
+                const chartData = {
+                    labels: Object.keys(softwareData),
+                    datasets: [{
+                        data: Object.values(softwareData),
+                        backgroundColor: Object.keys(softwareData).map((_, i) => colors[i % colors.length]),
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                };
+                
+                // Check if Chart.js is loaded
+                if (typeof Chart !== 'undefined') {
+                    new Chart(ctx, {
+                        type: 'pie',
+                        data: chartData,
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: true,
+                            plugins: {
+                                legend: {
+                                    display: false
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            const label = context.label || '';
+                                            const value = context.parsed || 0;
+                                            const percentage = ((value / totalHours) * 100).toFixed(1);
+                                            return `${label}: ${value.toFixed(1)}h (${percentage}%)`;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                } else {
+                    // Fallback if Chart.js isn't loaded
+                    canvas.remove();
+                    const fallback = document.createElement('div');
+                    fallback.style.cssText = 'padding: 20px; text-align: center; color: var(--text-secondary);';
+                    fallback.textContent = 'Chart library not loaded';
+                    card.appendChild(fallback);
+                }
+            });
+        }
+
+        // Email all users with their individual usage reports
+        function emailAllUsers() {
+            if (!monthlyUserData || !monthlyUserData.users || Object.keys(monthlyUserData.users).length === 0) {
+                alert('No user data available. Please ensure historical data is loaded.');
+                return;
+            }
+            
+            const users = Object.keys(monthlyUserData.users).sort();
+            
+            // Show options dialog
+            const choice = confirm(
+                `Generate emails for ${users.length} user${users.length > 1 ? 's' : ''}?\n\n` +
+                `Click OK to download individual .eml files (recommended)\n` +
+                `Click Cancel to copy all emails to clipboard`
+            );
+            
+            if (choice) {
+                // Option 1: Download .eml files
+                generateEMLFiles(users);
+            } else {
+                // Option 2: Copy to clipboard (fallback)
+                copyEmailsToClipboard(users);
+            }
+        }
+
+        // Generate individual .eml files that can be opened in Outlook
+        function generateEMLFiles(users) {
+            users.forEach((user, index) => {
+                const userData = monthlyUserData.users[user];
+                const subject = `Your ANSYS Usage Report - ${monthlyUserData.month}`;
+                const body = generateUserEmailContent(user, userData, monthlyUserData.month);
+                const toEmail = `${user}@arete.com`;
+                
+                // Create .eml file content
+                const emlContent = `To: ${toEmail}
+Subject: ${subject}
+Content-Type: text/plain; charset=utf-8
+X-Unsent: 1
+
+${body}`;
+                
+                // Create blob and download
+                const blob = new Blob([emlContent], { type: 'message/rfc822' });
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `ANSYS_Report_${user}_${monthlyUserData.month.replace(/\s+/g, '_')}.eml`;
+                
+                // Stagger downloads to avoid browser blocking
+                setTimeout(() => {
+                    link.click();
+                    window.URL.revokeObjectURL(url);
+                }, index * 300);
+            });
+            
+            alert(`✅ Downloading ${users.length} email file${users.length > 1 ? 's' : ''}!\n\nInstructions:\n1. Check your Downloads folder\n2. Double-click each .eml file\n3. Outlook will open with a draft email\n4. Review and click Send\n\nNote: Your browser may ask for permission to download multiple files.`);
+        }
+
+        // Copy all emails to clipboard (fallback method)
+        function copyEmailsToClipboard(users) {
+            let allEmailsText = '';
+            
+            users.forEach((user, index) => {
+                const userData = monthlyUserData.users[user];
+                const emailContent = generateUserEmailContent(user, userData, monthlyUserData.month);
+                
+                allEmailsText += `═══════════════════════════════════════════════════════════════\n`;
+                allEmailsText += `EMAIL ${index + 1} of ${users.length}\n`;
+                allEmailsText += `═══════════════════════════════════════════════════════════════\n\n`;
+                allEmailsText += `TO: ${user}@arete.com\n`;
+                allEmailsText += `SUBJECT: Your ANSYS Usage Report - ${monthlyUserData.month}\n\n`;
+                allEmailsText += `BODY:\n${emailContent}\n\n\n`;
+            });
+            
+            // Copy to clipboard
+            navigator.clipboard.writeText(allEmailsText).then(() => {
+                alert(`✅ Email content for ${users.length} user${users.length > 1 ? 's' : ''} copied to clipboard!\n\nInstructions:\n1. Open Outlook\n2. Create new emails for each user\n3. Paste the content (Ctrl+V)\n4. Copy the TO, SUBJECT, and BODY to the appropriate fields\n\nThe content includes all ${users.length} emails separated by dividers.`);
+            }).catch(() => {
+                // Fallback if clipboard API fails
+                const textarea = document.createElement('textarea');
+                textarea.value = allEmailsText;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                alert(`✅ Email content for ${users.length} user${users.length > 1 ? 's' : ''} copied to clipboard!\n\nInstructions:\n1. Open Outlook\n2. Create new emails for each user\n3. Paste the content (Ctrl+V)\n4. Copy the TO, SUBJECT, and BODY to the appropriate fields\n\nThe content includes all ${users.length} emails separated by dividers.`);
+            });
+        }
+
+        // Generate email content for a user
+        function generateUserEmailContent(username, userData, month) {
+            // Build software breakdown
+            let softwareList = '';
+            const sortedSoftware = Object.entries(userData.software)
+                .sort((a, b) => b[1] - a[1]); // Sort by hours descending
+            
+            sortedSoftware.forEach(([software, hours]) => {
+                const percentage = ((hours / userData.totalHours) * 100).toFixed(1);
+                softwareList += `    • ${software}: ${hours.toFixed(1)} hours (${percentage}%)\n`;
+            });
+            
+            const body = `Hello ${username},
+
+This is your ANSYS usage summary for ${month}.
+
+USAGE SUMMARY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Total Hours: ${userData.totalHours.toFixed(1)} hours
+Total Cost: ${userData.totalAEC.toFixed(1)} AEC ($${userData.totalAEC.toFixed(2)} USD)
+
+SOFTWARE BREAKDOWN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+${softwareList}
+
+NOTES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+• Exchange Rate: 1 AEC = $1.00 USD
+• These statistics are for tracking and budgeting purposes
+• If you have questions about your usage, please contact the ANSYS administrator
+
+Thank you for using our ANSYS resources responsibly!
+
+Best regards,
+ANSYS License Administrator
+Arete Associates`;
+
+            return body;
         }
 
         function exportToTeams() {
