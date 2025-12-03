@@ -2633,14 +2633,15 @@ Thanks,`;
 
         function requestPurchase() {
             const recentWeekly = parseFloat(document.getElementById('recentWeekly').textContent) || 0;
-            const runway = parseFloat(document.getElementById('runwayMonths').textContent) || 0;
-            const runwayWeeks = runway * 4.33;
-            const currentBalance = document.getElementById('balanceWarning')?.textContent || '0 AEC';
+            const currentBalanceNum = parseFloat(document.getElementById('balanceWarning')?.textContent) || 0;
+            
+            // Simple calculation: current balance / weekly usage = weeks remaining
+            const weeksRemaining = recentWeekly > 0 ? (currentBalanceNum / recentWeekly).toFixed(1) : 0;
 
             const subject = 'ANSYS AEC Purchase Request';
             const body = `Hi Ben and Dario,
 
-We've been using ${recentWeekly.toFixed(1)} AECs per week which means we've got around ${runwayWeeks.toFixed(1)} weeks left with our current balance of ${currentBalance}.
+We've been using ${recentWeekly.toFixed(1)} AECs per week which means we've got around ${weeksRemaining} weeks left with our current balance of ${currentBalanceNum.toFixed(1)} AEC.
 
 Can you help in putting in another order of 5000 AECs so we don't have any periods of interruption?
 
@@ -2850,48 +2851,114 @@ Natacha`;
             
             const users = Object.keys(monthlyUserData.users).sort();
             
-            // Open emails using Outlook web deeplink
-            openOutlookEmails(users);
+            // Open email queue modal
+            showEmailQueueModal(users);
         }
 
-        // Open Outlook web compose for each user
-        function openOutlookEmails(users) {
+        // Show modal to step through emails one at a time
+        function showEmailQueueModal(users) {
             let currentIndex = 0;
             
-            const openNextEmail = () => {
-                if (currentIndex >= users.length) {
-                    alert(`✅ Opened ${users.length} email${users.length > 1 ? 's' : ''} in Outlook Web!\n\nPlease review and send each email.`);
-                    return;
-                }
-                
+            const modal = document.createElement('div');
+            modal.id = 'emailQueueModal';
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.5);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 10000;
+            `;
+            
+            const updateModal = () => {
                 const user = users[currentIndex];
                 const userData = monthlyUserData.users[user];
-                const subject = `Your ANSYS Usage Report - ${monthlyUserData.month}`;
-                const body = generateUserEmailContent(user, userData, monthlyUserData.month);
-                const toEmail = `${user}@arete.com`;
                 
-                // Create Outlook web deeplink
-                const outlookUrl = `https://outlook.office365.us/owa/arete.com/?path=/mail/action/compose&to=${encodeURIComponent(toEmail)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                modal.innerHTML = `
+                    <div style="background: var(--bg-card); border-radius: 16px; padding: 24px; max-width: 500px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h2 style="margin: 0; font-size: 1.25rem; color: var(--text-primary);">📧 Email Queue</h2>
+                            <button onclick="document.getElementById('emailQueueModal').remove()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-secondary);">×</button>
+                        </div>
+                        
+                        <div style="background: var(--bg-secondary); padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+                            <p style="margin: 0 0 8px 0; font-size: 0.875rem; color: var(--text-secondary);">
+                                Email ${currentIndex + 1} of ${users.length}
+                            </p>
+                            <p style="margin: 0; font-size: 1.1rem; font-weight: 600; color: var(--text-primary);">
+                                📤 ${user}@arete.com
+                            </p>
+                            <p style="margin: 8px 0 0 0; font-size: 0.8rem; color: var(--text-secondary);">
+                                ${userData.totalHours.toFixed(1)} hours | ${userData.totalAEC.toFixed(1)} AEC
+                            </p>
+                        </div>
+                        
+                        <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                            <button onclick="document.getElementById('emailQueueModal').remove()" 
+                                style="padding: 10px 20px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary); font-size: 0.875rem; cursor: pointer;">
+                                Cancel
+                            </button>
+                            <button id="openEmailBtn"
+                                style="padding: 10px 20px; border: none; border-radius: 8px; background: var(--accent-teal); color: white; font-size: 0.875rem; font-weight: 600; cursor: pointer;">
+                                📧 Open Email ${currentIndex < users.length - 1 ? '& Next' : '(Last)'}
+                            </button>
+                        </div>
+                        
+                        <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);">
+                            <div style="display: flex; gap: 4px;">
+                                ${users.map((u, i) => `
+                                    <div style="flex: 1; height: 4px; border-radius: 2px; background: ${i < currentIndex ? 'var(--accent-success)' : i === currentIndex ? 'var(--accent-teal)' : 'var(--bg-secondary)'};"></div>
+                                `).join('')}
+                            </div>
+                            <p style="margin: 8px 0 0 0; font-size: 0.75rem; color: var(--text-secondary); text-align: center;">
+                                ${currentIndex} sent • ${users.length - currentIndex} remaining
+                            </p>
+                        </div>
+                    </div>
+                `;
                 
-                // Open in new tab
-                window.open(outlookUrl, '_blank');
-                
-                currentIndex++;
-                
-                // Stagger opening to avoid popup blockers
-                if (currentIndex < users.length) {
-                    setTimeout(openNextEmail, 800);
-                } else {
-                    setTimeout(() => {
-                        alert(`✅ Opened ${users.length} email${users.length > 1 ? 's' : ''} in Outlook Web!\n\nPlease review and send each email.`);
-                    }, 500);
-                }
+                // Add click handler for the open email button
+                document.getElementById('openEmailBtn').addEventListener('click', () => {
+                    const user = users[currentIndex];
+                    const userData = monthlyUserData.users[user];
+                    const subject = `Your ANSYS Usage Report - ${monthlyUserData.month}`;
+                    const body = generateUserEmailContent(user, userData, monthlyUserData.month);
+                    const toEmail = `${user}@arete.com`;
+                    
+                    // Create Outlook web deeplink
+                    const outlookUrl = `https://outlook.office365.us/owa/arete.com/?path=/mail/action/compose&to=${encodeURIComponent(toEmail)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                    
+                    // Open in new tab
+                    window.open(outlookUrl, '_blank');
+                    
+                    currentIndex++;
+                    
+                    if (currentIndex < users.length) {
+                        updateModal();
+                    } else {
+                        modal.innerHTML = `
+                            <div style="background: var(--bg-card); border-radius: 16px; padding: 24px; max-width: 400px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.3); text-align: center;">
+                                <div style="font-size: 3rem; margin-bottom: 16px;">✅</div>
+                                <h2 style="margin: 0 0 8px 0; font-size: 1.25rem; color: var(--text-primary);">All Done!</h2>
+                                <p style="margin: 0 0 20px 0; color: var(--text-secondary);">
+                                    Opened ${users.length} email${users.length > 1 ? 's' : ''} in Outlook Web.
+                                </p>
+                                <button onclick="document.getElementById('emailQueueModal').remove()" 
+                                    style="padding: 10px 24px; border: none; border-radius: 8px; background: var(--accent-teal); color: white; font-size: 0.875rem; font-weight: 600; cursor: pointer;">
+                                    Close
+                                </button>
+                            </div>
+                        `;
+                    }
+                });
             };
             
-            // Show initial message
-            alert(`Opening ${users.length} email${users.length > 1 ? 's' : ''} in Outlook Web...\n\nYour browser may ask to allow popups. Please allow them to open all emails.\n\nClick OK to begin.`);
-            
-            openNextEmail();
+            document.body.appendChild(modal);
+            updateModal();
         }
 
         // Generate email content for a user
