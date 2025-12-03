@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ANSYS AEC Trend Analysis</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         :root {
             --bg-primary: #ffffff;
@@ -1355,7 +1356,7 @@
                     <span class="result-value" id="remainingCredits">5,000.0 AEC</span>
                 </div>
                 <div class="result-row">
-                    <span class="result-label">Lead Time with Buffer</span>
+                    <span class="result-label">Lead Time with Buffer (×1.5)</span>
                     <span class="result-value" id="leadTimeBuffer">2 weeks</span>
                 </div>
                 <div id="alertMessage"></div>
@@ -1363,6 +1364,9 @@
 
             <button class="purchase-btn" onclick="calculateUsage()" style="margin-top: 10px; width: 100%; padding: 8px; font-size: 0.875rem;">
                 Calculate
+            </button>
+            <button class="purchase-btn" onclick="exportQuoteToPDF()" style="margin-top: 8px; width: 100%; padding: 8px; font-size: 0.875rem; background: linear-gradient(135deg, var(--accent-purple), var(--accent-info));">
+                📄 Export Quote to PDF
             </button>
             </div>
         </div>
@@ -1745,7 +1749,9 @@
         function calculateUsage() {
             const rows = document.querySelectorAll('.software-row');
             let totalCredits = 0;
+            let totalWeeks = 0;
 
+            // Calculate total credits needed and track weeks
             rows.forEach(row => {
                 const software = row.querySelector('.software-select').value;
                 const hours = parseFloat(row.querySelector('.hours-input').value) || 0;
@@ -1754,23 +1760,27 @@
                 if (software && hours > 0) {
                     const rate = softwareRates[software];
                     totalCredits += rate * hours * weeks;
+                    totalWeeks = Math.max(totalWeeks, weeks); // Track the longest duration
                 }
             });
+
+            // Calculate weekly burn rate (average per week)
+            const weeklyBurnRate = totalWeeks > 0 ? totalCredits / totalWeeks : totalCredits;
 
             // Get current balance from settings or default
             const currentBalance = settings.availableBalance || 5000;
             const leadTime = settings.leadTimeWeeks || 2;
             const remaining = currentBalance - totalCredits;
 
-            // Calculate safe threshold (credits needed for lead time period at current burn rate)
-            const weeklyBurnRate = totalCredits; // This is the planned weekly usage
-            const criticalThreshold = weeklyBurnRate * leadTime * 1.5; // Need 1.5x lead time buffer
+            // Calculate safe threshold based on WEEKLY burn rate
+            const criticalThreshold = weeklyBurnRate * leadTime * 1.5; // Need 1.5x lead time buffer based on weekly rate
+            const warningThreshold = weeklyBurnRate * leadTime * 2; // Warning at 2x lead time buffer
 
             // Update display
             document.getElementById('totalCredits').textContent = totalCredits.toFixed(1) + ' AEC';
             document.getElementById('currentBalance').textContent = currentBalance.toLocaleString('en-US', {minimumFractionDigits: 1, maximumFractionDigits: 1}) + ' AEC';
             document.getElementById('remainingCredits').textContent = remaining.toLocaleString('en-US', {minimumFractionDigits: 1, maximumFractionDigits: 1}) + ' AEC';
-            document.getElementById('leadTimeBuffer').textContent = leadTime + ' weeks';
+            document.getElementById('leadTimeBuffer').textContent = (leadTime * 1.5).toFixed(1) + ' weeks';
 
             // Determine alert level
             const alertDiv = document.getElementById('alertMessage');
@@ -1785,25 +1795,26 @@
                 </div>`;
             }
             
+            // Determine alert based on remaining credits vs weekly burn rate thresholds
             if (remaining < criticalThreshold) {
                 alertDiv.innerHTML = `
                     <div class="alert-box critical">
                         <span class="alert-icon">🚨</span>
                         <div>
-                            <strong>ALERT REQUIRED:</strong> Your planned usage will consume too many credits. 
-                            With ${leadTime} week lead time, you need at least ${criticalThreshold.toFixed(1)} AEC buffer. 
+                            <strong>ALERT REQUIRED:</strong> After this ${totalWeeks > 1 ? totalWeeks + '-week' : ''} usage (${totalCredits.toFixed(1)} AEC), remaining balance will be below critical threshold. 
+                            With ${leadTime} week lead time and ${weeklyBurnRate.toFixed(1)} AEC/week burn rate, you need at least ${criticalThreshold.toFixed(1)} AEC buffer remaining. 
                             Please notify the administrator immediately to order more credits.
                         </div>
                     </div>
                     ${activeUsersNote}
                 `;
-            } else if (remaining < weeklyBurnRate * leadTime * 2) {
+            } else if (remaining < warningThreshold) {
                 alertDiv.innerHTML = `
                     <div class="alert-box warning">
                         <span class="alert-icon">⚠️</span>
                         <div>
-                            <strong>CAUTION:</strong> Your usage is approaching the warning threshold. 
-                            Consider notifying the administrator if you plan to continue at this rate.
+                            <strong>CAUTION:</strong> After this usage, remaining balance (${remaining.toFixed(1)} AEC) will be approaching the warning threshold. 
+                            At ${weeklyBurnRate.toFixed(1)} AEC/week burn rate, consider notifying the administrator if you plan to continue at this rate.
                         </div>
                     </div>
                     ${activeUsersNote}
@@ -1814,6 +1825,7 @@
                         <span class="alert-icon">✅</span>
                         <div>
                             <strong>SAFE:</strong> Your planned usage is within safe limits. 
+                            After this usage, you'll have ${remaining.toFixed(1)} AEC remaining (${(remaining / weeklyBurnRate).toFixed(1)} weeks at current rate). 
                             No action needed at this time.
                         </div>
                     </div>
@@ -2603,6 +2615,204 @@ ${body}`;
                 document.body.removeChild(textarea);
                 alert('✅ Status update copied to clipboard!\n\nYou can now paste this into your Teams channel.');
             });
+        }
+
+        // Export Quote to PDF
+        function exportQuoteToPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Get current date
+            const today = new Date();
+            const dateStr = today.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            
+            // Collect software usage data
+            const rows = document.querySelectorAll('.software-row');
+            let usageData = [];
+            let totalCredits = 0;
+            
+            rows.forEach(row => {
+                const software = row.querySelector('.software-select').value;
+                const softwareName = row.querySelector('.software-select').selectedOptions[0]?.text;
+                const hours = parseFloat(row.querySelector('.hours-input').value) || 0;
+                const weeks = parseFloat(row.querySelector('.weeks-input').value) || 1;
+                
+                if (software && hours > 0) {
+                    const rate = softwareRates[software];
+                    const credits = rate * hours * weeks;
+                    totalCredits += credits;
+                    
+                    usageData.push({
+                        software: softwareName,
+                        rate: rate,
+                        hours: hours,
+                        weeks: weeks,
+                        credits: credits
+                    });
+                }
+            });
+            
+            if (usageData.length === 0) {
+                alert('Please add at least one software with hours to generate a quote.');
+                return;
+            }
+            
+            // Calculate totals
+            const totalWeeks = Math.max(...usageData.map(d => d.weeks));
+            const weeklyBurnRate = totalCredits / totalWeeks;
+            
+            // PDF Styling
+            const primaryColor = [0, 122, 255]; // Blue
+            const accentColor = [147, 51, 234]; // Purple
+            const darkGray = [60, 60, 67];
+            const lightGray = [142, 142, 147];
+            
+            let yPos = 20;
+            
+            // Header
+            doc.setFillColor(...primaryColor);
+            doc.rect(0, 0, 210, 35, 'F');
+            
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(24);
+            doc.setFont(undefined, 'bold');
+            doc.text('ANSYS Simulation Cost Quote', 105, 18, { align: 'center' });
+            
+            doc.setFontSize(11);
+            doc.setFont(undefined, 'normal');
+            doc.text('AEC Credit Usage Estimate', 105, 27, { align: 'center' });
+            
+            yPos = 45;
+            
+            // Document Info
+            doc.setTextColor(...darkGray);
+            doc.setFontSize(10);
+            doc.text(`Date: ${dateStr}`, 20, yPos);
+            doc.text(`Quote ID: Q-${Date.now().toString().slice(-8)}`, 150, yPos);
+            
+            yPos += 15;
+            
+            // Summary Box
+            doc.setDrawColor(...primaryColor);
+            doc.setLineWidth(0.5);
+            doc.roundedRect(20, yPos, 170, 25, 2, 2);
+            
+            yPos += 8;
+            doc.setFontSize(11);
+            doc.setFont(undefined, 'bold');
+            doc.text('Cost Summary', 25, yPos);
+            
+            yPos += 7;
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(10);
+            doc.text(`Total AEC Credits Required: ${totalCredits.toFixed(1)} AEC`, 25, yPos);
+            
+            yPos += 6;
+            doc.text(`Duration: ${totalWeeks} week${totalWeeks > 1 ? 's' : ''}`, 25, yPos);
+            doc.text(`Average Weekly Burn Rate: ${weeklyBurnRate.toFixed(1)} AEC/week`, 110, yPos);
+            
+            yPos += 15;
+            
+            // Software Breakdown Header
+            doc.setFontSize(13);
+            doc.setFont(undefined, 'bold');
+            doc.setTextColor(...accentColor);
+            doc.text('Software Breakdown', 20, yPos);
+            
+            yPos += 8;
+            
+            // Table Header
+            doc.setFillColor(245, 245, 247);
+            doc.rect(20, yPos - 5, 170, 8, 'F');
+            
+            doc.setFontSize(9);
+            doc.setFont(undefined, 'bold');
+            doc.setTextColor(...darkGray);
+            doc.text('Software', 22, yPos);
+            doc.text('Rate', 95, yPos);
+            doc.text('Hours', 120, yPos);
+            doc.text('Weeks', 145, yPos);
+            doc.text('Total AEC', 170, yPos);
+            
+            yPos += 8;
+            
+            // Table Rows
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(9);
+            
+            usageData.forEach((item, index) => {
+                if (yPos > 270) {
+                    doc.addPage();
+                    yPos = 20;
+                }
+                
+                // Alternating row colors
+                if (index % 2 === 0) {
+                    doc.setFillColor(250, 250, 250);
+                    doc.rect(20, yPos - 5, 170, 7, 'F');
+                }
+                
+                doc.setTextColor(...darkGray);
+                doc.text(item.software, 22, yPos);
+                doc.text(`${item.rate} AEC/hr`, 95, yPos);
+                doc.text(`${item.hours}`, 120, yPos);
+                doc.text(`${item.weeks}`, 145, yPos);
+                doc.text(`${item.credits.toFixed(1)}`, 170, yPos);
+                
+                yPos += 7;
+            });
+            
+            // Total Line
+            yPos += 3;
+            doc.setLineWidth(0.5);
+            doc.setDrawColor(...darkGray);
+            doc.line(20, yPos, 190, yPos);
+            
+            yPos += 7;
+            doc.setFontSize(11);
+            doc.setFont(undefined, 'bold');
+            doc.setTextColor(...primaryColor);
+            doc.text('TOTAL', 22, yPos);
+            doc.text(`${totalCredits.toFixed(1)} AEC`, 170, yPos);
+            
+            yPos += 15;
+            
+            // Recommendations Section (if there's space)
+            if (yPos < 240) {
+                doc.setFontSize(11);
+                doc.setFont(undefined, 'bold');
+                doc.setTextColor(...accentColor);
+                doc.text('Recommendations', 20, yPos);
+                
+                yPos += 7;
+                doc.setFontSize(9);
+                doc.setFont(undefined, 'normal');
+                doc.setTextColor(...darkGray);
+                
+                const leadTime = settings.leadTimeWeeks || 2;
+                const bufferNeeded = weeklyBurnRate * leadTime * 1.5;
+                
+                doc.text(`• Ensure available balance exceeds ${totalCredits.toFixed(1)} AEC before starting`, 22, yPos);
+                yPos += 6;
+                doc.text(`• Maintain buffer of ${bufferNeeded.toFixed(1)} AEC for ${(leadTime * 1.5).toFixed(1)}-week lead time`, 22, yPos);
+                yPos += 6;
+                doc.text(`• Monitor weekly consumption to stay within ${weeklyBurnRate.toFixed(1)} AEC/week estimate`, 22, yPos);
+            }
+            
+            // Footer
+            const pageCount = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                doc.setFontSize(8);
+                doc.setTextColor(...lightGray);
+                doc.text('ANSYS AEC Credit Usage Quote', 105, 290, { align: 'center' });
+                doc.text(`Page ${i} of ${pageCount}`, 190, 290, { align: 'right' });
+                doc.text(`Generated: ${today.toLocaleString()}`, 20, 290);
+            }
+            
+            // Save PDF
+            const filename = `ANSYS_Quote_${today.getFullYear()}${(today.getMonth()+1).toString().padStart(2,'0')}${today.getDate().toString().padStart(2,'0')}.pdf`;
+            doc.save(filename);
         }
     </script>
 </body>
