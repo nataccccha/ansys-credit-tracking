@@ -79,13 +79,6 @@
             z-index: 1;
             margin-bottom: 50px;
             animation: slideDown 0.8s ease-out;
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .header-text {
-            flex: 1;
         }
 
         @keyframes slideDown {
@@ -139,8 +132,8 @@
         .upload-section {
             background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 18px;
-            padding: 32px;
+            border-radius: 14px;
+            padding: 20px;
             text-align: center;
             transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             box-shadow: var(--shadow-sm);
@@ -164,22 +157,22 @@
         }
 
         .upload-section h3 {
-            font-size: 1.375rem;
-            margin-bottom: 8px;
+            font-size: 1.0625rem;
+            margin-bottom: 6px;
             font-weight: 600;
             letter-spacing: -0.01em;
         }
 
         .upload-label {
             display: inline-block;
-            padding: 4px 12px;
+            padding: 3px 10px;
             background: var(--accent-info);
             color: white;
-            border-radius: 12px;
+            border-radius: 10px;
             font-size: 0.6875rem;
             font-weight: 600;
             letter-spacing: -0.01em;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
         }
 
         .upload-label.historical {
@@ -194,10 +187,10 @@
             background: var(--accent-info);
             color: white;
             border: none;
-            padding: 12px 28px;
-            font-size: 1.0625rem;
+            padding: 8px 20px;
+            font-size: 0.9375rem;
             font-weight: 500;
-            border-radius: 12px;
+            border-radius: 10px;
             cursor: pointer;
             transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
@@ -221,8 +214,8 @@
         }
 
         .file-status {
-            margin-top: 16px;
-            font-size: 0.9375rem;
+            margin-top: 10px;
+            font-size: 0.8125rem;
             min-height: 20px;
             font-weight: 400;
             letter-spacing: -0.01em;
@@ -364,13 +357,6 @@
             letter-spacing: -0.015em;
         }
 
-        .comparison-section {
-            position: relative;
-            z-index: 1;
-            margin-bottom: 40px;
-            animation: fadeIn 1s ease-out 0.8s both;
-        }
-
         .comparison-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -378,16 +364,15 @@
         }
 
         .comparison-card {
-            background: var(--bg-card);
+            background: var(--bg-secondary);
             border: 1px solid var(--border);
-            border-radius: 18px;
-            padding: 32px;
-            box-shadow: var(--shadow-sm);
+            border-radius: 14px;
+            padding: 24px;
         }
 
         .comparison-card h3 {
-            font-size: 1.5rem;
-            margin-bottom: 24px;
+            font-size: 1.125rem;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
             gap: 12px;
@@ -411,13 +396,6 @@
         .period-badge.recent {
             background: rgba(0, 122, 255, 0.12);
             color: var(--accent-info);
-        }
-
-        .alerts-section {
-            position: relative;
-            z-index: 1;
-            margin-bottom: 40px;
-            animation: fadeIn 1s ease-out 1s both;
         }
 
         .alert-card {
@@ -642,6 +620,341 @@
             transform: scale(1.05);
         }
 
+        /* Active Users Box */
+        .active-users-box {
+            position: absolute;
+            top: 20px;
+            right: 140px;
+            z-index: 1000;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px 20px;
+            box-shadow: var(--shadow-md);
+            min-width: 180px;
+            text-align: center;
+        }
+
+        .active-users-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .active-users-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--accent-info);
+            line-height: 1;
+            letter-spacing: -0.02em;
+        }
+
+        .active-users-text {
+            font-size: 0.8125rem;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        /* Collapsible section for pivot table */
+        .collapsible-section {
+            position: relative;
+            z-index: 1;
+            margin-bottom: 40px;
+        }
+
+        .section-header {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 24px 32px;
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .section-header:hover {
+            box-shadow: var(--shadow-md);
+            border-color: var(--accent-info);
+        }
+
+        .section-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        .collapse-icon {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .collapse-icon.collapsed {
+            transform: rotate(-90deg);
+        }
+
+        .collapsible-content {
+            margin-top: 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 32px;
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            max-height: 2000px;
+            opacity: 1;
+        }
+
+        .collapsible-content.collapsed {
+            max-height: 0;
+            opacity: 0;
+            margin-top: 0;
+            padding: 0;
+            border: none;
+        }
+
+        .pivot-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9375rem;
+        }
+
+        .pivot-table thead {
+            position: sticky;
+            top: 0;
+            background: var(--bg-card);
+            z-index: 10;
+        }
+
+        .pivot-table th {
+            text-align: right;
+            padding: 12px 16px;
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            font-size: 0.8125rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .pivot-table th:first-child {
+            text-align: left;
+            position: sticky;
+            left: 0;
+            background: var(--bg-secondary);
+            z-index: 11;
+        }
+
+        .pivot-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+            text-align: right;
+            transition: background 0.2s ease;
+        }
+
+        .pivot-table td:first-child {
+            text-align: left;
+            font-weight: 600;
+            position: sticky;
+            left: 0;
+            background: var(--bg-card);
+            z-index: 5;
+        }
+
+        .pivot-table tr:hover td {
+            background: var(--bg-secondary);
+        }
+
+        .pivot-table tr:hover td:first-child {
+            background: var(--bg-secondary);
+        }
+
+        .pivot-table .total-row {
+            font-weight: 600;
+            background: var(--bg-secondary);
+            border-top: 2px solid var(--border);
+        }
+
+        .pivot-table .total-row:hover td {
+            background: var(--bg-secondary);
+        }
+
+        .pivot-table-container {
+            overflow-x: auto;
+            margin-top: 16px;
+        }
+
+        /* Credit Calculator */
+        .calculator-section {
+            position: relative;
+            z-index: 1;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .calculator-section:hover {
+            border-color: var(--accent-info);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .calculator-section .section-header:hover {
+            background: transparent;
+        }
+
+        .calculator-header {
+            margin-bottom: 16px;
+        }
+
+        .calculator-header h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+            letter-spacing: -0.015em;
+        }
+
+        .calculator-header p {
+            color: var(--text-secondary);
+            font-size: 0.8125rem;
+        }
+
+        .software-inputs {
+            display: grid;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .software-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr auto;
+            gap: 8px;
+            align-items: center;
+            padding: 8px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+        }
+
+        .software-row select,
+        .software-row input {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 8px 10px;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+
+        .software-row select:focus,
+        .software-row input:focus {
+            outline: none;
+            border-color: var(--accent-info);
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+        }
+
+        .add-software-btn,
+        .remove-software-btn {
+            background: var(--accent-info);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .add-software-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
+        }
+
+        .remove-software-btn {
+            background: var(--accent-danger);
+            padding: 8px 12px;
+        }
+
+        .remove-software-btn:hover {
+            box-shadow: 0 2px 8px rgba(255, 59, 48, 0.3);
+        }
+
+        .calculator-result {
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            padding: 16px;
+            margin-top: 16px;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .result-row:last-child {
+            border-bottom: none;
+            padding-top: 12px;
+            margin-top: 4px;
+            border-top: 2px solid var(--border);
+        }
+
+        .result-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .result-value {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .alert-box {
+            margin-top: 12px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+
+        .alert-box.safe {
+            background: rgba(52, 199, 89, 0.12);
+            color: var(--accent-success);
+        }
+
+        .alert-box.warning {
+            background: rgba(255, 149, 0, 0.12);
+            color: var(--accent-warning);
+        }
+
+        .alert-box.critical {
+            background: rgba(255, 59, 48, 0.12);
+            color: var(--accent-danger);
+        }
+
+        .alert-icon {
+            font-size: 1.25rem;
+        }
+
         @media (max-width: 1024px) {
             .upload-grid,
             .comparison-grid {
@@ -668,19 +981,138 @@
         <span id="themeText">Dark</span>
     </div>
 
+    <div class="active-users-box">
+        <div class="active-users-label">Active Users</div>
+        <div class="active-users-number" id="activeUsersNumber">0</div>
+        <div class="active-users-text">this week</div>
+    </div>
+
     <div class="dashboard-container">
         <header>
-            <div class="header-text">
-                <h1>ANSYS AEC Usage</h1>
-                <p class="subtitle">Real-time credit monitoring & insights</p>
+            <h1>ANSYS AEC Usage</h1>
+            <p class="subtitle">Real-time credit monitoring & insights</p>
+            <div style="margin-top: 16px;">
+                <div style="padding: 12px 20px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 10px; display: inline-block;">
+                    <div style="margin-bottom: 4px;">
+                        <span style="font-size: 0.875rem; color: var(--text-secondary);">Current balance: </span>
+                        <span style="font-size: 0.875rem; font-weight: 600; color: var(--text-primary);" id="headerBalance">834.2 AEC</span>
+                    </div>
+                    <div>
+                        <span style="font-size: 0.875rem; color: var(--text-secondary);">Balance last updated: </span>
+                        <span style="font-size: 0.875rem; font-weight: 600; color: var(--text-primary);" id="balanceUpdateDate">December 3, 2024</span>
+                    </div>
+                </div>
             </div>
         </header>
+
+        <div class="calculator-section">
+            <div class="section-header" onclick="toggleSection('calculatorContent', 'calculatorIcon')" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                <div class="calculator-header" style="margin: 0;">
+                    <h2 style="margin: 0;">💡 Credit Usage Calculator</h2>
+                    <p style="margin: 4px 0 0 0;">Calculate if your planned usage will exceed available credits</p>
+                </div>
+                <span class="collapse-icon" id="calculatorIcon">▼</span>
+            </div>
+
+            <div class="collapsible-content" id="calculatorContent">
+
+            <div class="software-inputs" id="softwareInputs">
+                <div class="software-row">
+                    <select class="software-select">
+                        <option value="">Select Software...</option>
+                        <optgroup label="Pre/Post Processing">
+                            <option value="blademodeler">BladeModeler (2 AEC/hour)</option>
+                            <option value="cfd_preppost">CFD PrepPost (14 AEC/hour)</option>
+                            <option value="designmodeler">DesignModeler (14 AEC/hour)</option>
+                            <option value="electronics_preppost">Electronics Desktop PrepPost (14 AEC/hour)</option>
+                            <option value="spaceclaim">SpaceClaim (14 AEC/hour)</option>
+                        </optgroup>
+                        <optgroup label="Solvers - Most Common">
+                            <option value="discovery_enterprise">Discovery Enterprise (18 AEC/hour)</option>
+                            <option value="mechanical_solver">Mechanical Enterprise Solver (28 AEC/hour)</option>
+                            <option value="fluent">CFD Enterprise Solver (28 AEC/hour)</option>
+                            <option value="electronics_solver">Electronics Enterprise Solver (28 AEC/hour)</option>
+                            <option value="hfss_solver">HFSS Solver (28 AEC/hour)</option>
+                            <option value="maxwell_solver">Maxwell Solver (28 AEC/hour)</option>
+                            <option value="icepak_solver">Icepak Solver (28 AEC/hour)</option>
+                            <option value="lsdyna">LS-DYNA (28 AEC/hour)</option>
+                        </optgroup>
+                        <optgroup label="Solvers - Other">
+                            <option value="aim">AIM (28 AEC/hour)</option>
+                            <option value="additive_suite">Additive Suite (39 AEC/hour)</option>
+                            <option value="electronics_2d">Electronics Desktop 2D Solver (14 AEC/hour)</option>
+                            <option value="hfss_sbr">HFSS SBR + Solver (28 AEC/hour)</option>
+                            <option value="lumerical_solver">Lumerical Enterprise Solver (28 AEC/hour)</option>
+                            <option value="motion_enterprise">Motion Enterprise (50 AEC/hour)</option>
+                            <option value="motion_premium">Motion Premium (25 AEC/hour)</option>
+                            <option value="motorcad_blackbox">Motor-CAD Blackbox (10 AEC/hour)</option>
+                            <option value="motorcad_enterprise">Motor-CAD Enterprise (27 AEC/hour)</option>
+                            <option value="ncode_designlife">nCode DesignLife Enterprise (39 AEC/hour)</option>
+                            <option value="q3d_extractor">Q3D Extractor 3D Solver (28 AEC/hour)</option>
+                            <option value="rf_option">RF Option (28 AEC/hour)</option>
+                            <option value="rocky">Rocky (34 AEC/hour)</option>
+                            <option value="sherlock">Sherlock (53 AEC/hour)</option>
+                            <option value="siwave_psi">SIwave PSI Solver (28 AEC/hour)</option>
+                            <option value="siwave_solver">SIwave Solver (28 AEC/hour)</option>
+                            <option value="speos_enterprise_solver">Speos Enterprise Solver (46 AEC/hour)</option>
+                            <option value="zemax">Zemax OpticStudio Enterprise (20 AEC/hour)</option>
+                        </optgroup>
+                        <optgroup label="Optimization">
+                            <option value="cfd_ai">CFD AI+ (10 AEC/hour)</option>
+                            <option value="designxplorer">DesignXplorer (7 AEC/hour)</option>
+                            <option value="optimetrics">Optimetrics (7 AEC/hour)</option>
+                            <option value="optislang_ai">optiSLang AI+ (16 AEC/hour)</option>
+                            <option value="optislang_enterprise">optiSLang Enterprise (38 AEC/hour)</option>
+                        </optgroup>
+                        <optgroup label="Materials & Safety">
+                            <option value="granta">GRANTA Materials Data for Simulation (33 AEC/hour)</option>
+                            <option value="medini">medini analyze Enterprise (114 AEC/hour)</option>
+                        </optgroup>
+                        <optgroup label="Geometry Interfaces">
+                            <option value="alinks">ALinks for EDA (7 AEC/hour)</option>
+                            <option value="dso">Distributed Solve DSO (4 AEC/hour)</option>
+                            <option value="geo_interface">Geometry Interfaces (4 AEC/hour)</option>
+                        </optgroup>
+                    </select>
+                    <input type="number" class="hours-input" placeholder="Hours" min="0" step="0.5">
+                    <input type="number" class="weeks-input" placeholder="Weeks" min="1" value="1" step="1">
+                    <button class="remove-software-btn" onclick="removeSoftwareRow(this)" style="visibility: hidden;">✕</button>
+                </div>
+            </div>
+
+            <button class="add-software-btn" onclick="addSoftwareRow()">+ Add Another Software</button>
+
+            <div class="calculator-result">
+                <div class="result-row">
+                    <span class="result-label">Total Credits Needed</span>
+                    <span class="result-value" id="totalCredits">0.0 AEC</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Current Balance</span>
+                    <span class="result-value" id="currentBalance">5,000.0 AEC</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Remaining After Usage</span>
+                    <span class="result-value" id="remainingCredits">5,000.0 AEC</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Lead Time Buffer</span>
+                    <span class="result-value" id="leadTimeBuffer">2 weeks</span>
+                </div>
+                <div id="alertMessage"></div>
+            </div>
+
+            <button class="purchase-btn" onclick="calculateUsage()" style="margin-top: 12px; width: 100%; padding: 10px; font-size: 0.9375rem;">
+                Calculate
+            </button>
+            </div>
+        </div>
 
         <div class="upload-grid">
             <div class="upload-section" id="historicalUploadSection">
                 <span class="upload-label historical">Historical Data</span>
                 <h3>Last Year Usage</h3>
-                <p style="color: var(--text-secondary); margin-bottom: 12px; font-size: 0.85rem;">
+                <p style="color: var(--text-secondary); margin-bottom: 10px; font-size: 0.75rem;">
                     Upload CSV with full year of historical data
                 </p>
                 <input type="file" id="historicalFile" accept=".csv">
@@ -693,7 +1125,7 @@
             <div class="upload-section" id="recentUploadSection">
                 <span class="upload-label">Recent Data</span>
                 <h3>Last Week Usage</h3>
-                <p style="color: var(--text-secondary); margin-bottom: 12px; font-size: 0.85rem;">
+                <p style="color: var(--text-secondary); margin-bottom: 10px; font-size: 0.75rem;">
                     Upload CSV with most recent week of data
                 </p>
                 <input type="file" id="recentFile" accept=".csv">
@@ -704,51 +1136,51 @@
             </div>
         </div>
 
-        <div class="settings-section">
-            <h2 class="section-title">Alert Settings</h2>
-            <div class="settings-grid">
-                <div class="setting-item">
-                    <label>Available Balance (AEC)</label>
-                    <input type="number" id="availableBalance" value="5000" min="0">
-                </div>
-                <div class="setting-item">
-                    <label>Procurement Lead Time (weeks)</label>
-                    <input type="number" id="leadTimeWeeks" value="2" min="0" step="0.5">
-                    <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px;">Time required to receive new credits</p>
-                </div>
-                <div class="setting-item">
-                    <label>Purchase Order Amount (AEC)</label>
-                    <input type="number" id="purchaseAmount" value="5000" min="0">
-                </div>
-                <div class="setting-item">
-                    <label>Acceleration Alert (%)</label>
-                    <input type="number" id="accelThreshold" value="50" min="0">
-                    <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px;">Alert if recent usage is X% higher than average</p>
-                </div>
-            </div>
-            <div id="calculatedThresholds" style="margin-top: 24px; padding: 20px; background: var(--bg-secondary); border-radius: 12px; border: 1px solid var(--border);">
-                <h3 style="font-size: 1.1rem; margin-bottom: 12px; color: var(--text-primary);">📊 Calculated Thresholds</h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
-                    <div>
-                        <div style="font-size: 0.9375rem; color: var(--text-secondary); font-weight: 500; letter-spacing: -0.01em;">Critical Weekly Rate</div>
-                        <div id="criticalWeeklyRate" style="font-size: 1.4rem; font-weight: 600; color: var(--accent-danger); margin-top: 4px;">-</div>
-                        <div style="font-size: 0.8125rem; color: var(--text-secondary); margin-top: 2px;">Users above this need immediate attention</div>
-                    </div>
-                    <div>
-                        <div style="font-size: 0.9375rem; color: var(--text-secondary); font-weight: 500; letter-spacing: -0.01em;">Warning Weekly Rate</div>
-                        <div id="warningWeeklyRate" style="font-size: 1.4rem; font-weight: 600; color: var(--accent-warning); margin-top: 4px;">-</div>
-                        <div style="font-size: 0.8125rem; color: var(--text-secondary); margin-top: 2px;">Buffer zone - monitor closely</div>
-                    </div>
-                    <div>
-                        <div style="font-size: 0.9375rem; color: var(--text-secondary); font-weight: 500; letter-spacing: -0.01em;">Safe Weekly Rate</div>
-                        <div id="safeWeeklyRate" style="font-size: 1.4rem; font-weight: 600; color: var(--accent-success); margin-top: 4px;">-</div>
-                        <div style="font-size: 0.8125rem; color: var(--text-secondary); margin-top: 2px;">Sustainable consumption level</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <div id="dashboardContent" class="hidden">
+            <div class="settings-section">
+                <h2 class="section-title">⚙️ Alert Settings</h2>
+                <div class="settings-grid">
+                    <div class="setting-item">
+                        <label>Available Balance (AEC)</label>
+                        <input type="number" id="availableBalance" value="" min="0">
+                    </div>
+                    <div class="setting-item">
+                        <label>Procurement Lead Time (weeks)</label>
+                        <input type="number" id="leadTimeWeeks" value="2" min="0" step="0.5">
+                        <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px;">Time required to receive new credits</p>
+                    </div>
+                    <div class="setting-item">
+                        <label>Purchase Order Amount (AEC)</label>
+                        <input type="number" id="purchaseAmount" value="5000" min="0">
+                    </div>
+                    <div class="setting-item">
+                        <label>Acceleration Alert (%)</label>
+                        <input type="number" id="accelThreshold" value="50" min="0">
+                        <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px;">Alert if recent usage is X% higher than average</p>
+                    </div>
+                </div>
+                <div id="calculatedThresholds" style="margin-top: 24px; padding: 20px; background: var(--bg-secondary); border-radius: 12px; border: 1px solid var(--border);">
+                    <h3 style="font-size: 1.1rem; margin-bottom: 12px; color: var(--text-primary);">📊 Calculated Thresholds</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                        <div>
+                            <div style="font-size: 0.9375rem; color: var(--text-secondary); font-weight: 500; letter-spacing: -0.01em;">Critical Weekly Rate</div>
+                            <div id="criticalWeeklyRate" style="font-size: 1.4rem; font-weight: 600; color: var(--accent-danger); margin-top: 4px;">-</div>
+                            <div style="font-size: 0.8125rem; color: var(--text-secondary); margin-top: 2px;">Users above this need immediate attention</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.9375rem; color: var(--text-secondary); font-weight: 500; letter-spacing: -0.01em;">Warning Weekly Rate</div>
+                            <div id="warningWeeklyRate" style="font-size: 1.4rem; font-weight: 600; color: var(--accent-warning); margin-top: 4px;">-</div>
+                            <div style="font-size: 0.8125rem; color: var(--text-secondary); margin-top: 2px;">Buffer zone - monitor closely</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 0.9375rem; color: var(--text-secondary); font-weight: 500; letter-spacing: -0.01em;">Safe Weekly Rate</div>
+                            <div id="safeWeeklyRate" style="font-size: 1.4rem; font-weight: 600; color: var(--accent-success); margin-top: 4px;">-</div>
+                            <div style="font-size: 0.8125rem; color: var(--text-secondary); margin-top: 2px;">Sustainable consumption level</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-label">Historical Avg/Month</div>
@@ -774,29 +1206,57 @@
                 </div>
             </div>
 
-            <div class="alerts-section">
-                <h2 class="section-title">
-                    <span>⚡ Usage Alerts</span>
-                </h2>
-                <div id="alertsList"></div>
+            <div class="collapsible-section">
+                <div class="section-header" onclick="toggleSection('alertsContent', 'alertsIcon')">
+                    <h2>⚡ Usage Alerts</h2>
+                    <span class="collapse-icon" id="alertsIcon">▼</span>
+                </div>
+                <div class="collapsible-content" id="alertsContent">
+                    <div id="alertsList"></div>
+                </div>
             </div>
 
-            <div class="comparison-section">
-                <h2 class="section-title">User Comparison</h2>
-                <div class="comparison-grid">
-                    <div class="comparison-card">
-                        <h3>
-                            <span class="period-badge historical">Historical</span>
-                            Average Usage
-                        </h3>
-                        <div id="historicalUserTable"></div>
+            <div class="collapsible-section">
+                <div class="section-header" onclick="toggleSection('comparisonContent', 'comparisonIcon')">
+                    <h2>👥 User Comparison</h2>
+                    <span class="collapse-icon" id="comparisonIcon">▼</span>
+                </div>
+                <div class="collapsible-content" id="comparisonContent">
+                    <div class="comparison-grid">
+                        <div class="comparison-card">
+                            <h3>
+                                <span class="period-badge historical">Historical</span>
+                                Average Usage
+                            </h3>
+                            <div id="historicalUserTable"></div>
+                        </div>
+                        <div class="comparison-card">
+                            <h3>
+                                <span class="period-badge recent">Recent Week</span>
+                                Current Usage
+                            </h3>
+                            <div id="recentUserTable"></div>
+                        </div>
                     </div>
-                    <div class="comparison-card">
-                        <h3>
-                            <span class="period-badge recent">Recent Week</span>
-                            Current Usage
-                        </h3>
-                        <div id="recentUserTable"></div>
+                </div>
+            </div>
+
+            <div class="collapsible-section">
+                <div class="section-header" onclick="toggleSection('pivotContent', 'pivotIcon')">
+                    <h2>📊 Monthly Usage by User</h2>
+                    <span class="collapse-icon" id="pivotIcon">▼</span>
+                </div>
+                <div class="collapsible-content" id="pivotContent">
+                    <div class="pivot-table-container">
+                        <table class="pivot-table" id="pivotTable">
+                            <thead>
+                                <tr id="pivotTableHeader">
+                                    <th>Username</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pivotTableBody">
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -821,6 +1281,18 @@
     </div>
 
     <script>
+        // ============================================
+        // CONFIGURATION - Update these values
+        // ============================================
+        const INITIAL_BALANCE = 834.2;  // Update this with current AEC balance
+        const BALANCE_UPDATE_DATE = "December 3, 2025";  // Update this with the date you set the balance
+        const ACTIVE_USERS_THIS_WEEK = 3;  // Update this with the number of active users this week
+
+        // CSV File URLs - Update these with your hosted file locations
+        const HISTORICAL_CSV_URL = "https://raw.githubusercontent.com/nataccccha/ansys-credit-tracking/refs/heads/main/data/historical.csv";
+        const RECENT_CSV_URL = "https://raw.githubusercontent.com/nataccccha/ansys-credit-tracking/refs/heads/main/data/recent.csv";
+        const AUTO_LOAD_CSV = true;    // Set to true to automatically load CSV files on page load
+
         // Dark mode toggle
         function toggleDarkMode() {
             const html = document.documentElement;
@@ -850,14 +1322,318 @@
                 document.getElementById('themeIcon').textContent = '☀️';
                 document.getElementById('themeText').textContent = 'Light';
             }
+
+            // Set active users count
+            document.getElementById('activeUsersNumber').textContent = ACTIVE_USERS_THIS_WEEK;
+
+            // Set balance update date and check if old
+            const balanceDateElement = document.getElementById('balanceUpdateDate');
+            balanceDateElement.textContent = BALANCE_UPDATE_DATE;
+            
+            // Check if balance is more than a week old
+            const updateDate = new Date(BALANCE_UPDATE_DATE);
+            const today = new Date();
+            const daysDifference = Math.floor((today - updateDate) / (1000 * 60 * 60 * 24));
+            
+            if (daysDifference > 7) {
+                balanceDateElement.style.color = 'var(--accent-danger)';
+                balanceDateElement.style.fontWeight = '700';
+                
+                // Add warning icon
+                const warningSpan = document.createElement('span');
+                warningSpan.innerHTML = ' ⚠️';
+                warningSpan.style.fontSize = '1rem';
+                balanceDateElement.parentElement.appendChild(warningSpan);
+                
+                // Add warning message
+                const warningMsg = document.createElement('div');
+                warningMsg.style.marginTop = '8px';
+                warningMsg.style.padding = '8px 12px';
+                warningMsg.style.background = 'rgba(255, 59, 48, 0.12)';
+                warningMsg.style.color = 'var(--accent-danger)';
+                warningMsg.style.borderRadius = '6px';
+                warningMsg.style.fontSize = '0.8125rem';
+                warningMsg.style.fontWeight = '600';
+                warningMsg.innerHTML = '⚠️ Balance is ' + daysDifference + ' days old. Please update the administrator.';
+                balanceDateElement.parentElement.parentElement.appendChild(warningMsg);
+            }
+
+            // Load collapsed states for all sections
+            ['calculatorContent', 'alertsContent', 'comparisonContent', 'pivotContent'].forEach(sectionId => {
+                const isCollapsed = localStorage.getItem(sectionId + 'Collapsed') === 'true';
+                if (isCollapsed) {
+                    document.getElementById(sectionId).classList.add('collapsed');
+                    document.getElementById(sectionId.replace('Content', 'Icon')).classList.add('collapsed');
+                }
+            });
+
+            // Auto-load CSV files if enabled
+            if (AUTO_LOAD_CSV && HISTORICAL_CSV_URL && RECENT_CSV_URL) {
+                loadCSVFromURL(HISTORICAL_CSV_URL, 'historical');
+                loadCSVFromURL(RECENT_CSV_URL, 'recent');
+            }
         });
+
+        // Software consumption rates (AEC per hour) from official ANSYS table
+        const softwareRates = {
+            // Pre/Post
+            blademodeler: 2,
+            cfd_preppost: 14,
+            designmodeler: 14,
+            electronics_preppost: 14,
+            spaceclaim: 14,
+            // Solvers - Most Common
+            discovery_enterprise: 18,
+            mechanical_solver: 28,
+            fluent: 28,
+            electronics_solver: 28,
+            hfss_solver: 28,
+            maxwell_solver: 28,
+            icepak_solver: 28,
+            lsdyna: 28,
+            // Solvers - Other
+            aim: 28,
+            additive_suite: 39,
+            electronics_2d: 14,
+            hfss_sbr: 28,
+            lumerical_solver: 28,
+            motion_enterprise: 50,
+            motion_premium: 25,
+            motorcad_blackbox: 10,
+            motorcad_enterprise: 27,
+            ncode_designlife: 39,
+            q3d_extractor: 28,
+            rf_option: 28,
+            rocky: 34,
+            sherlock: 53,
+            siwave_psi: 28,
+            siwave_solver: 28,
+            speos_enterprise_solver: 46,
+            zemax: 20,
+            // Optimization
+            cfd_ai: 10,
+            designxplorer: 7,
+            optimetrics: 7,
+            optislang_ai: 16,
+            optislang_enterprise: 38,
+            // Materials & Safety
+            granta: 33,
+            medini: 114,
+            // Geometry Interfaces
+            alinks: 7,
+            dso: 4,
+            geo_interface: 4
+        };
+
+        // Add software row
+        function addSoftwareRow() {
+            const container = document.getElementById('softwareInputs');
+            const newRow = document.createElement('div');
+            newRow.className = 'software-row';
+            newRow.innerHTML = `
+                <select class="software-select">
+                    <option value="">Select Software...</option>
+                    <optgroup label="Pre/Post Processing">
+                        <option value="blademodeler">BladeModeler (2 AEC/hour)</option>
+                        <option value="cfd_preppost">CFD PrepPost (14 AEC/hour)</option>
+                        <option value="designmodeler">DesignModeler (14 AEC/hour)</option>
+                        <option value="electronics_preppost">Electronics Desktop PrepPost (14 AEC/hour)</option>
+                        <option value="spaceclaim">SpaceClaim (14 AEC/hour)</option>
+                    </optgroup>
+                    <optgroup label="Solvers - Most Common">
+                        <option value="discovery_enterprise">Discovery Enterprise (18 AEC/hour)</option>
+                        <option value="mechanical_solver">Mechanical Enterprise Solver (28 AEC/hour)</option>
+                        <option value="fluent">CFD Enterprise Solver (28 AEC/hour)</option>
+                        <option value="electronics_solver">Electronics Enterprise Solver (28 AEC/hour)</option>
+                        <option value="hfss_solver">HFSS Solver (28 AEC/hour)</option>
+                        <option value="maxwell_solver">Maxwell Solver (28 AEC/hour)</option>
+                        <option value="icepak_solver">Icepak Solver (28 AEC/hour)</option>
+                        <option value="lsdyna">LS-DYNA (28 AEC/hour)</option>
+                    </optgroup>
+                    <optgroup label="Solvers - Other">
+                        <option value="aim">AIM (28 AEC/hour)</option>
+                        <option value="additive_suite">Additive Suite (39 AEC/hour)</option>
+                        <option value="electronics_2d">Electronics Desktop 2D Solver (14 AEC/hour)</option>
+                        <option value="hfss_sbr">HFSS SBR + Solver (28 AEC/hour)</option>
+                        <option value="lumerical_solver">Lumerical Enterprise Solver (28 AEC/hour)</option>
+                        <option value="motion_enterprise">Motion Enterprise (50 AEC/hour)</option>
+                        <option value="motion_premium">Motion Premium (25 AEC/hour)</option>
+                        <option value="motorcad_blackbox">Motor-CAD Blackbox (10 AEC/hour)</option>
+                        <option value="motorcad_enterprise">Motor-CAD Enterprise (27 AEC/hour)</option>
+                        <option value="ncode_designlife">nCode DesignLife Enterprise (39 AEC/hour)</option>
+                        <option value="q3d_extractor">Q3D Extractor 3D Solver (28 AEC/hour)</option>
+                        <option value="rf_option">RF Option (28 AEC/hour)</option>
+                        <option value="rocky">Rocky (34 AEC/hour)</option>
+                        <option value="sherlock">Sherlock (53 AEC/hour)</option>
+                        <option value="siwave_psi">SIwave PSI Solver (28 AEC/hour)</option>
+                        <option value="siwave_solver">SIwave Solver (28 AEC/hour)</option>
+                        <option value="speos_enterprise_solver">Speos Enterprise Solver (46 AEC/hour)</option>
+                        <option value="zemax">Zemax OpticStudio Enterprise (20 AEC/hour)</option>
+                    </optgroup>
+                    <optgroup label="Optimization">
+                        <option value="cfd_ai">CFD AI+ (10 AEC/hour)</option>
+                        <option value="designxplorer">DesignXplorer (7 AEC/hour)</option>
+                        <option value="optimetrics">Optimetrics (7 AEC/hour)</option>
+                        <option value="optislang_ai">optiSLang AI+ (16 AEC/hour)</option>
+                        <option value="optislang_enterprise">optiSLang Enterprise (38 AEC/hour)</option>
+                    </optgroup>
+                    <optgroup label="Materials & Safety">
+                        <option value="granta">GRANTA Materials Data for Simulation (33 AEC/hour)</option>
+                        <option value="medini">medini analyze Enterprise (114 AEC/hour)</option>
+                    </optgroup>
+                    <optgroup label="Geometry Interfaces">
+                        <option value="alinks">ALinks for EDA (7 AEC/hour)</option>
+                        <option value="dso">Distributed Solve DSO (4 AEC/hour)</option>
+                        <option value="geo_interface">Geometry Interfaces (4 AEC/hour)</option>
+                    </optgroup>
+                </select>
+                <input type="number" class="hours-input" placeholder="Hours" min="0" step="0.5">
+                <input type="number" class="weeks-input" placeholder="Weeks" min="1" value="1" step="1">
+                <button class="remove-software-btn" onclick="removeSoftwareRow(this)">✕</button>
+            `;
+            container.appendChild(newRow);
+        }
+
+        // Remove software row
+        function removeSoftwareRow(button) {
+            button.closest('.software-row').remove();
+        }
+
+        // Calculate usage
+        function calculateUsage() {
+            const rows = document.querySelectorAll('.software-row');
+            let totalCredits = 0;
+
+            rows.forEach(row => {
+                const software = row.querySelector('.software-select').value;
+                const hours = parseFloat(row.querySelector('.hours-input').value) || 0;
+                const weeks = parseFloat(row.querySelector('.weeks-input').value) || 1;
+
+                if (software && hours > 0) {
+                    const rate = softwareRates[software];
+                    totalCredits += rate * hours * weeks;
+                }
+            });
+
+            // Get current balance from settings or default
+            const currentBalance = settings.availableBalance || 5000;
+            const leadTime = settings.leadTimeWeeks || 2;
+            const remaining = currentBalance - totalCredits;
+
+            // Calculate safe threshold (credits needed for lead time period at current burn rate)
+            const weeklyBurnRate = totalCredits; // This is the planned weekly usage
+            const criticalThreshold = weeklyBurnRate * leadTime * 1.5; // Need 1.5x lead time buffer
+
+            // Update display
+            document.getElementById('totalCredits').textContent = totalCredits.toFixed(1) + ' AEC';
+            document.getElementById('currentBalance').textContent = currentBalance.toLocaleString('en-US', {minimumFractionDigits: 1, maximumFractionDigits: 1}) + ' AEC';
+            document.getElementById('remainingCredits').textContent = remaining.toLocaleString('en-US', {minimumFractionDigits: 1, maximumFractionDigits: 1}) + ' AEC';
+            document.getElementById('leadTimeBuffer').textContent = leadTime + ' weeks';
+
+            // Determine alert level
+            const alertDiv = document.getElementById('alertMessage');
+            
+            // Add note about active users
+            let activeUsersNote = '';
+            if (ACTIVE_USERS_THIS_WEEK > 0) {
+                activeUsersNote = `<div style="margin-top: 8px; padding: 10px 12px; background: var(--bg-primary); border: 1px solid var(--accent-info); border-radius: 6px; font-size: 0.8125rem;">
+                    <strong style="color: var(--accent-info);">📊 Note:</strong> There are currently <strong>${ACTIVE_USERS_THIS_WEEK}</strong> other user${ACTIVE_USERS_THIS_WEEK > 1 ? 's' : ''} running simulations. 
+                    If you're planning computationally heavy work, please check with the administrator to avoid credit conflicts.
+                </div>`;
+            }
+            
+            if (remaining < criticalThreshold) {
+                alertDiv.innerHTML = `
+                    <div class="alert-box critical">
+                        <span class="alert-icon">🚨</span>
+                        <div>
+                            <strong>ALERT REQUIRED:</strong> Your planned usage will consume too many credits. 
+                            With ${leadTime} week lead time, you need at least ${criticalThreshold.toFixed(1)} AEC buffer. 
+                            Please notify the administrator immediately to order more credits.
+                        </div>
+                    </div>
+                    ${activeUsersNote}
+                `;
+            } else if (remaining < weeklyBurnRate * leadTime * 2) {
+                alertDiv.innerHTML = `
+                    <div class="alert-box warning">
+                        <span class="alert-icon">⚠️</span>
+                        <div>
+                            <strong>CAUTION:</strong> Your usage is approaching the warning threshold. 
+                            Consider notifying the administrator if you plan to continue at this rate.
+                        </div>
+                    </div>
+                    ${activeUsersNote}
+                `;
+            } else {
+                alertDiv.innerHTML = `
+                    <div class="alert-box safe">
+                        <span class="alert-icon">✅</span>
+                        <div>
+                            <strong>SAFE:</strong> Your planned usage is within safe limits. 
+                            No action needed at this time.
+                        </div>
+                    </div>
+                    ${activeUsersNote}
+                `;
+            }
+        }
+
+        // Load CSV from URL
+        async function loadCSVFromURL(url, type) {
+            const statusId = type === 'historical' ? 'historicalStatus' : 'recentStatus';
+            const sectionId = type === 'historical' ? 'historicalUploadSection' : 'recentUploadSection';
+            
+            try {
+                document.getElementById(statusId).innerHTML = `<span style="color: var(--accent-info);">Loading from server...</span>`;
+                
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`Failed to load: ${response.status}`);
+                }
+                
+                const csvText = await response.text();
+                const data = parseCSV(csvText);
+                
+                if (type === 'historical') {
+                    historicalData = data;
+                } else {
+                    recentData = data;
+                }
+                
+                document.getElementById(statusId).innerHTML = `<span style="color: var(--accent-success);">✓ Loaded from server</span>`;
+                document.getElementById(sectionId).classList.add('loaded');
+                
+                if (historicalData.length > 0 && recentData.length > 0) {
+                    setTimeout(() => {
+                        document.getElementById('dashboardContent').classList.remove('hidden');
+                        updateDashboard();
+                    }, 300);
+                }
+            } catch (error) {
+                document.getElementById(statusId).innerHTML = `<span style="color: var(--accent-danger);">✗ Failed to load: ${error.message}</span>`;
+                console.error(`Error loading ${type} CSV:`, error);
+            }
+        }
+
+        // Toggle collapsible section
+        function toggleSection(contentId, iconId) {
+            const content = document.getElementById(contentId);
+            const icon = document.getElementById(iconId);
+            
+            content.classList.toggle('collapsed');
+            icon.classList.toggle('collapsed');
+
+            // Save state
+            localStorage.setItem(contentId + 'Collapsed', content.classList.contains('collapsed'));
+        }
 
         let historicalData = [];
         let recentData = [];
         let settings = {
             leadTimeWeeks: 2,
             accelThreshold: 50,
-            availableBalance: 5000,
+            availableBalance: INITIAL_BALANCE,
             purchaseAmount: 5000
         };
         let calculatedThresholds = {
@@ -908,6 +1684,18 @@
                 }
             });
         });
+
+        // Populate balance fields with initial values
+        function populateBalanceFields() {
+            const formattedBalance = INITIAL_BALANCE.toLocaleString('en-US', {minimumFractionDigits: 1, maximumFractionDigits: 1}) + ' AEC';
+            document.getElementById('availableBalance').value = INITIAL_BALANCE;
+            document.getElementById('currentBalance').textContent = formattedBalance;
+            document.getElementById('remainingCredits').textContent = formattedBalance;
+            document.getElementById('headerBalance').textContent = formattedBalance;
+        }
+
+        // Call populate function on load
+        populateBalanceFields();
 
         function handleFileUpload(file, type) {
             if (!file) return;
@@ -1061,6 +1849,94 @@
             if (recentTotal > calculatedThresholds.warningWeekly || runwayWeeks <= settings.leadTimeWeeks * 2) {
                 document.getElementById('purchaseSection').style.display = 'block';
             }
+
+            // Generate pivot table
+            generatePivotTable();
+        }
+
+        function generatePivotTable() {
+            // Get all months from historical data
+            const monthlyData = {};
+            const allMonths = new Set();
+            
+            historicalData.forEach(row => {
+                const startTime = row['Start Time'];
+                const user = row['Username'];
+                const cost = parseFloat(row['Cost'] || 0);
+                
+                if (startTime && user) {
+                    const month = startTime.substring(0, 7); // YYYY-MM
+                    allMonths.add(month);
+                    
+                    if (!monthlyData[user]) {
+                        monthlyData[user] = {};
+                    }
+                    monthlyData[user][month] = (monthlyData[user][month] || 0) + cost;
+                }
+            });
+
+            // Sort months
+            const sortedMonths = Array.from(allMonths).sort();
+            
+            // Generate month names
+            const monthNames = sortedMonths.map(month => {
+                const [year, monthNum] = month.split('-');
+                const date = new Date(year, monthNum - 1);
+                return date.toLocaleDateString('en-US', { month: 'long' });
+            });
+
+            // Generate header
+            const headerRow = document.getElementById('pivotTableHeader');
+            headerRow.innerHTML = '<th>Username</th>' + 
+                monthNames.map(name => `<th>${name}</th>`).join('') +
+                '<th style="background: var(--bg-primary); font-weight: 700;">Total</th>';
+
+            // Generate body
+            const tbody = document.getElementById('pivotTableBody');
+            const rows = [];
+            const monthTotals = {};
+            
+            // Initialize month totals
+            sortedMonths.forEach(month => {
+                monthTotals[month] = 0;
+            });
+
+            // Sort users by total
+            const userTotals = {};
+            Object.keys(monthlyData).forEach(user => {
+                userTotals[user] = Object.values(monthlyData[user]).reduce((a, b) => a + b, 0);
+            });
+
+            const sortedUsers = Object.keys(userTotals).sort((a, b) => userTotals[b] - userTotals[a]);
+
+            // Generate rows
+            sortedUsers.forEach(user => {
+                let rowHTML = `<td>${user}</td>`;
+                let userTotal = 0;
+                
+                sortedMonths.forEach(month => {
+                    const value = monthlyData[user][month] || 0;
+                    userTotal += value;
+                    monthTotals[month] += value;
+                    rowHTML += `<td>${value > 0 ? value.toFixed(1) : '0'}</td>`;
+                });
+                
+                rowHTML += `<td style="font-weight: 600; background: var(--bg-secondary);">${userTotal.toFixed(1)}</td>`;
+                rows.push(`<tr>${rowHTML}</tr>`);
+            });
+
+            // Add total row
+            let totalRowHTML = '<td style="font-weight: 700;">Total</td>';
+            let grandTotal = 0;
+            sortedMonths.forEach(month => {
+                const total = monthTotals[month];
+                grandTotal += total;
+                totalRowHTML += `<td style="font-weight: 600;">${total.toFixed(1)}</td>`;
+            });
+            totalRowHTML += `<td style="font-weight: 700; background: var(--bg-primary);">${grandTotal.toFixed(1)}</td>`;
+            rows.push(`<tr class="total-row">${totalRowHTML}</tr>`);
+
+            tbody.innerHTML = rows.join('');
         }
 
         function getTrendHTML(changePercent) {
@@ -1283,20 +2159,24 @@
                     <thead>
                         <tr>
                             <th>User</th>
+                            <th style="text-align: right;">Recent Week</th>
                             <th style="text-align: right;">Projected/Month</th>
                             <th style="text-align: right;">vs Avg</th>
                         </tr>
                     </thead>
                     <tbody>
-                        ${recentUsers.map(({user, projected, change}) => `
+                        ${recentUsers.map(({user, projected, change}) => {
+                            const weeklyUsage = recentByUser[user].total;
+                            return `
                             <tr>
                                 <td style="font-weight: 600;">${user}</td>
-                                <td style="text-align: right; font-weight: 600; color: var(--accent-info);">${projected.toFixed(1)} AEC</td>
+                                <td style="text-align: right; font-weight: 600; color: var(--text-secondary);">${weeklyUsage.toFixed(1)}</td>
+                                <td style="text-align: right; font-weight: 600; color: var(--accent-info);">${projected.toFixed(1)}</td>
                                 <td style="text-align: right; font-weight: 600; color: ${change > 20 ? 'var(--accent-danger)' : change < -20 ? 'var(--accent-success)' : 'var(--text-secondary)'};">
                                     ${change === 999 ? 'NEW' : (change > 0 ? '+' : '') + change.toFixed(0) + '%'}
                                 </td>
                             </tr>
-                        `).join('')}
+                        `}).join('')}
                     </tbody>
                 </table>
             `;
