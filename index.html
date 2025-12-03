@@ -1544,26 +1544,8 @@
             </div>
             <div class="master-section-content collapsed" id="adminToolsContent">
 
-                <!-- Running Low on Credits -->
-                <div class="purchase-section" id="purchaseSection" style="margin-bottom: 20px;">
-                    <h2 style="margin-bottom: 12px; font-size: 1rem; font-weight: 600;">Running Low on Credits?</h2>
-                    <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 0.8125rem;">
-                        Current balance: <strong id="balanceWarning" style="color: var(--accent-warning);">0 AEC</strong><br>
-                        Projected depletion: <strong id="depletionWarning" style="color: var(--accent-danger);"></strong><br>
-                        <span id="depletionWeeks" style="font-size: 0.75rem;"></span>
-                    </p>
-                    <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
-                        <button class="purchase-btn pulse" onclick="requestPurchase()" style="padding: 8px 16px; font-size: 0.8125rem;">
-                            Request More AECs
-                        </button>
-                        <button class="purchase-btn" style="background: linear-gradient(135deg, var(--accent-teal), var(--accent-info)); box-shadow: 0 4px 16px rgba(0, 91, 127, 0.3); padding: 8px 16px; font-size: 0.8125rem;" onclick="exportToTeams()">
-                            Update the Team
-                        </button>
-                    </div>
-                </div>
-
                 <!-- Previous Month Software Usage by User -->
-                <div id="monthlyPieChartsSection" style="background: var(--bg-card); padding: 20px; border-radius: 12px; box-shadow: var(--shadow-sm);">
+                <div id="monthlyPieChartsSection" style="background: var(--bg-card); padding: 20px; border-radius: 12px; box-shadow: var(--shadow-sm); margin-bottom: 20px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 12px;">
                         <div>
                             <h2 style="margin-bottom: 4px; font-size: 1rem; font-weight: 600; color: var(--accent-teal);">
@@ -1577,8 +1559,26 @@
                             📧 Email Each User
                         </button>
                     </div>
-                    <div id="monthlyPieChartsContainer" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; margin-top: 16px;">
+                    <div id="monthlyPieChartsContainer" style="display: flex; flex-wrap: nowrap; gap: 16px; margin-top: 16px; overflow-x: auto; padding-bottom: 8px;">
                         <!-- Pie charts will be inserted here -->
+                    </div>
+                </div>
+
+                <!-- Running Low on Credits -->
+                <div class="purchase-section" id="purchaseSection">
+                    <h2 style="margin-bottom: 12px; font-size: 1rem; font-weight: 600;">Running Low on Credits?</h2>
+                    <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 0.8125rem;">
+                        Current balance: <strong id="balanceWarning" style="color: var(--accent-warning);">0 AEC</strong><br>
+                        Projected depletion: <strong id="depletionWarning" style="color: var(--accent-danger);"></strong><br>
+                        <span id="depletionWeeks" style="font-size: 0.75rem;"></span>
+                    </p>
+                    <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                        <button class="purchase-btn pulse" onclick="requestPurchase()" style="padding: 8px 16px; font-size: 0.8125rem;">
+                            Request More AECs
+                        </button>
+                        <button class="purchase-btn" style="background: linear-gradient(135deg, var(--accent-teal), var(--accent-info)); box-shadow: 0 4px 16px rgba(0, 91, 127, 0.3); padding: 8px 16px; font-size: 0.8125rem;" onclick="exportToTeams()">
+                            Update the Team
+                        </button>
                     </div>
                 </div>
 
@@ -1866,7 +1866,7 @@
                             <strong>ALERT REQUIRED:</strong> Your planned usage (${totalCredits.toFixed(1)} AEC) exceeds your current balance (${currentBalance.toFixed(1)} AEC). 
                             You are short by ${(totalCredits - currentBalance).toFixed(1)} AEC.
                         </div>
-                        <button onclick="openEmailForm('critical', ${totalCredits.toFixed(1)}, ${currentBalance.toFixed(1)}, ${remaining.toFixed(1)}, ${weeklyBurnRate.toFixed(1)}, ${totalWeeks})" 
+                        <button onclick="openNatachaEmail('critical', ${totalCredits.toFixed(1)}, ${currentBalance.toFixed(1)}, ${remaining.toFixed(1)}, ${weeklyBurnRate.toFixed(1)}, ${totalWeeks})" 
                             style="margin-top: 12px; padding: 8px 16px; background: white; color: var(--accent-danger); border: none; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">
                             📧 Notify Natacha
                         </button>
@@ -1882,7 +1882,7 @@
                             <strong>CAUTION:</strong> ${highBurnRate ? `High burn rate (${weeklyBurnRate.toFixed(1)} AEC/week). ` : ''}${lowRemaining ? `Remaining balance (${remaining.toFixed(1)} AEC) will be below 1,500 AEC. ` : ''}${isWarning ? `Planned usage will consume most of your balance. ` : ''}
                             Planned: ${totalCredits.toFixed(1)} AEC | Balance: ${currentBalance.toFixed(1)} AEC | Remaining: ${remaining.toFixed(1)} AEC.
                         </div>
-                        <button onclick="openEmailForm('warning', ${totalCredits.toFixed(1)}, ${currentBalance.toFixed(1)}, ${remaining.toFixed(1)}, ${weeklyBurnRate.toFixed(1)}, ${totalWeeks})" 
+                        <button onclick="openNatachaEmail('warning', ${totalCredits.toFixed(1)}, ${currentBalance.toFixed(1)}, ${remaining.toFixed(1)}, ${weeklyBurnRate.toFixed(1)}, ${totalWeeks})" 
                             style="margin-top: 12px; padding: 8px 16px; background: white; color: var(--accent-warning); border: none; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">
                             📧 Notify Natacha
                         </button>
@@ -1904,8 +1904,8 @@
             }
         }
         
-        // Open HTML email form modal
-        function openEmailForm(alertType, plannedUsage, currentBalance, remaining, weeklyRate, weeks) {
+        // Open Outlook Web directly to email Natacha
+        function openNatachaEmail(alertType, plannedUsage, currentBalance, remaining, weeklyRate, weeks) {
             // Get software list from calculator
             const rows = document.querySelectorAll('.software-row');
             let softwareList = '';
@@ -1922,7 +1922,7 @@
                 ? 'URGENT: ANSYS AEC Credit Request - Balance Exceeded'
                 : 'ANSYS AEC Credit Alert - Low Balance Warning';
             
-            const bodyText = `Hi Natacha,
+            const body = `Hi Natacha,
 
 I am planning to run ANSYS simulations and wanted to notify you about our credit situation.
 
@@ -1945,114 +1945,11 @@ Please let me know if you have any questions.
 
 Thanks,`;
 
-            // Create modal
-            const modal = document.createElement('div');
-            modal.id = 'emailFormModal';
-            modal.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0,0,0,0.5);
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                z-index: 10000;
-            `;
+            // Create Outlook web deeplink
+            const outlookUrl = `https://outlook.office365.us/owa/arete.com/?path=/mail/action/compose&to=${encodeURIComponent('nramioulle@arete.com')}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
             
-            modal.innerHTML = `
-                <div style="background: var(--bg-card); border-radius: 16px; padding: 24px; max-width: 600px; width: 90%; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3);">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                        <h2 style="margin: 0; font-size: 1.25rem; color: var(--text-primary);">📧 Send Email to Natacha</h2>
-                        <button onclick="closeEmailForm()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-secondary);">×</button>
-                    </div>
-                    
-                    <form id="emailForm" style="display: flex; flex-direction: column; gap: 16px;">
-                        <div>
-                            <label style="display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 4px; color: var(--text-secondary);">To:</label>
-                            <input type="email" value="nramioulle@arete.com" readonly 
-                                style="width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.875rem; background: var(--bg-secondary); color: var(--text-primary); box-sizing: border-box;">
-                        </div>
-                        
-                        <div>
-                            <label style="display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 4px; color: var(--text-secondary);">Your Name:</label>
-                            <input type="text" id="senderName" placeholder="Enter your name" required
-                                style="width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.875rem; background: var(--bg-primary); color: var(--text-primary); box-sizing: border-box;">
-                        </div>
-                        
-                        <div>
-                            <label style="display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 4px; color: var(--text-secondary);">Your Email:</label>
-                            <input type="email" id="senderEmail" placeholder="Enter your email" required
-                                style="width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.875rem; background: var(--bg-primary); color: var(--text-primary); box-sizing: border-box;">
-                        </div>
-                        
-                        <div>
-                            <label style="display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 4px; color: var(--text-secondary);">Subject:</label>
-                            <input type="text" id="emailSubject" value="${subject}" 
-                                style="width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.875rem; background: var(--bg-primary); color: var(--text-primary); box-sizing: border-box;">
-                        </div>
-                        
-                        <div>
-                            <label style="display: block; font-size: 0.875rem; font-weight: 600; margin-bottom: 4px; color: var(--text-secondary);">Message:</label>
-                            <textarea id="emailBody" rows="12" 
-                                style="width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.875rem; font-family: inherit; resize: vertical; background: var(--bg-primary); color: var(--text-primary); box-sizing: border-box;">${bodyText}</textarea>
-                        </div>
-                        
-                        <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 8px;">
-                            <button type="button" onclick="closeEmailForm()" 
-                                style="padding: 10px 20px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary); font-size: 0.875rem; cursor: pointer;">
-                                Cancel
-                            </button>
-                            <button type="submit" 
-                                style="padding: 10px 20px; border: none; border-radius: 8px; background: var(--accent-teal); color: white; font-size: 0.875rem; font-weight: 600; cursor: pointer;">
-                                📧 Send Email
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            `;
-            
-            document.body.appendChild(modal);
-            
-            // Handle form submission
-            document.getElementById('emailForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                const senderName = document.getElementById('senderName').value;
-                const senderEmail = document.getElementById('senderEmail').value;
-                const subject = document.getElementById('emailSubject').value;
-                const body = document.getElementById('emailBody').value + `\n\n${senderName}\n${senderEmail}`;
-                
-                // Create Outlook web deeplink
-                const outlookUrl = `https://outlook.office.com/mail/deeplink/compose?to=${encodeURIComponent('nramioulle@arete.com')}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-                
-                // Open Outlook web
-                window.open(outlookUrl, '_blank');
-                
-                // Close modal
-                closeEmailForm();
-            });
-            
-            // Close on backdrop click
-            modal.addEventListener('click', function(e) {
-                if (e.target === modal) {
-                    closeEmailForm();
-                }
-            });
-            
-            // Focus on name field
-            setTimeout(() => {
-                document.getElementById('senderName').focus();
-            }, 100);
-        }
-        
-        // Close email form modal
-        function closeEmailForm() {
-            const modal = document.getElementById('emailFormModal');
-            if (modal) {
-                modal.remove();
-            }
+            // Open Outlook web
+            window.open(outlookUrl, '_blank');
         }
 
         // Load CSV from URL
@@ -2735,39 +2632,32 @@ Thanks,`;
         }
 
         function requestPurchase() {
-            const recentWeekly = parseFloat(document.getElementById('recentWeekly').textContent);
-            const runway = parseFloat(document.getElementById('runwayMonths').textContent);
+            const recentWeekly = parseFloat(document.getElementById('recentWeekly').textContent) || 0;
+            const runway = parseFloat(document.getElementById('runwayMonths').textContent) || 0;
             const runwayWeeks = runway * 4.33;
+            const currentBalance = document.getElementById('balanceWarning')?.textContent || '0 AEC';
 
             const subject = 'ANSYS AEC Purchase Request';
-            const body = `Hi,
+            const body = `Hi Ben and Dario,
 
-Quick heads up on our ANSYS credits - we've been using about ${recentWeekly.toFixed(1)} AEC per week, which means we've got around ${runwayWeeks.toFixed(1)} weeks left with our current balance.
+We've been using ${recentWeekly.toFixed(1)} AECs per week which means we've got around ${runwayWeeks.toFixed(1)} weeks left with our current balance of ${currentBalance}.
 
-Could we go ahead and order another ${settings.purchaseAmount.toFixed(0)} AECs to keep things running smoothly?
+Can you help in putting in another order of 5000 AECs so we don't have any periods of interruption?
 
-Let me know if you need anything else from me.
+Thanks so much!
 
-Thanks,
+Let me know if you need anything from me.
+
+Best,
 Natacha`;
 
-            const fullMessage = `Subject: ${subject}
-
-${body}`;
-
-            // Copy to clipboard
-            navigator.clipboard.writeText(fullMessage).then(() => {
-                alert('✅ Email content copied to clipboard!\n\nYou can now paste this into Outlook.');
-            }).catch(() => {
-                // Fallback for older browsers
-                const textarea = document.createElement('textarea');
-                textarea.value = fullMessage;
-                document.body.appendChild(textarea);
-                textarea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textarea);
-                alert('✅ Email content copied to clipboard!\n\nYou can now paste this into Outlook.');
-            });
+            // Create Outlook web deeplink with To and CC
+            const toEmails = 'BBennett@arete.com;dcontreras@arete.com';
+            const ccEmails = 'tbaker@arete.com;mmarnon@arete.com';
+            const outlookUrl = `https://outlook.office365.us/owa/arete.com/?path=/mail/action/compose&to=${encodeURIComponent(toEmails)}&cc=${encodeURIComponent(ccEmails)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            
+            // Open Outlook web
+            window.open(outlookUrl, '_blank');
         }
 
         // Store monthly user data for email generation
@@ -2865,36 +2755,36 @@ ${body}`;
                 
                 // Create card for this user
                 const card = document.createElement('div');
-                card.style.cssText = 'background: var(--bg-secondary); padding: 20px; border-radius: 12px; box-shadow: var(--shadow-sm);';
+                card.style.cssText = 'background: var(--bg-secondary); padding: 16px; border-radius: 12px; box-shadow: var(--shadow-sm); min-width: 280px; max-width: 320px; flex-shrink: 0;';
                 
                 // User header
                 const header = document.createElement('div');
-                header.style.cssText = 'margin-bottom: 16px;';
+                header.style.cssText = 'margin-bottom: 12px;';
                 header.innerHTML = `
-                    <h3 style="font-size: 0.9375rem; font-weight: 600; margin-bottom: 4px; color: var(--text-primary);">${user}</h3>
-                    <p style="font-size: 0.75rem; color: var(--text-secondary);">Total: ${totalHours.toFixed(1)} hours | ${totalAEC.toFixed(1)} AEC</p>
+                    <h3 style="font-size: 0.875rem; font-weight: 600; margin-bottom: 4px; color: var(--text-primary);">${user}</h3>
+                    <p style="font-size: 0.7rem; color: var(--text-secondary);">Total: ${totalHours.toFixed(1)} hours | ${totalAEC.toFixed(1)} AEC</p>
                 `;
                 card.appendChild(header);
                 
                 // Create canvas for pie chart
                 const canvas = document.createElement('canvas');
                 canvas.id = `pieChart-${userIndex}`;
-                canvas.style.cssText = 'max-height: 250px;';
+                canvas.style.cssText = 'max-height: 180px;';
                 card.appendChild(canvas);
                 
                 // Legend
                 const legend = document.createElement('div');
-                legend.style.cssText = 'margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px; font-size: 0.75rem;';
+                legend.style.cssText = 'margin-top: 12px; display: flex; flex-wrap: wrap; gap: 4px 8px; font-size: 0.65rem;';
                 
                 Object.keys(softwareData).sort((a, b) => softwareData[b] - softwareData[a]).forEach((software, index) => {
                     const hours = softwareData[software];
-                    const percentage = ((hours / totalHours) * 100).toFixed(1);
+                    const percentage = ((hours / totalHours) * 100).toFixed(0);
                     const color = colors[index % colors.length];
                     
                     const legendItem = document.createElement('div');
-                    legendItem.style.cssText = 'display: flex; align-items: center; gap: 6px;';
+                    legendItem.style.cssText = 'display: flex; align-items: center; gap: 4px;';
                     legendItem.innerHTML = `
-                        <div style="width: 12px; height: 12px; border-radius: 2px; background: ${color};"></div>
+                        <div style="width: 8px; height: 8px; border-radius: 2px; background: ${color};"></div>
                         <span style="color: var(--text-secondary);">${software}: ${percentage}%</span>
                     `;
                     legend.appendChild(legendItem);
@@ -2981,7 +2871,7 @@ ${body}`;
                 const toEmail = `${user}@arete.com`;
                 
                 // Create Outlook web deeplink
-                const outlookUrl = `https://outlook.office.com/mail/deeplink/compose?to=${encodeURIComponent(toEmail)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                const outlookUrl = `https://outlook.office365.us/owa/arete.com/?path=/mail/action/compose&to=${encodeURIComponent(toEmail)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
                 
                 // Open in new tab
                 window.open(outlookUrl, '_blank');
