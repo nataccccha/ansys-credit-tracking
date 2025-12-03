@@ -239,26 +239,19 @@
 
         /* Settings Gear Button */
         .settings-gear-btn {
-            padding: 10px 14px;
-            border-radius: 8px;
+            background: none;
+            border: none;
             cursor: pointer;
-            font-size: 0.8125rem;
-            font-weight: 500;
+            font-size: 1.25rem;
+            padding: 8px;
             color: var(--text-secondary);
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
             transition: all 0.2s ease;
-            text-align: left;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            width: 100%;
+            margin-top: 8px;
         }
 
         .settings-gear-btn:hover {
-            background: var(--bg-card);
-            color: var(--text-primary);
-            border-color: var(--accent-info);
+            color: var(--accent-info);
+            transform: rotate(45deg);
         }
 
         /* Settings Modal */
@@ -1643,8 +1636,8 @@
                             <button class="sidebar-nav-item" onclick="showSidebarPanel('monthly', this)">
                                 📊 Monthly Usage
                             </button>
-                            <button class="settings-gear-btn" onclick="openSettingsModal()" title="Alert Settings" style="margin-top: 8px;">
-                                ⚙️ Settings
+                            <button class="settings-gear-btn" onclick="openSettingsModal()" title="Alert Settings">
+                                ⚙️
                             </button>
                         </div>
 
