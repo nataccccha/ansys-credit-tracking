@@ -1285,7 +1285,7 @@
         // CONFIGURATION - Update these values
         // ============================================
         const INITIAL_BALANCE = 834.2;  // Update this with current AEC balance
-        const BALANCE_UPDATE_DATE = "December 3, 2025";  // Update this with the date you set the balance
+        const BALANCE_UPDATE_DATE = "December 3, 2025";  // Fallback date (auto-detected from recent CSV data)
         const ACTIVE_USERS_THIS_WEEK = 3;  // Update this with the number of active users this week
 
         // CSV File URLs - Update these with your hosted file locations
@@ -1325,38 +1325,6 @@
 
             // Set active users count
             document.getElementById('activeUsersNumber').textContent = ACTIVE_USERS_THIS_WEEK;
-
-            // Set balance update date and check if old
-            const balanceDateElement = document.getElementById('balanceUpdateDate');
-            balanceDateElement.textContent = BALANCE_UPDATE_DATE;
-            
-            // Check if balance is more than a week old
-            const updateDate = new Date(BALANCE_UPDATE_DATE);
-            const today = new Date();
-            const daysDifference = Math.floor((today - updateDate) / (1000 * 60 * 60 * 24));
-            
-            if (daysDifference > 7) {
-                balanceDateElement.style.color = 'var(--accent-danger)';
-                balanceDateElement.style.fontWeight = '700';
-                
-                // Add warning icon
-                const warningSpan = document.createElement('span');
-                warningSpan.innerHTML = ' ⚠️';
-                warningSpan.style.fontSize = '1rem';
-                balanceDateElement.parentElement.appendChild(warningSpan);
-                
-                // Add warning message
-                const warningMsg = document.createElement('div');
-                warningMsg.style.marginTop = '8px';
-                warningMsg.style.padding = '8px 12px';
-                warningMsg.style.background = 'rgba(255, 59, 48, 0.12)';
-                warningMsg.style.color = 'var(--accent-danger)';
-                warningMsg.style.borderRadius = '6px';
-                warningMsg.style.fontSize = '0.8125rem';
-                warningMsg.style.fontWeight = '600';
-                warningMsg.innerHTML = '⚠️ Balance is ' + daysDifference + ' days old. Please update the administrator.';
-                balanceDateElement.parentElement.parentElement.appendChild(warningMsg);
-            }
 
             // Load collapsed states for all sections
             ['calculatorContent', 'alertsContent', 'comparisonContent', 'pivotContent'].forEach(sectionId => {
@@ -1599,6 +1567,8 @@
                     historicalData = data;
                 } else {
                     recentData = data;
+                    // Extract the most recent date from recent data
+                    updateBalanceDateFromData(data);
                 }
                 
                 document.getElementById(statusId).innerHTML = `<span style="color: var(--accent-success);">✓ Loaded from server</span>`;
@@ -1613,6 +1583,61 @@
             } catch (error) {
                 document.getElementById(statusId).innerHTML = `<span style="color: var(--accent-danger);">✗ Failed to load: ${error.message}</span>`;
                 console.error(`Error loading ${type} CSV:`, error);
+            }
+        }
+
+        // Update balance date from most recent data entry
+        function updateBalanceDateFromData(data) {
+            if (!data || data.length === 0) return;
+            
+            // Find the most recent date in the data
+            let mostRecentDate = null;
+            
+            data.forEach(row => {
+                const endTime = row['End Time'] || row['Start Time'];
+                if (endTime) {
+                    const date = new Date(endTime);
+                    if (!mostRecentDate || date > mostRecentDate) {
+                        mostRecentDate = date;
+                    }
+                }
+            });
+            
+            if (mostRecentDate) {
+                // Format the date
+                const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                const formattedDate = mostRecentDate.toLocaleDateString('en-US', options);
+                
+                // Update the display
+                const balanceDateElement = document.getElementById('balanceUpdateDate');
+                balanceDateElement.textContent = formattedDate;
+                
+                // Check if balance is more than a week old
+                const today = new Date();
+                const daysDifference = Math.floor((today - mostRecentDate) / (1000 * 60 * 60 * 24));
+                
+                if (daysDifference > 7) {
+                    balanceDateElement.style.color = 'var(--accent-danger)';
+                    balanceDateElement.style.fontWeight = '700';
+                    
+                    // Add warning icon
+                    const warningSpan = document.createElement('span');
+                    warningSpan.innerHTML = ' ⚠️';
+                    warningSpan.style.fontSize = '1rem';
+                    balanceDateElement.parentElement.appendChild(warningSpan);
+                    
+                    // Add warning message
+                    const warningMsg = document.createElement('div');
+                    warningMsg.style.marginTop = '8px';
+                    warningMsg.style.padding = '8px 12px';
+                    warningMsg.style.background = 'rgba(255, 59, 48, 0.12)';
+                    warningMsg.style.color = 'var(--accent-danger)';
+                    warningMsg.style.borderRadius = '6px';
+                    warningMsg.style.fontSize = '0.8125rem';
+                    warningMsg.style.fontWeight = '600';
+                    warningMsg.innerHTML = '⚠️ Balance is ' + daysDifference + ' days old. Please update the administrator.';
+                    balanceDateElement.parentElement.parentElement.appendChild(warningMsg);
+                }
             }
         }
 
@@ -1713,6 +1738,8 @@
                     historicalData = data;
                 } else {
                     recentData = data;
+                    // Update balance date from recent data
+                    updateBalanceDateFromData(data);
                 }
                 
                 document.getElementById(statusId).innerHTML = `<span style="color: var(--accent-success);">✓ Loaded: ${file.name}</span>`;
