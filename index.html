@@ -1355,7 +1355,7 @@
                     <span class="result-value" id="remainingCredits">5,000.0 AEC</span>
                 </div>
                 <div class="result-row">
-                    <span class="result-label">Lead Time Buffer</span>
+                    <span class="result-label">Lead Time with Buffer</span>
                     <span class="result-value" id="leadTimeBuffer">2 weeks</span>
                 </div>
                 <div id="alertMessage"></div>
@@ -1764,7 +1764,7 @@
 
             // Calculate safe threshold (credits needed for lead time period at current burn rate)
             const weeklyBurnRate = totalCredits; // This is the planned weekly usage
-            const criticalThreshold = weeklyBurnRate * leadTime // * 1.5; // Need 1.5x lead time buffer
+            const criticalThreshold = weeklyBurnRate * leadTime * 1.5; // Need 1.5x lead time buffer
 
             // Update display
             document.getElementById('totalCredits').textContent = totalCredits.toFixed(1) + ' AEC';
