@@ -1064,8 +1064,38 @@
             color: var(--accent-danger);
         }
 
+        .notify-btn {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid currentColor;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+            margin-left: auto;
+            flex-shrink: 0;
+        }
+
+        .notify-btn:hover {
+            background: white;
+            transform: scale(1.02);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .notify-btn.warning {
+            color: var(--accent-warning);
+        }
+
+        .notify-btn.critical {
+            color: var(--accent-danger);
+        }
+
         .alert-icon {
             font-size: 1.25rem;
+            flex-shrink: 0;
         }
 
         @media (max-width: 1024px) {
@@ -1795,29 +1825,13 @@
             document.getElementById('currentBalance').textContent = currentBalance.toLocaleString('en-US', {minimumFractionDigits: 1, maximumFractionDigits: 1}) + ' AEC';
             document.getElementById('remainingCredits').textContent = remaining.toLocaleString('en-US', {minimumFractionDigits: 1, maximumFractionDigits: 1}) + ' AEC';
             
-            // Build additional warnings
-            let additionalWarnings = '';
+            // Build additional warning messages (text only, to be combined)
+            let additionalWarningTexts = [];
             if (highBurnRate) {
-                additionalWarnings += `
-                    <div class="alert-box warning" style="margin-top: 12px;">
-                        <span class="alert-icon">⚡</span>
-                        <div>
-                            <strong>HIGH BURN RATE:</strong> Your weekly usage rate (${weeklyBurnRate.toFixed(1)} AEC/week) exceeds 750 AEC/week. 
-                            Please contact Natacha at <a href="mailto:nramioulle@arete.com" style="color: var(--accent-teal);">nramioulle@arete.com</a> to discuss credit planning.
-                        </div>
-                    </div>
-                `;
+                additionalWarningTexts.push(`<strong>HIGH BURN RATE:</strong> Your weekly usage rate (${weeklyBurnRate.toFixed(1)} AEC/week) exceeds 750 AEC/week.`);
             }
             if (lowRemaining && !isCritical) {
-                additionalWarnings += `
-                    <div class="alert-box warning" style="margin-top: 12px;">
-                        <span class="alert-icon">📉</span>
-                        <div>
-                            <strong>LOW BALANCE ALERT:</strong> After this usage, your remaining balance (${remaining.toFixed(1)} AEC) will be below 1,500 AEC. 
-                            Please contact Natacha at <a href="mailto:nramioulle@arete.com" style="color: var(--accent-teal);">nramioulle@arete.com</a> to order more credits.
-                        </div>
-                    </div>
-                `;
+                additionalWarningTexts.push(`<strong>LOW BALANCE:</strong> After this usage, your remaining balance (${remaining.toFixed(1)} AEC) will be below 1,500 AEC.`);
             }
 
             // Determine alert level
@@ -1835,31 +1849,43 @@
             
             // Determine alert based on whether usage exceeds balance
             if (isCritical) {
+                // Build combined message for critical alert
+                let criticalMessages = [`Your planned usage (${totalCredits.toFixed(1)} AEC) exceeds your current balance (${currentBalance.toFixed(1)} AEC). You are short by ${(totalCredits - currentBalance).toFixed(1)} AEC.`];
+                additionalWarningTexts.forEach(msg => criticalMessages.push(msg));
+                
                 alertDiv.innerHTML = `
                     <div class="alert-box critical">
                         <span class="alert-icon">🚨</span>
                         <div>
-                            <strong>ALERT REQUIRED:</strong> Your planned usage (${totalCredits.toFixed(1)} AEC) exceeds your current balance (${currentBalance.toFixed(1)} AEC). 
-                            You are short by ${(totalCredits - currentBalance).toFixed(1)} AEC.
+                            <strong>ALERT REQUIRED:</strong> ${criticalMessages.join('<br>')}
                         </div>
-                        <button onclick="openNatachaEmail('critical', ${totalCredits.toFixed(1)}, ${currentBalance.toFixed(1)}, ${remaining.toFixed(1)}, ${weeklyBurnRate.toFixed(1)}, ${totalWeeks})" 
-                            style="margin-top: 12px; padding: 8px 16px; background: white; color: var(--accent-danger); border: none; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                        <button class="notify-btn critical" onclick="openNatachaEmail('critical', ${totalCredits.toFixed(1)}, ${currentBalance.toFixed(1)}, ${remaining.toFixed(1)}, ${weeklyBurnRate.toFixed(1)}, ${totalWeeks})">
                             📧 Notify
                         </button>
                     </div>
                     ${activeUsersNote}
-                    ${additionalWarnings}
                 `;
             } else if (isWarning || highBurnRate || lowRemaining) {
+                // Build combined warning messages
+                let warningMessages = [];
+                if (highBurnRate) {
+                    warningMessages.push(`High burn rate (${weeklyBurnRate.toFixed(1)} AEC/week exceeds 750 AEC/week)`);
+                }
+                if (lowRemaining) {
+                    warningMessages.push(`Remaining balance (${remaining.toFixed(1)} AEC) will be below 1,500 AEC`);
+                }
+                if (isWarning && !highBurnRate && !lowRemaining) {
+                    warningMessages.push(`Planned usage will consume most of your balance`);
+                }
+                
                 alertDiv.innerHTML = `
                     <div class="alert-box warning">
                         <span class="alert-icon">⚠️</span>
                         <div>
-                            <strong>CAUTION:</strong> ${highBurnRate ? `High burn rate (${weeklyBurnRate.toFixed(1)} AEC/week). ` : ''}${lowRemaining ? `Remaining balance (${remaining.toFixed(1)} AEC) will be below 1,500 AEC. ` : ''}${isWarning ? `Planned usage will consume most of your balance. ` : ''}
-                            Planned: ${totalCredits.toFixed(1)} AEC | Balance: ${currentBalance.toFixed(1)} AEC | Remaining: ${remaining.toFixed(1)} AEC.
+                            <strong>CAUTION:</strong> ${warningMessages.join('<br>')}
+                            <br>Planned: ${totalCredits.toFixed(1)} AEC | Balance: ${currentBalance.toFixed(1)} AEC | Remaining: ${remaining.toFixed(1)} AEC.
                         </div>
-                        <button onclick="openNatachaEmail('warning', ${totalCredits.toFixed(1)}, ${currentBalance.toFixed(1)}, ${remaining.toFixed(1)}, ${weeklyBurnRate.toFixed(1)}, ${totalWeeks})" 
-                            style="margin-top: 12px; padding: 8px 16px; background: white; color: var(--accent-warning); border: none; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                        <button class="notify-btn warning" onclick="openNatachaEmail('warning', ${totalCredits.toFixed(1)}, ${currentBalance.toFixed(1)}, ${remaining.toFixed(1)}, ${weeklyBurnRate.toFixed(1)}, ${totalWeeks})">
                             📧 Notify
                         </button>
                     </div>
