@@ -285,7 +285,7 @@
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: 10px;
-            padding: 12px;
+            padding: 14px;
             transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             box-shadow: var(--shadow-sm);
             text-align: center;
@@ -299,23 +299,23 @@
         }
 
         .stat-label {
-            font-size: 0.6875rem;
+            font-size: 0.75rem;
             color: var(--text-secondary);
-            margin-bottom: 2px;
+            margin-bottom: 4px;
             font-weight: 500;
             text-transform: uppercase;
             letter-spacing: 0.05em;
         }
 
         .stat-value {
-            font-size: 1.25rem;
+            font-size: 1.75rem;
             font-weight: 700;
-            margin-bottom: 2px;
+            margin-bottom: 4px;
             letter-spacing: -0.02em;
         }
 
         .stat-subtext {
-            font-size: 0.625rem;
+            font-size: 0.75rem;
             color: var(--text-secondary);
             font-weight: 400;
         }
@@ -324,11 +324,11 @@
             display: inline-flex;
             align-items: center;
             gap: 3px;
-            padding: 2px 6px;
+            padding: 3px 8px;
             border-radius: 10px;
-            font-size: 0.5625rem;
+            font-size: 0.625rem;
             font-weight: 600;
-            margin-top: 2px;
+            margin-top: 4px;
         }
 
         .trend-indicator.up {
@@ -727,9 +727,9 @@
 
         .master-section-content {
             padding: 12px 16px;
-            overflow: hidden;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            max-height: 10000px;
+            overflow: visible;
+            transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, padding 0.3s ease;
+            max-height: none;
             opacity: 1;
             border-top: 2px solid var(--border);
         }
@@ -739,6 +739,7 @@
             opacity: 0;
             padding: 0;
             border-top: none;
+            overflow: hidden;
         }
 
         /* Nested sections inside master */
@@ -1384,24 +1385,23 @@
                                 <input type="number" id="accelThreshold" value="50" min="0">
                             </div>
                         </div>
-                        </div>
                     </div>
 
                     <div class="stats-grid">
                         <div class="stat-card">
                             <div class="stat-label">Calculated Thresholds</div>
-                            <div style="margin-top: 6px;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 3px 0;">
-                                    <span style="font-size: 0.625rem; color: var(--text-secondary);">Critical</span>
-                                    <span id="criticalWeeklyRate" style="font-size: 0.75rem; font-weight: 600; color: var(--accent-danger);">-</span>
+                            <div style="margin-top: 8px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 0;">
+                                    <span style="font-size: 0.75rem; color: var(--text-secondary);">Critical</span>
+                                    <span id="criticalWeeklyRate" style="font-size: 1rem; font-weight: 600; color: var(--accent-danger);">-</span>
                                 </div>
-                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 3px 0;">
-                                    <span style="font-size: 0.625rem; color: var(--text-secondary);">Warning</span>
-                                    <span id="warningWeeklyRate" style="font-size: 0.75rem; font-weight: 600; color: var(--accent-warning);">-</span>
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 0;">
+                                    <span style="font-size: 0.75rem; color: var(--text-secondary);">Warning</span>
+                                    <span id="warningWeeklyRate" style="font-size: 1rem; font-weight: 600; color: var(--accent-warning);">-</span>
                                 </div>
-                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 3px 0;">
-                                    <span style="font-size: 0.625rem; color: var(--text-secondary);">Safe</span>
-                                    <span id="safeWeeklyRate" style="font-size: 0.75rem; font-weight: 600; color: var(--accent-success);">-</span>
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 0;">
+                                    <span style="font-size: 0.75rem; color: var(--text-secondary);">Safe</span>
+                                    <span id="safeWeeklyRate" style="font-size: 1rem; font-weight: 600; color: var(--accent-success);">-</span>
                                 </div>
                             </div>
                         </div>
