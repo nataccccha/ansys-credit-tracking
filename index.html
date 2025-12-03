@@ -359,66 +359,6 @@
             letter-spacing: -0.015em;
         }
 
-        /* Sidebar Navigation for Usage Analysis */
-        .sidebar-layout {
-            display: flex;
-            gap: 16px;
-            min-height: 400px;
-        }
-
-        .sidebar-nav {
-            width: 180px;
-            flex-shrink: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .sidebar-nav-item {
-            padding: 10px 14px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.8125rem;
-            font-weight: 500;
-            color: var(--text-secondary);
-            background: transparent;
-            border: 1px solid transparent;
-            transition: all 0.2s ease;
-            text-align: left;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .sidebar-nav-item:hover {
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-        }
-
-        .sidebar-nav-item.active {
-            background: var(--accent-info);
-            color: white;
-            font-weight: 600;
-            box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
-        }
-
-        .sidebar-content {
-            flex: 1;
-            background: var(--bg-secondary);
-            border-radius: 10px;
-            padding: 16px;
-            border: 1px solid var(--border);
-            overflow: auto;
-        }
-
-        .sidebar-panel {
-            display: none;
-        }
-
-        .sidebar-panel.active {
-            display: block;
-        }
-
         .comparison-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -1427,138 +1367,126 @@
                 </div>
                 <div class="master-section-content collapsed" id="usageAnalysisContent">
 
-                    <!-- Sidebar Layout -->
-                    <div class="sidebar-layout">
-                        <!-- Sidebar Navigation -->
-                        <div class="sidebar-nav">
-                            <button class="sidebar-nav-item active" onclick="showSidebarPanel('alerts')">
-                                ⚡ Usage Alerts
-                            </button>
-                            <button class="sidebar-nav-item" onclick="showSidebarPanel('comparison')">
-                                👥 User Comparison
-                            </button>
-                            <button class="sidebar-nav-item" onclick="showSidebarPanel('monthly')">
-                                📊 Monthly Usage
-                            </button>
-                            <button class="sidebar-nav-item" onclick="showSidebarPanel('settings')">
-                                ⚙️ Settings
-                            </button>
+                    <div class="settings-section">
+                        <h2 class="section-title">⚙️ Alert Settings</h2>
+                        <div class="settings-grid">
+                            <div class="setting-item">
+                                <label>Available Balance (AEC)</label>
+                                <input type="number" id="availableBalance" value="" min="0">
+                            </div>
+                            <div class="setting-item">
+                                <label>Lead Time (weeks)</label>
+                                <input type="number" id="leadTimeWeeks" value="2" min="0" step="0.5">
+                            </div>
+                            <div class="setting-item">
+                                <label>Purchase Amount (AEC)</label>
+                                <input type="number" id="purchaseAmount" value="5000" min="0">
+                            </div>
+                            <div class="setting-item">
+                                <label>Acceleration Alert (%)</label>
+                                <input type="number" id="accelThreshold" value="50" min="0">
+                            </div>
                         </div>
-
-                        <!-- Sidebar Content -->
-                        <div class="sidebar-content">
-                            <!-- Usage Alerts Panel -->
-                            <div class="sidebar-panel active" id="panel-alerts">
-                                <h3 style="font-size: 0.875rem; font-weight: 600; margin-bottom: 12px; color: var(--text-primary);">⚡ Usage Alerts</h3>
-                                
-                                <div class="stats-grid" style="margin-bottom: 16px;">
-                                    <div class="stat-card">
-                                        <div class="stat-label">Historical Avg/Month</div>
-                                        <div class="stat-value" id="historicalAvg" style="color: var(--accent-teal);">0</div>
-                                        <div class="stat-subtext">AEC</div>
-                                    </div>
-                                    <div class="stat-card">
-                                        <div class="stat-label">Recent Weekly Usage</div>
-                                        <div class="stat-value" id="recentWeekly" style="color: var(--accent-info);">0</div>
-                                        <div class="stat-subtext">AEC</div>
-                                        <div id="weeklyTrend"></div>
-                                    </div>
-                                    <div class="stat-card">
-                                        <div class="stat-label">Projected Monthly</div>
-                                        <div class="stat-value" id="projectedMonthly" style="color: var(--accent-warning);">0</div>
-                                        <div class="stat-subtext">AEC</div>
-                                        <div id="projectionTrend"></div>
-                                    </div>
-                                    <div class="stat-card">
-                                        <div class="stat-label">Balance Runway</div>
-                                        <div class="stat-value" id="runwayMonths" style="color: var(--accent-success);">0</div>
-                                        <div class="stat-subtext">weeks remaining</div>
-                                    </div>
+                        <div id="calculatedThresholds" style="margin-top: 8px; padding: 10px; background: var(--bg-secondary); border-radius: 8px; border: 1px solid var(--border);">
+                            <h3 style="font-size: 0.75rem; margin-bottom: 6px; color: var(--text-primary); font-weight: 600;">Calculated Thresholds</h3>
+                            <div style="display: flex; gap: 16px;">
+                                <div style="flex: 1;">
+                                    <div style="font-size: 0.6875rem; color: var(--text-secondary);">Critical Weekly</div>
+                                    <div id="criticalWeeklyRate" style="font-size: 0.8125rem; font-weight: 600; color: var(--accent-danger);">-</div>
                                 </div>
-
-                                <div id="alertsList"></div>
-                            </div>
-
-                            <!-- User Comparison Panel -->
-                            <div class="sidebar-panel" id="panel-comparison">
-                                <h3 style="font-size: 0.875rem; font-weight: 600; margin-bottom: 12px; color: var(--text-primary);">👥 User Comparison</h3>
-                                <div class="comparison-grid">
-                                    <div class="comparison-card">
-                                        <h3>
-                                            <span class="period-badge historical">Historical</span>
-                                            Average Usage
-                                        </h3>
-                                        <div id="historicalUserTable"></div>
-                                    </div>
-                                    <div class="comparison-card">
-                                        <h3>
-                                            <span class="period-badge recent">Recent Week</span>
-                                            Current Usage
-                                        </h3>
-                                        <div id="recentUserTable"></div>
-                                    </div>
+                                <div style="flex: 1;">
+                                    <div style="font-size: 0.6875rem; color: var(--text-secondary);">Warning Weekly</div>
+                                    <div id="warningWeeklyRate" style="font-size: 0.8125rem; font-weight: 600; color: var(--accent-warning);">-</div>
                                 </div>
-                            </div>
-
-                            <!-- Monthly Usage Panel -->
-                            <div class="sidebar-panel" id="panel-monthly">
-                                <h3 style="font-size: 0.875rem; font-weight: 600; margin-bottom: 12px; color: var(--text-primary);">📊 Monthly Usage by User</h3>
-                                <div class="pivot-table-container">
-                                    <table class="pivot-table" id="pivotTable">
-                                        <thead>
-                                            <tr id="pivotTableHeader">
-                                                <th>Username</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="pivotTableBody">
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-
-                            <!-- Settings Panel -->
-                            <div class="sidebar-panel" id="panel-settings">
-                                <h3 style="font-size: 0.875rem; font-weight: 600; margin-bottom: 12px; color: var(--text-primary);">⚙️ Alert Settings</h3>
-                                <div class="settings-grid">
-                                    <div class="setting-item">
-                                        <label>Available Balance (AEC)</label>
-                                        <input type="number" id="availableBalance" value="" min="0">
-                                    </div>
-                                    <div class="setting-item">
-                                        <label>Lead Time (weeks)</label>
-                                        <input type="number" id="leadTimeWeeks" value="2" min="0" step="0.5">
-                                    </div>
-                                    <div class="setting-item">
-                                        <label>Purchase Amount (AEC)</label>
-                                        <input type="number" id="purchaseAmount" value="5000" min="0">
-                                    </div>
-                                    <div class="setting-item">
-                                        <label>Acceleration Alert (%)</label>
-                                        <input type="number" id="accelThreshold" value="50" min="0">
-                                    </div>
-                                </div>
-                                <div id="calculatedThresholds" style="margin-top: 12px; padding: 12px; background: var(--bg-card); border-radius: 8px; border: 1px solid var(--border);">
-                                    <h4 style="font-size: 0.75rem; margin-bottom: 8px; color: var(--text-primary); font-weight: 600;">Calculated Thresholds</h4>
-                                    <div style="display: flex; gap: 16px;">
-                                        <div style="flex: 1;">
-                                            <div style="font-size: 0.6875rem; color: var(--text-secondary);">Critical Weekly</div>
-                                            <div id="criticalWeeklyRate" style="font-size: 0.8125rem; font-weight: 600; color: var(--accent-danger);">-</div>
-                                        </div>
-                                        <div style="flex: 1;">
-                                            <div style="font-size: 0.6875rem; color: var(--text-secondary);">Warning Weekly</div>
-                                            <div id="warningWeeklyRate" style="font-size: 0.8125rem; font-weight: 600; color: var(--accent-warning);">-</div>
-                                        </div>
-                                        <div style="flex: 1;">
-                                            <div style="font-size: 0.6875rem; color: var(--text-secondary);">Safe Weekly</div>
-                                            <div id="safeWeeklyRate" style="font-size: 0.8125rem; font-weight: 600; color: var(--accent-success);">-</div>
-                                        </div>
-                                    </div>
+                                <div style="flex: 1;">
+                                    <div style="font-size: 0.6875rem; color: var(--text-secondary);">Safe Weekly</div>
+                                    <div id="safeWeeklyRate" style="font-size: 0.8125rem; font-weight: 600; color: var(--accent-success);">-</div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-            </div>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-label">Historical Avg/Month</div>
+                            <div class="stat-value" id="historicalAvg" style="color: var(--accent-teal);">0</div>
+                            <div class="stat-subtext">AEC</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Recent Weekly Usage</div>
+                            <div class="stat-value" id="recentWeekly" style="color: var(--accent-info);">0</div>
+                            <div class="stat-subtext">AEC</div>
+                            <div id="weeklyTrend"></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Projected Monthly</div>
+                            <div class="stat-value" id="projectedMonthly" style="color: var(--accent-warning);">0</div>
+                            <div class="stat-subtext">AEC</div>
+                            <div id="projectionTrend"></div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Balance Runway</div>
+                            <div class="stat-value" id="runwayMonths" style="color: var(--accent-success);">0</div>
+                            <div class="stat-subtext">weeks remaining</div>
+                        </div>
+                    </div>
+
+                    <div class="collapsible-section">
+                        <div class="section-header" onclick="toggleSection('alertsContent', 'alertsIcon')">
+                            <h2>⚡ Usage Alerts</h2>
+                            <span class="collapse-icon" id="alertsIcon">▼</span>
+                        </div>
+                        <div class="collapsible-content" id="alertsContent">
+                            <div id="alertsList"></div>
+                        </div>
+                    </div>
+
+                    <div class="collapsible-section">
+                        <div class="section-header" onclick="toggleSection('comparisonContent', 'comparisonIcon')">
+                            <h2>👥 User Comparison</h2>
+                            <span class="collapse-icon" id="comparisonIcon">▼</span>
+                        </div>
+                        <div class="collapsible-content" id="comparisonContent">
+                            <div class="comparison-grid">
+                                <div class="comparison-card">
+                                    <h3>
+                                        <span class="period-badge historical">Historical</span>
+                                        Average Usage
+                                    </h3>
+                                    <div id="historicalUserTable"></div>
+                                </div>
+                                <div class="comparison-card">
+                                    <h3>
+                                        <span class="period-badge recent">Recent Week</span>
+                                        Current Usage
+                                    </h3>
+                                    <div id="recentUserTable"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="collapsible-section">
+                        <div class="section-header" onclick="toggleSection('pivotContent', 'pivotIcon')">
+                            <h2>📊 Monthly Usage by User</h2>
+                            <span class="collapse-icon" id="pivotIcon">▼</span>
+                        </div>
+                        <div class="collapsible-content" id="pivotContent">
+                            <div class="pivot-table-container">
+                                <table class="pivot-table" id="pivotTable">
+                                    <thead>
+                                        <tr id="pivotTableHeader">
+                                            <th>Username</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="pivotTableBody">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
             </div>
         
         <!-- Administrative Tools Section -->
@@ -2117,28 +2045,6 @@ Thanks,`;
 
             // Save state
             localStorage.setItem(contentId + 'Collapsed', content.classList.contains('collapsed'));
-        }
-
-        // Sidebar panel navigation
-        function showSidebarPanel(panelName) {
-            // Hide all panels
-            document.querySelectorAll('.sidebar-panel').forEach(panel => {
-                panel.classList.remove('active');
-            });
-            
-            // Remove active from all nav items
-            document.querySelectorAll('.sidebar-nav-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            
-            // Show selected panel
-            const panel = document.getElementById('panel-' + panelName);
-            if (panel) {
-                panel.classList.add('active');
-            }
-            
-            // Set active nav item
-            event.target.classList.add('active');
         }
 
         let historicalData = [];
