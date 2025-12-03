@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ANSYS AEC Trend Analysis</title>
-    <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         :root {
             --bg-primary: #ffffff;
@@ -14,13 +14,14 @@
             --accent-warning: #ff9500;
             --accent-success: #34c759;
             --accent-info: #007aff;
-            --accent-purple: #af52de;
+            --accent-teal: #005B7F;
             --text-primary: #1d1d1f;
             --text-secondary: #86868b;
             --border: #d2d2d7;
             --glow-danger: rgba(255, 59, 48, 0.15);
             --glow-warning: rgba(255, 149, 0, 0.15);
             --glow-success: rgba(52, 199, 89, 0.15);
+            --glow-teal: rgba(0, 91, 127, 0.15);
             --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
             --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
             --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
@@ -34,7 +35,7 @@
             --accent-warning: #ff9f0a;
             --accent-success: #32d74b;
             --accent-info: #0a84ff;
-            --accent-purple: #bf5af2;
+            --accent-teal: #0088AA;
             --text-primary: #f5f5f7;
             --text-secondary: #98989d;
             --border: #38383a;
@@ -177,7 +178,7 @@
         }
 
         .upload-label.historical {
-            background: var(--accent-purple);
+            background: var(--accent-teal);
         }
 
         input[type="file"] {
@@ -207,7 +208,7 @@
         }
 
         .upload-btn.historical {
-            background: var(--accent-purple);
+            background: var(--accent-teal);
         }
 
         .upload-btn.historical:hover {
@@ -444,7 +445,7 @@
 
         .period-badge.historical {
             background: rgba(175, 82, 222, 0.12);
-            color: var(--accent-purple);
+            color: var(--accent-teal);
         }
 
         .period-badge.recent {
@@ -488,7 +489,7 @@
         }
 
         .alert-card.accelerating {
-            border-left-color: var(--accent-purple);
+            border-left-color: var(--accent-teal);
             animation: accelPulse 2s ease-in-out infinite;
         }
 
@@ -528,7 +529,7 @@
         }
 
         .alert-badge.accelerating {
-            background: var(--accent-purple);
+            background: var(--accent-teal);
             color: white;
         }
 
@@ -1366,7 +1367,7 @@
                 <button class="purchase-btn" onclick="calculateUsage()" style="flex: 1; padding: 8px; font-size: 0.875rem;">
                     Calculate
                 </button>
-                <button class="purchase-btn" onclick="exportQuoteToPDF()" style="padding: 8px 16px; font-size: 0.8125rem; background: linear-gradient(135deg, var(--accent-purple), var(--accent-info)); white-space: nowrap;">
+                <button class="purchase-btn" onclick="exportQuoteToPDF()" style="padding: 8px 16px; font-size: 0.8125rem; background: linear-gradient(135deg, var(--accent-teal), var(--accent-info)); white-space: nowrap;">
                     📄 Export as Quote
                 </button>
             </div>
@@ -1458,7 +1459,7 @@
                     <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-label">Historical Avg/Month</div>
-                    <div class="stat-value" id="historicalAvg" style="color: var(--accent-purple);">0</div>
+                    <div class="stat-value" id="historicalAvg" style="color: var(--accent-teal);">0</div>
                     <div class="stat-subtext">AEC</div>
                 </div>
                 <div class="stat-card">
@@ -1546,7 +1547,7 @@
                     <button class="purchase-btn pulse" onclick="requestPurchase()" style="padding: 8px 16px; font-size: 0.8125rem;">
                         Request More AECs
                     </button>
-                    <button class="purchase-btn" style="background: linear-gradient(135deg, var(--accent-purple), var(--accent-info)); box-shadow: 0 4px 16px rgba(147, 51, 234, 0.3); padding: 8px 16px; font-size: 0.8125rem;" onclick="exportToTeams()">
+                    <button class="purchase-btn" style="background: linear-gradient(135deg, var(--accent-teal), var(--accent-info)); box-shadow: 0 4px 16px rgba(0, 91, 127, 0.3); padding: 8px 16px; font-size: 0.8125rem;" onclick="exportToTeams()">
                         Update the Team
                     </button>
                 </div>
@@ -2429,7 +2430,7 @@
                             </div>
                             <div class="alert-metric">
                                 <div class="alert-metric-label">Historical Avg</div>
-                                <div class="alert-metric-value" style="color: var(--accent-purple);">${alert.historicalAvg.toFixed(1)} AEC</div>
+                                <div class="alert-metric-value" style="color: var(--accent-teal);">${alert.historicalAvg.toFixed(1)} AEC</div>
                             </div>
                             <div class="alert-metric">
                                 <div class="alert-metric-label">Change</div>
@@ -2461,7 +2462,7 @@
                         ${historicalUsers.map(([user, metrics]) => `
                             <tr>
                                 <td style="font-weight: 600;">${user}</td>
-                                <td style="text-align: right; font-weight: 600; color: var(--accent-purple);">${metrics.avgMonthly.toFixed(1)}</td>
+                                <td style="text-align: right; font-weight: 600; color: var(--accent-teal);">${metrics.avgMonthly.toFixed(1)}</td>
                             </tr>
                         `).join('')}
                     </tbody>
@@ -2619,13 +2620,9 @@ ${body}`;
             });
         }
 
-        // Export Quote to Word Document
-        async function exportQuoteToPDF() {
-            const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, AlignmentType, 
-                    WidthType, BorderStyle, VerticalAlign, ShadingType, Media, ImageRun } = docx;
-            
-            // Arete logo as base64
-            const areteLogoBase64 = "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";
+        // Export Quote to PDF with Fillable Fields
+        function exportQuoteToPDF() {
+            const { jsPDF } = window.jspdf;
             
             // Get current date
             const today = new Date();
@@ -2666,401 +2663,266 @@ ${body}`;
             const totalWeeks = Math.max(...usageData.map(d => d.weeks));
             const weeklyAverage = (totalCredits / totalWeeks).toFixed(2);
             
-            // Professional table borders
-            const tableBorder = { style: BorderStyle.SINGLE, size: 6, color: "CCCCCC" };
-            const headerBorder = { style: BorderStyle.SINGLE, size: 8, color: "005B7F" };
-            const cellBorders = { top: tableBorder, bottom: tableBorder, left: tableBorder, right: tableBorder };
-            const headerBorders = { top: headerBorder, bottom: headerBorder, left: headerBorder, right: headerBorder };
+            // Create PDF
+            const doc = new jsPDF();
             
-            // Create table rows for software items
-            const tableRows = [
-                // Header row with professional styling
-                new TableRow({
-                    tableHeader: true,
-                    height: { value: 600, rule: "atLeast" },
-                    children: [
-                        new TableCell({
-                            borders: headerBorders,
-                            width: { size: 4500, type: WidthType.DXA },
-                            shading: { fill: "005B7F", type: ShadingType.CLEAR },
-                            verticalAlign: VerticalAlign.CENTER,
-                            margins: { top: 100, bottom: 100, left: 150, right: 150 },
-                            children: [new Paragraph({
-                                alignment: AlignmentType.LEFT,
-                                children: [new TextRun({ text: "Software Description", bold: true, size: 22, color: "FFFFFF" })]
-                            })]
-                        }),
-                        new TableCell({
-                            borders: headerBorders,
-                            width: { size: 1500, type: WidthType.DXA },
-                            shading: { fill: "005B7F", type: ShadingType.CLEAR },
-                            verticalAlign: VerticalAlign.CENTER,
-                            margins: { top: 100, bottom: 100, left: 150, right: 150 },
-                            children: [new Paragraph({
-                                alignment: AlignmentType.CENTER,
-                                children: [new TextRun({ text: "Rate\n($/hr)", bold: true, size: 22, color: "FFFFFF" })]
-                            })]
-                        }),
-                        new TableCell({
-                            borders: headerBorders,
-                            width: { size: 1200, type: WidthType.DXA },
-                            shading: { fill: "005B7F", type: ShadingType.CLEAR },
-                            verticalAlign: VerticalAlign.CENTER,
-                            margins: { top: 100, bottom: 100, left: 150, right: 150 },
-                            children: [new Paragraph({
-                                alignment: AlignmentType.CENTER,
-                                children: [new TextRun({ text: "Hours", bold: true, size: 22, color: "FFFFFF" })]
-                            })]
-                        }),
-                        new TableCell({
-                            borders: headerBorders,
-                            width: { size: 1200, type: WidthType.DXA },
-                            shading: { fill: "005B7F", type: ShadingType.CLEAR },
-                            verticalAlign: VerticalAlign.CENTER,
-                            margins: { top: 100, bottom: 100, left: 150, right: 150 },
-                            children: [new Paragraph({
-                                alignment: AlignmentType.CENTER,
-                                children: [new TextRun({ text: "Weeks", bold: true, size: 22, color: "FFFFFF" })]
-                            })]
-                        }),
-                        new TableCell({
-                            borders: headerBorders,
-                            width: { size: 2000, type: WidthType.DXA },
-                            shading: { fill: "005B7F", type: ShadingType.CLEAR },
-                            verticalAlign: VerticalAlign.CENTER,
-                            margins: { top: 100, bottom: 100, left: 150, right: 150 },
-                            children: [new Paragraph({
-                                alignment: AlignmentType.CENTER,
-                                children: [new TextRun({ text: "Total Cost", bold: true, size: 22, color: "FFFFFF" })]
-                            })]
-                        })
-                    ]
-                })
-            ];
+            // Colors
+            const tealColor = [0, 91, 127];
+            const grayColor = [102, 102, 102];
+            const darkColor = [51, 51, 51];
+            const lightBlue = [230, 242, 245];
             
-            // Data rows with alternating colors
+            let yPos = 20;
+            
+            // Arete Logo (as text since jsPDF doesn't easily embed images from base64 WEBP)
+            doc.setFontSize(28);
+            doc.setTextColor(...tealColor);
+            doc.setFont(undefined, 'bold');
+            doc.text('Arete', 105, yPos, { align: 'center' });
+            
+            yPos += 8;
+            doc.setFontSize(9);
+            doc.setTextColor(...grayColor);
+            doc.setFont(undefined, 'normal');
+            doc.text('9301 Corbin Ave, Suite 2000 | Northridge, CA 91324 | Tel: 818.885.2200', 105, yPos, { align: 'center' });
+            
+            yPos += 15;
+            
+            // Document Title
+            doc.setFontSize(18);
+            doc.setTextColor(...darkColor);
+            doc.setFont(undefined, 'bold');
+            doc.text('ANSYS AEC USAGE QUOTE', 105, yPos, { align: 'center' });
+            
+            yPos += 12;
+            
+            // Info boxes
+            doc.setFillColor(249, 249, 249);
+            doc.setDrawColor(200, 200, 200);
+            doc.setLineWidth(0.5);
+            
+            // Left box - Quote Number
+            doc.roundedRect(20, yPos, 85, 18, 2, 2, 'FD');
+            doc.setFontSize(10);
+            doc.setTextColor(...darkColor);
+            doc.setFont(undefined, 'bold');
+            doc.text('Quote Number:', 25, yPos + 6);
+            doc.setFont(undefined, 'normal');
+            doc.setTextColor(...tealColor);
+            doc.text(quoteNumber, 25, yPos + 13);
+            
+            // Right box - Date
+            doc.roundedRect(105, yPos, 85, 18, 2, 2, 'FD');
+            doc.setTextColor(...darkColor);
+            doc.setFont(undefined, 'bold');
+            doc.text('Date:', 110, yPos + 6);
+            doc.setFont(undefined, 'normal');
+            doc.setTextColor(...darkColor);
+            doc.text(dateStr, 110, yPos + 13);
+            
+            yPos += 25;
+            
+            // Fillable fields section
+            doc.setFontSize(10);
+            doc.setTextColor(...darkColor);
+            doc.setFont(undefined, 'bold');
+            doc.text('Prepared For:', 20, yPos);
+            yPos += 2;
+            
+            // Fillable box for customer name
+            doc.setDrawColor(100, 100, 100);
+            doc.setLineWidth(0.3);
+            doc.rect(20, yPos, 170, 8);
+            doc.setFontSize(8);
+            doc.setTextColor(...grayColor);
+            doc.setFont(undefined, 'italic');
+            doc.text('(Customer/Company Name)', 22, yPos + 5.5);
+            
+            yPos += 15;
+            
+            // Fillable box for project name
+            doc.setFont(undefined, 'bold');
+            doc.setFontSize(10);
+            doc.setTextColor(...darkColor);
+            doc.text('Project Name:', 20, yPos);
+            yPos += 2;
+            doc.setDrawColor(100, 100, 100);
+            doc.rect(20, yPos, 170, 8);
+            doc.setFontSize(8);
+            doc.setTextColor(...grayColor);
+            doc.setFont(undefined, 'italic');
+            doc.text('(Project Description)', 22, yPos + 5.5);
+            
+            yPos += 15;
+            
+            // Project info boxes
+            doc.setFillColor(249, 249, 249);
+            
+            // Duration box
+            doc.roundedRect(20, yPos, 85, 18, 2, 2, 'FD');
+            doc.setFontSize(10);
+            doc.setTextColor(...darkColor);
+            doc.setFont(undefined, 'bold');
+            doc.text('Project Duration:', 25, yPos + 6);
+            doc.setFont(undefined, 'normal');
+            doc.text(`${totalWeeks} week${totalWeeks > 1 ? 's' : ''}`, 25, yPos + 13);
+            
+            // Avg weekly cost box
+            doc.roundedRect(105, yPos, 85, 18, 2, 2, 'FD');
+            doc.setFont(undefined, 'bold');
+            doc.text('Avg Weekly Cost:', 110, yPos + 6);
+            doc.setFont(undefined, 'normal');
+            doc.setTextColor(...tealColor);
+            doc.text(`$${weeklyAverage}/week`, 110, yPos + 13);
+            
+            yPos += 25;
+            
+            // Section header
+            doc.setFontSize(12);
+            doc.setTextColor(...darkColor);
+            doc.setFont(undefined, 'bold');
+            doc.text('Simulation Software Breakdown', 20, yPos);
+            
+            yPos += 8;
+            
+            // Table header
+            doc.setFillColor(...tealColor);
+            doc.rect(20, yPos, 170, 8, 'F');
+            
+            doc.setFontSize(9);
+            doc.setTextColor(255, 255, 255);
+            doc.setFont(undefined, 'bold');
+            doc.text('Software', 22, yPos + 5.5);
+            doc.text('Rate ($/hr)', 95, yPos + 5.5, { align: 'center' });
+            doc.text('Hours', 125, yPos + 5.5, { align: 'center' });
+            doc.text('Weeks', 145, yPos + 5.5, { align: 'center' });
+            doc.text('Total Cost', 175, yPos + 5.5, { align: 'right' });
+            
+            yPos += 8;
+            
+            // Table rows
+            doc.setTextColor(...darkColor);
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(9);
+            
             usageData.forEach((item, index) => {
-                const rowColor = index % 2 === 0 ? "FFFFFF" : "F5F5F5";
-                tableRows.push(new TableRow({
-                    height: { value: 500, rule: "atLeast" },
-                    children: [
-                        new TableCell({
-                            borders: cellBorders,
-                            width: { size: 4500, type: WidthType.DXA },
-                            shading: { fill: rowColor, type: ShadingType.CLEAR },
-                            verticalAlign: VerticalAlign.CENTER,
-                            margins: { top: 100, bottom: 100, left: 150, right: 150 },
-                            children: [new Paragraph({
-                                children: [new TextRun({ text: item.software, size: 22 })]
-                            })]
-                        }),
-                        new TableCell({
-                            borders: cellBorders,
-                            width: { size: 1500, type: WidthType.DXA },
-                            shading: { fill: rowColor, type: ShadingType.CLEAR },
-                            verticalAlign: VerticalAlign.CENTER,
-                            margins: { top: 100, bottom: 100, left: 150, right: 150 },
-                            children: [new Paragraph({
-                                alignment: AlignmentType.CENTER,
-                                children: [new TextRun({ text: `$${item.rate.toFixed(2)}`, size: 22 })]
-                            })]
-                        }),
-                        new TableCell({
-                            borders: cellBorders,
-                            width: { size: 1200, type: WidthType.DXA },
-                            shading: { fill: rowColor, type: ShadingType.CLEAR },
-                            verticalAlign: VerticalAlign.CENTER,
-                            margins: { top: 100, bottom: 100, left: 150, right: 150 },
-                            children: [new Paragraph({
-                                alignment: AlignmentType.CENTER,
-                                children: [new TextRun({ text: `${item.hours}`, size: 22 })]
-                            })]
-                        }),
-                        new TableCell({
-                            borders: cellBorders,
-                            width: { size: 1200, type: WidthType.DXA },
-                            shading: { fill: rowColor, type: ShadingType.CLEAR },
-                            verticalAlign: VerticalAlign.CENTER,
-                            margins: { top: 100, bottom: 100, left: 150, right: 150 },
-                            children: [new Paragraph({
-                                alignment: AlignmentType.CENTER,
-                                children: [new TextRun({ text: `${item.weeks}`, size: 22 })]
-                            })]
-                        }),
-                        new TableCell({
-                            borders: cellBorders,
-                            width: { size: 2000, type: WidthType.DXA },
-                            shading: { fill: rowColor, type: ShadingType.CLEAR },
-                            verticalAlign: VerticalAlign.CENTER,
-                            margins: { top: 100, bottom: 100, left: 150, right: 150 },
-                            children: [new Paragraph({
-                                alignment: AlignmentType.RIGHT,
-                                children: [new TextRun({ text: `$${item.credits.toFixed(2)}`, size: 22 })]
-                            })]
-                        })
-                    ]
-                }));
+                if (yPos > 250) {
+                    doc.addPage();
+                    yPos = 20;
+                }
+                
+                // Alternating row colors
+                if (index % 2 === 0) {
+                    doc.setFillColor(250, 250, 250);
+                    doc.rect(20, yPos, 170, 7, 'F');
+                }
+                
+                doc.text(item.software, 22, yPos + 5);
+                doc.text(`$${item.rate.toFixed(2)}`, 95, yPos + 5, { align: 'center' });
+                doc.text(`${item.hours}`, 125, yPos + 5, { align: 'center' });
+                doc.text(`${item.weeks}`, 145, yPos + 5, { align: 'center' });
+                doc.text(`$${item.credits.toFixed(2)}`, 188, yPos + 5, { align: 'right' });
+                
+                yPos += 7;
             });
             
-            // Total row with emphasis
-            tableRows.push(new TableRow({
-                height: { value: 700, rule: "atLeast" },
-                children: [
-                    new TableCell({
-                        borders: headerBorders,
-                        columnSpan: 4,
-                        width: { size: 8400, type: WidthType.DXA },
-                        shading: { fill: "E6F2F5", type: ShadingType.CLEAR },
-                        verticalAlign: VerticalAlign.CENTER,
-                        margins: { top: 150, bottom: 150, left: 150, right: 150 },
-                        children: [new Paragraph({
-                            alignment: AlignmentType.RIGHT,
-                            children: [new TextRun({ text: "TOTAL PROJECT COST", bold: true, size: 26 })]
-                        })]
-                    }),
-                    new TableCell({
-                        borders: headerBorders,
-                        width: { size: 2000, type: WidthType.DXA },
-                        shading: { fill: "E6F2F5", type: ShadingType.CLEAR },
-                        verticalAlign: VerticalAlign.CENTER,
-                        margins: { top: 150, bottom: 150, left: 150, right: 150 },
-                        children: [new Paragraph({
-                            alignment: AlignmentType.RIGHT,
-                            children: [new TextRun({ text: `$${totalCredits.toFixed(2)}`, bold: true, size: 28, color: "005B7F" })]
-                        })]
-                    })
-                ]
-            }));
+            // Total row
+            doc.setFillColor(...lightBlue);
+            doc.rect(20, yPos, 170, 10, 'F');
+            doc.setDrawColor(...tealColor);
+            doc.setLineWidth(0.8);
+            doc.rect(20, yPos, 170, 10);
             
-            // Create document
-            const doc = new Document({
-                sections: [{
-                    properties: {
-                        page: {
-                            margin: {
-                                top: 1440,
-                                right: 1440,
-                                bottom: 1440,
-                                left: 1440
-                            }
-                        }
-                    },
-                    children: [
-                        // Arete logo
-                        new Paragraph({
-                            alignment: AlignmentType.CENTER,
-                            spacing: { after: 200 },
-                            children: [
-                                new ImageRun({
-                                    data: Uint8Array.from(atob(areteLogoBase64), c => c.charCodeAt(0)),
-                                    transformation: {
-                                        width: 150,
-                                        height: 40
-                                    }
-                                })
-                            ]
-                        }),
-                        
-                        new Paragraph({
-                            alignment: AlignmentType.CENTER,
-                            spacing: { after: 300 },
-                            children: [new TextRun({ 
-                                text: "9301 Corbin Ave, Suite 2000 | Northridge, CA 91324 | Tel: 818.885.2200", 
-                                size: 20,
-                                color: "666666",
-                                font: "Calibri"
-                            })]
-                        }),
-                        
-                        // Document title
-                        new Paragraph({
-                            alignment: AlignmentType.CENTER,
-                            spacing: { before: 200, after: 100 },
-                            children: [new TextRun({ 
-                                text: "ANSYS AEC USAGE QUOTE", 
-                                bold: true, 
-                                size: 32,
-                                color: "333333"
-                            })]
-                        }),
-                        
-                        // Quote info box
-                        new Table({
-                            columnWidths: [5000, 5000],
-                            margins: { top: 100, bottom: 100, left: 150, right: 150 },
-                            rows: [
-                                new TableRow({
-                                    children: [
-                                        new TableCell({
-                                            borders: cellBorders,
-                                            width: { size: 5000, type: WidthType.DXA },
-                                            shading: { fill: "F9F9F9", type: ShadingType.CLEAR },
-                                            verticalAlign: VerticalAlign.CENTER,
-                                            margins: { top: 150, bottom: 150, left: 200, right: 200 },
-                                            children: [
-                                                new Paragraph({
-                                                    children: [new TextRun({ text: "Quote Number:", bold: true, size: 22 })]
-                                                }),
-                                                new Paragraph({
-                                                    spacing: { before: 100 },
-                                                    children: [new TextRun({ text: quoteNumber, size: 22, color: "005B7F" })]
-                                                })
-                                            ]
-                                        }),
-                                        new TableCell({
-                                            borders: cellBorders,
-                                            width: { size: 5000, type: WidthType.DXA },
-                                            shading: { fill: "F9F9F9", type: ShadingType.CLEAR },
-                                            verticalAlign: VerticalAlign.CENTER,
-                                            margins: { top: 150, bottom: 150, left: 200, right: 200 },
-                                            children: [
-                                                new Paragraph({
-                                                    children: [new TextRun({ text: "Date:", bold: true, size: 22 })]
-                                                }),
-                                                new Paragraph({
-                                                    spacing: { before: 100 },
-                                                    children: [new TextRun({ text: dateStr, size: 22 })]
-                                                })
-                                            ]
-                                        })
-                                    ]
-                                }),
-                                new TableRow({
-                                    children: [
-                                        new TableCell({
-                                            borders: cellBorders,
-                                            width: { size: 5000, type: WidthType.DXA },
-                                            shading: { fill: "F9F9F9", type: ShadingType.CLEAR },
-                                            verticalAlign: VerticalAlign.CENTER,
-                                            margins: { top: 150, bottom: 150, left: 200, right: 200 },
-                                            children: [
-                                                new Paragraph({
-                                                    children: [new TextRun({ text: "Project Duration:", bold: true, size: 22 })]
-                                                }),
-                                                new Paragraph({
-                                                    spacing: { before: 100 },
-                                                    children: [new TextRun({ text: `${totalWeeks} week${totalWeeks > 1 ? 's' : ''}`, size: 22 })]
-                                                })
-                                            ]
-                                        }),
-                                        new TableCell({
-                                            borders: cellBorders,
-                                            width: { size: 5000, type: WidthType.DXA },
-                                            shading: { fill: "F9F9F9", type: ShadingType.CLEAR },
-                                            verticalAlign: VerticalAlign.CENTER,
-                                            margins: { top: 150, bottom: 150, left: 200, right: 200 },
-                                            children: [
-                                                new Paragraph({
-                                                    children: [new TextRun({ text: "Avg Weekly Cost:", bold: true, size: 22 })]
-                                                }),
-                                                new Paragraph({
-                                                    spacing: { before: 100 },
-                                                    children: [new TextRun({ text: `$${weeklyAverage}/week`, size: 22, color: "005B7F" })]
-                                                })
-                                            ]
-                                        })
-                                    ]
-                                })
-                            ]
-                        }),
-                        
-                        new Paragraph({ spacing: { before: 400, after: 200 }, children: [] }),
-                        
-                        // Section header
-                        new Paragraph({
-                            spacing: { after: 200 },
-                            children: [new TextRun({ 
-                                text: "Simulation Software Breakdown", 
-                                bold: true, 
-                                size: 24,
-                                color: "333333"
-                            })]
-                        }),
-                        
-                        // Main data table
-                        new Table({
-                            columnWidths: [4500, 1500, 1200, 1200, 2000],
-                            margins: { top: 0, bottom: 0, left: 0, right: 0 },
-                            rows: tableRows
-                        }),
-                        
-                        new Paragraph({ spacing: { before: 400, after: 200 }, children: [] }),
-                        
-                        // Notes section
-                        new Paragraph({
-                            spacing: { after: 150 },
-                            children: [new TextRun({ text: "Notes:", bold: true, size: 22 })]
-                        }),
-                        new Paragraph({
-                            spacing: { after: 100, before: 50 },
-                            indent: { left: 360 },
-                            children: [new TextRun({
-                                text: "• Exchange Rate: 1 AEC = $1.00 USD",
-                                size: 20,
-                                color: "666666"
-                            })]
-                        }),
-                        new Paragraph({
-                            spacing: { after: 100 },
-                            indent: { left: 360 },
-                            children: [new TextRun({
-                                text: "• Rates are based on official ANSYS AEC consumption rates",
-                                size: 20,
-                                color: "666666"
-                            })]
-                        }),
-                        new Paragraph({
-                            spacing: { after: 300 },
-                            indent: { left: 360 },
-                            children: [new TextRun({
-                                text: "• Quote valid for 90 days from date of issue",
-                                size: 20,
-                                color: "666666"
-                            })]
-                        }),
-                        
-                        // Contact section
-                        new Paragraph({
-                            spacing: { before: 300, after: 100 },
-                            children: [new TextRun({ 
-                                text: "Questions? Contact Us:", 
-                                bold: true, 
-                                size: 22,
-                                color: "333333"
-                            })]
-                        }),
-                        new Paragraph({
-                            spacing: { after: 50 },
-                            children: [new TextRun({ 
-                                text: "Email: info@arete.com", 
-                                size: 20,
-                                color: "005B7F"
-                            })]
-                        }),
-                        new Paragraph({
-                            children: [new TextRun({ 
-                                text: "Web: www.arete.com", 
-                                size: 20,
-                                color: "005B7F"
-                            })]
-                        })
-                    ]
-                }]
-            });
+            doc.setFontSize(11);
+            doc.setFont(undefined, 'bold');
+            doc.setTextColor(...darkColor);
+            doc.text('TOTAL PROJECT COST', 150, yPos + 7, { align: 'right' });
+            doc.setTextColor(...tealColor);
+            doc.setFontSize(13);
+            doc.text(`$${totalCredits.toFixed(2)}`, 188, yPos + 7, { align: 'right' });
             
-            // Generate and download
-            Packer.toBlob(doc).then(blob => {
-                const url = window.URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = url;
-                const filename = `Arete_ANSYS_AEC_Quote_${today.getFullYear()}${(today.getMonth()+1).toString().padStart(2,'0')}${today.getDate().toString().padStart(2,'0')}.docx`;
-                link.download = filename;
-                link.click();
-                window.URL.revokeObjectURL(url);
-            }).catch(err => {
-                console.error('Error generating document:', err);
-                alert('Error generating quote. Please try again.');
-            });
+            yPos += 18;
+            
+            // Notes section
+            if (yPos < 220) {
+                doc.setFontSize(10);
+                doc.setTextColor(...darkColor);
+                doc.setFont(undefined, 'bold');
+                doc.text('Notes:', 20, yPos);
+                
+                yPos += 6;
+                doc.setFontSize(9);
+                doc.setFont(undefined, 'normal');
+                doc.setTextColor(...grayColor);
+                doc.text('•  Exchange Rate: 1 AEC = $1.00 USD', 25, yPos);
+                yPos += 5;
+                doc.text('•  Rates based on official ANSYS AEC consumption rates', 25, yPos);
+                yPos += 5;
+                doc.text('•  Quote valid for 90 days from date of issue', 25, yPos);
+                
+                yPos += 12;
+                
+                // Contact section
+                doc.setFont(undefined, 'bold');
+                doc.setTextColor(...darkColor);
+                doc.text('Questions? Contact Us:', 20, yPos);
+                yPos += 5;
+                doc.setFont(undefined, 'normal');
+                doc.setTextColor(...tealColor);
+                doc.text('Email: info@arete.com  |  Web: www.arete.com', 20, yPos);
+            }
+            
+            // Approval signature boxes at bottom
+            if (yPos < 240) {
+                yPos = 250;
+            } else {
+                doc.addPage();
+                yPos = 20;
+            }
+            
+            // Signature boxes
+            doc.setFontSize(10);
+            doc.setTextColor(...darkColor);
+            doc.setFont(undefined, 'bold');
+            doc.text('APPROVALS', 105, yPos, { align: 'center' });
+            
+            yPos += 8;
+            
+            // Customer signature box
+            doc.setDrawColor(100, 100, 100);
+            doc.setLineWidth(0.3);
+            doc.rect(20, yPos, 80, 20);
+            doc.setFontSize(9);
+            doc.setFont(undefined, 'normal');
+            doc.text('Customer Signature:', 22, yPos + 5);
+            doc.setFontSize(7);
+            doc.setTextColor(...grayColor);
+            doc.text('Date:', 22, yPos + 17);
+            doc.line(35, yPos + 17, 98, yPos + 17);
+            
+            // Arete representative box
+            doc.rect(110, yPos, 80, 20);
+            doc.setFontSize(9);
+            doc.setTextColor(...darkColor);
+            doc.text('Arete Representative:', 112, yPos + 5);
+            doc.setFontSize(7);
+            doc.setTextColor(...grayColor);
+            doc.text('Date:', 112, yPos + 17);
+            doc.line(125, yPos + 17, 188, yPos + 17);
+            
+            // Footer on all pages
+            const pageCount = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                doc.setFontSize(7);
+                doc.setTextColor(...grayColor);
+                doc.text('Arete ANSYS AEC Quote', 105, 285, { align: 'center' });
+                doc.text(`Page ${i} of ${pageCount}`, 188, 285, { align: 'right' });
+            }
+            
+            // Save PDF
+            const filename = `Arete_ANSYS_AEC_Quote_${today.getFullYear()}${(today.getMonth()+1).toString().padStart(2,'0')}${today.getDate().toString().padStart(2,'0')}.pdf`;
+            doc.save(filename);
         }
     </script>
 </body>
