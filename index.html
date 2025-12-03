@@ -1277,16 +1277,13 @@
         <div class="calculator-upload-grid" style="display: grid; grid-template-columns: 1fr; gap: 20px; margin-bottom: 24px;">
             <!-- Calculator -->
             <div>
-                <div class="calculator-section">
-            <div class="section-header" onclick="toggleSection('calculatorContent', 'calculatorIcon')" style="cursor: pointer; display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                <div class="calculator-header" style="margin: 0;">
-                    <h2 style="margin: 0;">💡 Credit Usage Calculator</h2>
-                    <p style="margin: 4px 0 0 0;">Calculate if your planned usage will exceed available credits</p>
-                </div>
+                <div class="master-section">
+            <div class="master-section-header" onclick="toggleSection('calculatorContent', 'calculatorIcon')">
+                <h2>💡 Credit Usage Calculator</h2>
                 <span class="collapse-icon" id="calculatorIcon">▼</span>
             </div>
 
-            <div class="collapsible-content" id="calculatorContent">
+            <div class="master-section-content" id="calculatorContent">
 
             <div class="software-inputs" id="softwareInputs">
                 <div class="software-row">
@@ -1380,7 +1377,7 @@
             </div>
             </div>
         </div>
-            </div>
+        </div>
         </div>
 
         <div id="dashboardContent" class="hidden">
