@@ -1764,7 +1764,7 @@
 
             // Calculate safe threshold (credits needed for lead time period at current burn rate)
             const weeklyBurnRate = totalCredits; // This is the planned weekly usage
-            const criticalThreshold = weeklyBurnRate * leadTime * 1.5; // Need 1.5x lead time buffer
+            const criticalThreshold = weeklyBurnRate * leadTime // * 1.5; // Need 1.5x lead time buffer
 
             // Update display
             document.getElementById('totalCredits').textContent = totalCredits.toFixed(1) + ' AEC';
