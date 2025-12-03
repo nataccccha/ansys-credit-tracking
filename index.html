@@ -238,19 +238,26 @@
 
         /* Settings Gear Button */
         .settings-gear-btn {
+            padding: 10px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            color: var(--text-secondary);
             background: var(--bg-secondary);
             border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 6px 10px;
-            font-size: 1rem;
-            cursor: pointer;
             transition: all 0.2s ease;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
         }
 
         .settings-gear-btn:hover {
             background: var(--bg-card);
+            color: var(--text-primary);
             border-color: var(--accent-info);
-            transform: rotate(45deg);
         }
 
         /* Settings Modal */
@@ -542,6 +549,29 @@
             gap: 8px;
             font-weight: 600;
             letter-spacing: -0.01em;
+        }
+
+        .comparison-card table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.75rem;
+        }
+
+        .comparison-card th {
+            padding: 4px 6px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .comparison-card td {
+            padding: 3px 6px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .comparison-card tr:last-child td {
+            border-bottom: none;
         }
 
         .period-badge {
@@ -1520,7 +1550,6 @@
             </div>
         </div>
         </div>
-        </div>
 
         <div id="dashboardContent" class="hidden">
             <div class="master-section">
@@ -1556,13 +1585,6 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Gear icon button -->
-                    <div style="display: flex; justify-content: flex-end; margin-bottom: 8px;">
-                        <button class="settings-gear-btn" onclick="openSettingsModal()" title="Alert Settings">
-                            ⚙️
-                        </button>
                     </div>
 
                     <div class="stats-grid">
@@ -1619,6 +1641,9 @@
                             </button>
                             <button class="sidebar-nav-item" onclick="showSidebarPanel('monthly', this)">
                                 📊 Monthly Usage
+                            </button>
+                            <button class="settings-gear-btn" onclick="openSettingsModal()" title="Alert Settings" style="margin-top: 8px;">
+                                ⚙️ Settings
                             </button>
                         </div>
 
