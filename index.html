@@ -157,7 +157,7 @@
         }
 
         .upload-section h3 {
-            font-size: 1.0625rem;
+            font-size: 1rem;
             margin-bottom: 6px;
             font-weight: 600;
             letter-spacing: -0.01em;
@@ -276,6 +276,9 @@
             gap: 16px;
             margin-bottom: 24px;
             animation: fadeIn 1s ease-out 0.6s both;
+            max-width: 50%;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .stat-card {
@@ -409,11 +412,11 @@
         }
 
         .comparison-card h3 {
-            font-size: 1.125rem;
-            margin-bottom: 20px;
+            font-size: 1rem;
+            margin-bottom: 16px;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             font-weight: 600;
             letter-spacing: -0.01em;
         }
@@ -531,11 +534,12 @@
             color: var(--text-secondary);
             font-weight: 400;
             letter-spacing: -0.01em;
+            font-size: 0.8125rem;
         }
 
         .alert-metric-value {
             font-weight: 600;
-            font-size: 1rem;
+            font-size: 0.8125rem;
             margin-top: 3px;
             letter-spacing: -0.015em;
         }
@@ -724,7 +728,7 @@
 
         .section-header h2 {
             margin: 0;
-            font-size: 1.125rem;
+            font-size: 1rem;
             font-weight: 600;
             letter-spacing: -0.01em;
         }
@@ -756,7 +760,7 @@
 
         .master-section-header h2 {
             margin: 0;
-            font-size: 1.5rem;
+            font-size: 1.125rem;
             font-weight: 600;
             letter-spacing: -0.015em;
             color: var(--accent-info);
@@ -915,7 +919,7 @@
         }
 
         .calculator-header h2 {
-            font-size: 1.125rem;
+            font-size: 1rem;
             font-weight: 600;
             margin-bottom: 2px;
             letter-spacing: -0.015em;
@@ -923,7 +927,7 @@
 
         .calculator-header p {
             color: var(--text-secondary);
-            font-size: 0.75rem;
+            font-size: 0.8125rem;
         }
 
         .software-inputs {
@@ -1072,6 +1076,10 @@
                 max-width: 100%;
                 padding: 30px 25px;
             }
+
+            .calculator-upload-grid {
+                grid-template-columns: 1fr 1fr !important;
+            }
         }
 
         @media (max-width: 1200px) {
@@ -1081,10 +1089,16 @@
 
             .stats-grid {
                 grid-template-columns: repeat(2, 1fr);
+                max-width: 70%;
             }
 
             .master-section-content {
                 padding: 16px;
+            }
+
+            /* Stack calculator and upload vertically on medium screens */
+            .calculator-upload-grid {
+                grid-template-columns: 1fr !important;
             }
         }
 
@@ -1097,9 +1111,8 @@
                 font-size: 1.75rem;
             }
 
-            /* Stack calculator and upload boxes vertically on smaller screens */
-            .calculator-upload-grid {
-                grid-template-columns: 1fr !important;
+            .stats-grid {
+                max-width: 90%;
             }
 
             .comparison-grid {
@@ -1112,10 +1125,19 @@
 
             .section-header {
                 padding: 12px 16px;
+                font-size: 1rem;
+            }
+
+            .section-header h2 {
+                font-size: 1rem;
             }
 
             .master-section-header {
                 padding: 16px 20px;
+            }
+
+            .master-section-header h2 {
+                font-size: 1.25rem;
             }
         }
 
@@ -1135,6 +1157,7 @@
             .stats-grid {
                 grid-template-columns: 1fr;
                 gap: 12px;
+                max-width: 100%;
             }
 
             .stat-value {
@@ -1153,6 +1176,7 @@
                 top: 15px;
                 right: 10px;
                 padding: 8px 12px;
+                font-size: 0.8125rem;
             }
 
             .calculator-section,
@@ -1164,8 +1188,30 @@
                 padding: 16px;
             }
 
+            .upload-section h3 {
+                font-size: 1rem;
+            }
+
             .collapsible-section {
                 margin-bottom: 16px;
+            }
+
+            .section-header h2 {
+                font-size: 0.9375rem;
+            }
+
+            .master-section-header h2 {
+                font-size: 1.125rem;
+            }
+
+            .software-row {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+
+            .software-row select,
+            .software-row input {
+                font-size: 0.8125rem;
             }
         }
     </style>
@@ -1345,9 +1391,9 @@
             <div class="master-section">
                 <div class="master-section-header" onclick="toggleSection('usageAnalysisContent', 'usageAnalysisIcon')">
                     <h2>📊 Usage Analysis</h2>
-                    <span class="collapse-icon" id="usageAnalysisIcon">▼</span>
+                    <span class="collapse-icon collapsed" id="usageAnalysisIcon">▼</span>
                 </div>
-                <div class="master-section-content" id="usageAnalysisContent">
+                <div class="master-section-content collapsed" id="usageAnalysisContent">
 
                     <div class="settings-section">
                 <h2 class="section-title">⚙️ Alert Settings</h2>
@@ -1394,24 +1440,24 @@
                 <div class="stat-card">
                     <div class="stat-label">Historical Avg/Month</div>
                     <div class="stat-value" id="historicalAvg" style="color: var(--accent-purple);">0</div>
-                    <div class="stat-subtext">AEC per month (yearly avg)</div>
+                    <div class="stat-subtext">AEC</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-label">Recent Weekly Usage</div>
                     <div class="stat-value" id="recentWeekly" style="color: var(--accent-info);">0</div>
-                    <div class="stat-subtext">AEC in last week</div>
+                    <div class="stat-subtext">AEC</div>
                     <div id="weeklyTrend"></div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-label">Projected Monthly</div>
                     <div class="stat-value" id="projectedMonthly" style="color: var(--accent-warning);">0</div>
-                    <div class="stat-subtext">Based on recent pace</div>
+                    <div class="stat-subtext">AEC</div>
                     <div id="projectionTrend"></div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-label">Balance Runway</div>
                     <div class="stat-value" id="runwayMonths" style="color: var(--accent-success);">0</div>
-                    <div class="stat-subtext">months remaining</div>
+                    <div class="stat-subtext">weeks remaining</div>
                 </div>
             </div>
 
@@ -1471,8 +1517,8 @@
             </div>
 
             <div class="purchase-section" id="purchaseSection">
-                <h2 style="margin-bottom: 12px; font-size: 1.25rem;">Running Low on Credits?</h2>
-                <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 0.875rem;">
+                <h2 style="margin-bottom: 12px; font-size: 1rem; font-weight: 600;">Running Low on Credits?</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 0.8125rem;">
                     Current balance: <strong id="balanceWarning" style="color: var(--accent-warning);">0 AEC</strong><br>
                     Projected depletion: <strong id="depletionWarning" style="color: var(--accent-danger);"></strong><br>
                     <span id="depletionWeeks" style="font-size: 0.75rem;"></span>
@@ -1536,13 +1582,19 @@
             }
 
             // Load collapsed states for all sections
-            ['usageAnalysisContent', 'calculatorContent', 'alertsContent', 'comparisonContent', 'pivotContent'].forEach(sectionId => {
+            ['usageAnalysisContent', 'alertsContent', 'comparisonContent', 'pivotContent'].forEach(sectionId => {
                 const isCollapsed = localStorage.getItem(sectionId + 'Collapsed') === 'true';
                 if (isCollapsed) {
                     document.getElementById(sectionId).classList.add('collapsed');
                     document.getElementById(sectionId.replace('Content', 'Icon')).classList.add('collapsed');
                 }
             });
+
+            // Calculator starts expanded by default (ignore localStorage for first load)
+            if (!localStorage.getItem('calculatorContentFirstLoad')) {
+                localStorage.setItem('calculatorContentFirstLoad', 'true');
+                localStorage.removeItem('calculatorContentCollapsed');
+            }
 
             // Auto-load CSV files if enabled
             if (AUTO_LOAD_CSV && HISTORICAL_CSV_URL && RECENT_CSV_URL) {
@@ -2040,7 +2092,7 @@
             document.getElementById('historicalAvg').textContent = historicalAvgMonthly.toFixed(1);
             document.getElementById('recentWeekly').textContent = recentTotal.toFixed(1);
             document.getElementById('projectedMonthly').textContent = projectedMonthly.toFixed(1);
-            document.getElementById('runwayMonths').textContent = runwayMonths.toFixed(1);
+            document.getElementById('runwayMonths').textContent = runwayWeeks.toFixed(1);
 
             // Add trend indicators
             const weeklyChange = ((projectedMonthly - historicalAvgMonthly) / historicalAvgMonthly) * 100;
@@ -2338,7 +2390,7 @@
                             <div class="alert-user">${alert.user}</div>
                             <div class="alert-badge ${alert.level}">${alert.level}</div>
                         </div>
-                        <p style="color: var(--text-secondary); margin-bottom: 16px; line-height: 1.5;">${description}</p>
+                        <p style="color: var(--text-secondary); margin-bottom: 16px; line-height: 1.5; font-size: 0.8125rem;">${description}</p>
                         <div class="alert-details">
                             <div class="alert-metric">
                                 <div class="alert-metric-label">Recent Week</div>
