@@ -691,6 +691,62 @@
             letter-spacing: -0.01em;
         }
 
+        /* Master section for Usage Analysis */
+        .master-section {
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 18px;
+            padding: 0;
+            margin-bottom: 40px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .master-section-header {
+            padding: 28px 36px;
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s ease;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .master-section-header:hover {
+            background: var(--bg-secondary);
+        }
+
+        .master-section-header h2 {
+            margin: 0;
+            font-size: 1.75rem;
+            font-weight: 600;
+            letter-spacing: -0.015em;
+            color: var(--accent-info);
+        }
+
+        .master-section-content {
+            padding: 32px;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            max-height: 10000px;
+            opacity: 1;
+        }
+
+        .master-section-content.collapsed {
+            max-height: 0;
+            opacity: 0;
+            padding: 0;
+        }
+
+        /* Nested sections inside master */
+        .master-section .collapsible-section {
+            margin-bottom: 24px;
+        }
+
+        .master-section .section-header {
+            background: var(--bg-secondary);
+        }
+
         .collapse-icon {
             font-size: 1.2rem;
             color: var(--text-secondary);
@@ -1181,6 +1237,13 @@
                 </div>
             </div>
 
+            <div class="master-section">
+                <div class="master-section-header" onclick="toggleSection('usageAnalysisContent', 'usageAnalysisIcon')">
+                    <h2>📊 Usage Analysis</h2>
+                    <span class="collapse-icon" id="usageAnalysisIcon">▼</span>
+                </div>
+                <div class="master-section-content" id="usageAnalysisContent">
+
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-label">Historical Avg/Month</div>
@@ -1277,6 +1340,9 @@
                     </button>
                 </div>
             </div>
+
+            </div>
+            </div>
         </div>
     </div>
 
@@ -1286,7 +1352,7 @@
         // ============================================
         const INITIAL_BALANCE = 834.2;  // Update this with current AEC balance
         const BALANCE_UPDATE_DATE = "December 3, 2025";  // Fallback date (auto-detected from recent CSV data)
-        const ACTIVE_USERS_THIS_WEEK = 3;  // Update this with the number of active users this week
+        const ACTIVE_USERS_THIS_WEEK = 3;  // Fallback value (auto-detected from unique usernames in recent CSV)
 
         // CSV File URLs - Update these with your hosted file locations
         const HISTORICAL_CSV_URL = "https://raw.githubusercontent.com/nataccccha/ansys-credit-tracking/refs/heads/main/data/historical.csv";
@@ -1323,11 +1389,8 @@
                 document.getElementById('themeText').textContent = 'Light';
             }
 
-            // Set active users count
-            document.getElementById('activeUsersNumber').textContent = ACTIVE_USERS_THIS_WEEK;
-
             // Load collapsed states for all sections
-            ['calculatorContent', 'alertsContent', 'comparisonContent', 'pivotContent'].forEach(sectionId => {
+            ['usageAnalysisContent', 'calculatorContent', 'alertsContent', 'comparisonContent', 'pivotContent'].forEach(sectionId => {
                 const isCollapsed = localStorage.getItem(sectionId + 'Collapsed') === 'true';
                 if (isCollapsed) {
                     document.getElementById(sectionId).classList.add('collapsed');
@@ -1501,11 +1564,12 @@
             // Determine alert level
             const alertDiv = document.getElementById('alertMessage');
             
-            // Add note about active users
+            // Add note about active users (get current count from display)
+            const activeUsersCount = parseInt(document.getElementById('activeUsersNumber').textContent) || 0;
             let activeUsersNote = '';
-            if (ACTIVE_USERS_THIS_WEEK > 0) {
+            if (activeUsersCount > 0) {
                 activeUsersNote = `<div style="margin-top: 8px; padding: 10px 12px; background: var(--bg-primary); border: 1px solid var(--accent-info); border-radius: 6px; font-size: 0.8125rem;">
-                    <strong style="color: var(--accent-info);">📊 Note:</strong> There are currently <strong>${ACTIVE_USERS_THIS_WEEK}</strong> other user${ACTIVE_USERS_THIS_WEEK > 1 ? 's' : ''} running simulations. 
+                    <strong style="color: var(--accent-info);">📊 Note:</strong> There are currently <strong>${activeUsersCount}</strong> other user${activeUsersCount > 1 ? 's' : ''} running simulations this week. 
                     If you're planning computationally heavy work, please check with the administrator to avoid credit conflicts.
                 </div>`;
             }
@@ -1639,6 +1703,19 @@
                     balanceDateElement.parentElement.parentElement.appendChild(warningMsg);
                 }
             }
+            
+            // Count unique users
+            const uniqueUsers = new Set();
+            data.forEach(row => {
+                const username = row['Username'];
+                if (username) {
+                    uniqueUsers.add(username);
+                }
+            });
+            
+            // Update active users count
+            const activeUsersCount = uniqueUsers.size;
+            document.getElementById('activeUsersNumber').textContent = activeUsersCount;
         }
 
         // Toggle collapsible section
