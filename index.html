@@ -2032,7 +2032,7 @@
             if (activeUsersCount > 0) {
                 activeUsersNote = `<div style="margin-top: 8px; padding: 10px 12px; background: var(--bg-primary); border: 1px solid var(--accent-info); border-radius: 6px; font-size: 0.875rem;">
                     <strong style="color: var(--accent-info);">📊 Note:</strong> There are currently <strong>${activeUsersCount}</strong> other user${activeUsersCount > 1 ? 's' : ''} running simulations this week. 
-                    If you're planning computationally heavy work, please check with the Natacha to avoid credit conflicts.
+                    If you're planning computationally heavy work, please check with the administrator to avoid credit conflicts.
                 </div>`;
             }
             
@@ -3375,7 +3375,7 @@ Thanks!`;
             doc.text('Aret\u00E9', 20, yPos); // é = \u00E9
             
             // "ANSYS AEC Quote" - top right
-            doc.setFontSize(20);
+            doc.setFontSize(14);
             doc.setTextColor(150, 150, 150);
             doc.setFont('helvetica', 'normal');
             doc.text('ANSYS AEC Quote', 190, yPos, { align: 'right' });
