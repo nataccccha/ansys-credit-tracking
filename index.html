@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+        <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -546,22 +546,30 @@
         }
 
         .comparison-card table {
-            width: 100%;
+            width: auto;
             border-collapse: collapse;
             font-size: 0.75rem;
         }
 
         .comparison-card th {
-            padding: 4px 6px;
+            padding: 4px 8px;
             text-align: left;
             font-weight: 600;
             color: var(--text-secondary);
             border-bottom: 1px solid var(--border);
         }
 
+        .comparison-card th:last-child {
+            text-align: right;
+        }
+
         .comparison-card td {
-            padding: 3px 6px;
+            padding: 2px 8px;
             border-bottom: 1px solid var(--border);
+        }
+
+        .comparison-card td:last-child {
+            text-align: right;
         }
 
         .comparison-card tr:last-child td {
@@ -1440,16 +1448,13 @@
 
         <div class="calculator-upload-grid" style="display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 16px;">
             <!-- Calculator -->
-            <div>
                 <div class="master-section">
-            <div class="master-section-header" onclick="toggleSection('calculatorContent', 'calculatorIcon')">
-                <h2>💡 Credit Usage Calculator</h2>
-                <span class="collapse-icon" id="calculatorIcon">▼</span>
-            </div>
-
-            <div class="master-section-content" id="calculatorContent">
-
-            <div class="software-inputs" id="softwareInputs">
+                    <div class="master-section-header" onclick="toggleSection('calculatorContent', 'calculatorIcon')">
+                        <h2>💡 Credit Usage Calculator</h2>
+                        <span class="collapse-icon" id="calculatorIcon">▼</span>
+                    </div>
+                    <div class="master-section-content" id="calculatorContent">
+                        <div class="software-inputs" id="softwareInputs">
                 <div class="software-row">
                     <select class="software-select">
                         <option value="">Select Software...</option>
@@ -1539,8 +1544,8 @@
                     📄 Export as Quote
                 </button>
             </div>
-            </div>
-        </div>
+                    </div>
+                </div>
         </div>
 
         <div id="dashboardContent" class="hidden">
@@ -1686,8 +1691,8 @@
                 </div>
             </div>
         
-        <!-- Administrative Tools Section -->
-        <div class="master-section" style="margin-top: 20px;">
+            <!-- Administrative Tools Section -->
+            <div class="master-section" style="margin-top: 20px;">
             <div class="master-section-header" onclick="toggleSection('adminToolsContent', 'adminToolsIcon')">
                 <h2>🔧 Administrative Tools</h2>
                 <span class="collapse-icon collapsed" id="adminToolsIcon">▼</span>
