@@ -1,7 +1,6 @@
 const puppeteer = require('puppeteer');
 const path = require('path');
 const fs = require('fs');
-const https = require('https');
 
 const USERNAME = process.env.ANSYS_USERNAME;
 const PASSWORD = process.env.ANSYS_PASSWORD;
@@ -21,13 +20,11 @@ async function downloadAnsysData() {
     console.log('Starting browser...');
     const browser = await puppeteer.launch({
         headless: 'new',
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--window-size=1920,1080']
     });
     
     const page = await browser.newPage();
-    
-    // Store cookies for later direct download
-    let cookies = [];
+    await page.setViewport({ width: 1920, height: 1080 });
     
     try {
         // LOGIN
@@ -35,10 +32,7 @@ async function downloadAnsysData() {
         await page.goto('https://licensing.ansys.com', { waitUntil: 'networkidle2', timeout: 60000 });
         await new Promise(r => setTimeout(r, 5000));
         
-        // Find and fill email
-        console.log('Looking for email input...');
         const emailInput = await page.$('input[type="email"]') || 
-                          await page.$('input[name="email"]') ||
                           await page.$('input[id="email"]') ||
                           await page.$('input:not([type="hidden"]):not([type="submit"])');
         
@@ -46,8 +40,6 @@ async function downloadAnsysData() {
             await emailInput.click();
             await emailInput.type(USERNAME);
             console.log('Email entered');
-        } else {
-            throw new Error('Could not find email input');
         }
         
         await page.click('button[type="submit"]');
@@ -60,109 +52,165 @@ async function downloadAnsysData() {
         await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 30000 });
         console.log('Login successful!');
         
-        // Get cookies after login
-        cookies = await page.cookies();
-        console.log('Got session cookies');
-        
         // GO TO TRANSACTIONS
         console.log('Navigating to Usage Transactions...');
         await page.goto('https://licensing.ansys.com/transactions', { waitUntil: 'networkidle2' });
         await new Promise(r => setTimeout(r, 5000));
         
+        await page.screenshot({ path: 'debug-1-transactions-page.png', fullPage: true });
+        console.log('Screenshot: transactions page saved');
+        
         // DOWNLOAD YTD DATA
         console.log('=== Downloading YTD data ===');
-        await selectDateRangeAndDownload(page, 'YTD', 'historical', downloadPath, cookies);
+        await selectDateRangeAndDownload(page, 'YTD', 'historical', downloadPath);
         
         // DOWNLOAD 5 DAYS DATA  
         console.log('=== Downloading 5 Days data ===');
-        await selectDateRangeAndDownload(page, '5 Days', 'recent', downloadPath, cookies);
+        await selectDateRangeAndDownload(page, '5 Days', 'recent', downloadPath);
         
         console.log('All downloads complete!');
         
+        // Upload screenshots as artifacts
+        console.log('Debug screenshots saved');
+        
     } catch (error) {
         console.error('Error during automation:', error);
-        await page.screenshot({ path: 'error-screenshot.png' });
+        await page.screenshot({ path: 'error-screenshot.png', fullPage: true });
         throw error;
     } finally {
         await browser.close();
     }
 }
 
-async function selectDateRangeAndDownload(page, dateOption, filePrefix, downloadPath, cookies) {
+async function selectDateRangeAndDownload(page, dateOption, filePrefix, downloadPath) {
     // Click the date range button
     console.log('Opening date picker...');
-    const buttons = await page.$$('button');
-    for (const btn of buttons) {
-        const text = await page.evaluate(el => el.textContent, btn);
-        if (text && text.includes('From') && text.includes('To')) {
-            await btn.click();
-            console.log('Clicked date picker button');
-            break;
+    
+    // Find button containing "From" text
+    const clicked = await page.evaluate(() => {
+        const buttons = document.querySelectorAll('button');
+        for (const btn of buttons) {
+            if (btn.textContent && btn.textContent.includes('From') && btn.textContent.includes('To')) {
+                btn.click();
+                return true;
+            }
         }
-    }
-    
-    await new Promise(r => setTimeout(r, 2000));
-    
-    // Click on the date option
-    console.log(`Looking for "${dateOption}" option...`);
-    const allElements = await page.$$('div, li, span, button, p, a');
-    for (const el of allElements) {
-        const text = await page.evaluate(e => e.textContent?.trim(), el);
-        if (text === dateOption) {
-            await el.click();
-            console.log(`Clicked "${dateOption}"`);
-            break;
-        }
-    }
-    
-    await new Promise(r => setTimeout(r, 4000));
-    
-    // Set up request interception to capture download URL
-    let downloadUrl = null;
-    
-    await page.setRequestInterception(true);
-    
-    page.on('request', request => {
-        const url = request.url();
-        if (url.includes('download') || url.includes('export') || url.includes('.csv')) {
-            console.log('Intercepted download URL:', url);
-            downloadUrl = url;
-        }
-        request.continue();
+        return false;
     });
+    
+    console.log('Date picker clicked:', clicked);
+    await new Promise(r => setTimeout(r, 2000));
+    await page.screenshot({ path: `debug-2-${filePrefix}-datepicker-open.png`, fullPage: true });
+    
+    // Click on the date option using evaluate
+    console.log(`Looking for "${dateOption}" option...`);
+    
+    const optionClicked = await page.evaluate((option) => {
+        // Look for the option in various elements
+        const elements = document.querySelectorAll('div, li, span, p, a, button');
+        for (const el of elements) {
+            const text = el.textContent?.trim();
+            if (text === option) {
+                el.click();
+                return { found: true, text: text };
+            }
+        }
+        // Also try looking for elements that just contain the text
+        for (const el of elements) {
+            if (el.innerText === option && el.children.length === 0) {
+                el.click();
+                return { found: true, text: el.innerText };
+            }
+        }
+        return { found: false };
+    }, dateOption);
+    
+    console.log('Option click result:', optionClicked);
+    await new Promise(r => setTimeout(r, 4000));
+    await page.screenshot({ path: `debug-3-${filePrefix}-after-option.png`, fullPage: true });
     
     // Click download button
     console.log('Looking for download button...');
-    const allButtons = await page.$$('button, [role="button"]');
-    for (const btn of allButtons) {
-        const html = await page.evaluate(el => el.outerHTML.toLowerCase(), btn);
-        if (html.includes('download') || html.includes('export') || html.includes('filedownload')) {
-            console.log('Found download button, clicking...');
-            await btn.click();
-            break;
+    
+    // Log all buttons with their content
+    const buttonInfo = await page.evaluate(() => {
+        const buttons = document.querySelectorAll('button, [role="button"]');
+        const info = [];
+        buttons.forEach((btn, i) => {
+            info.push({
+                index: i,
+                text: btn.textContent?.substring(0, 50),
+                ariaLabel: btn.getAttribute('aria-label'),
+                title: btn.getAttribute('title'),
+                hasDownloadText: btn.outerHTML.toLowerCase().includes('download')
+            });
+        });
+        return info;
+    });
+    
+    console.log('Buttons found:', JSON.stringify(buttonInfo.filter(b => b.hasDownloadText || b.ariaLabel || b.title), null, 2));
+    
+    // Try to click download
+    const downloadClicked = await page.evaluate(() => {
+        const buttons = document.querySelectorAll('button, [role="button"]');
+        for (const btn of buttons) {
+            const html = btn.outerHTML.toLowerCase();
+            const aria = btn.getAttribute('aria-label')?.toLowerCase() || '';
+            const title = btn.getAttribute('title')?.toLowerCase() || '';
+            if (html.includes('download') || aria.includes('download') || title.includes('download') ||
+                html.includes('export') || aria.includes('export') || title.includes('export')) {
+                btn.click();
+                return true;
+            }
         }
-    }
+        // Try finding by SVG icon
+        const svgs = document.querySelectorAll('svg');
+        for (const svg of svgs) {
+            const parent = svg.closest('button');
+            if (parent && svg.outerHTML.toLowerCase().includes('download')) {
+                parent.click();
+                return true;
+            }
+        }
+        return false;
+    });
     
-    await new Promise(r => setTimeout(r, 5000));
+    console.log('Download button clicked:', downloadClicked);
+    await new Promise(r => setTimeout(r, 3000));
+    await page.screenshot({ path: `debug-4-${filePrefix}-after-download-click.png`, fullPage: true });
     
-    // Disable interception
-    await page.setRequestInterception(false);
+    // Wait and check for file
+    await new Promise(r => setTimeout(r, 10000));
     
-    if (downloadUrl) {
-        console.log('Downloading from URL:', downloadUrl);
-        // Use cookies to download file directly
-        const cookieString = cookies.map(c => `${c.name}=${c.value}`).join('; ');
-        await downloadFile(downloadUrl, path.join(downloadPath, `${filePrefix}.csv`), cookieString);
-        console.log(`Saved ${filePrefix}.csv`);
-    } else {
-        console.log('No download URL captured, trying alternate method...');
+    const files = fs.readdirSync(downloadPath);
+    console.log('Files in data folder:', files);
+    
+    // Try to scrape table if download didn't work
+    if (!files.some(f => f.includes('ANSYS') && f.endsWith('.csv'))) {
+        console.log('No download detected, scraping table data...');
         
-        // Try to get data from table and save as CSV
         const tableData = await page.evaluate(() => {
-            const rows = document.querySelectorAll('table tr, [role="row"]');
+            // Try to find the table
+            const table = document.querySelector('table');
+            if (!table) {
+                // Try MUI/React table
+                const rows = document.querySelectorAll('[role="row"]');
+                if (rows.length === 0) return null;
+                
+                const data = [];
+                rows.forEach(row => {
+                    const cells = row.querySelectorAll('[role="cell"], [role="columnheader"], td, th');
+                    const rowData = [];
+                    cells.forEach(cell => rowData.push(cell.textContent?.trim() || ''));
+                    if (rowData.length > 0 && rowData.some(c => c)) data.push(rowData);
+                });
+                return data;
+            }
+            
             const data = [];
+            const rows = table.querySelectorAll('tr');
             rows.forEach(row => {
-                const cells = row.querySelectorAll('td, th, [role="cell"], [role="columnheader"]');
+                const cells = row.querySelectorAll('td, th');
                 const rowData = [];
                 cells.forEach(cell => rowData.push(cell.textContent?.trim() || ''));
                 if (rowData.length > 0) data.push(rowData);
@@ -170,30 +218,14 @@ async function selectDateRangeAndDownload(page, dateOption, filePrefix, download
             return data;
         });
         
-        if (tableData.length > 0) {
-            const csv = tableData.map(row => row.join(',')).join('\n');
+        if (tableData && tableData.length > 0) {
+            const csv = tableData.map(row => row.map(cell => `"${cell.replace(/"/g, '""')}"`).join(',')).join('\n');
             fs.writeFileSync(path.join(downloadPath, `${filePrefix}.csv`), csv);
             console.log(`Created ${filePrefix}.csv from table data (${tableData.length} rows)`);
         } else {
-            console.log('Warning: Could not get table data');
+            console.log('Could not scrape table data');
         }
     }
-}
-
-function downloadFile(url, dest, cookieString) {
-    return new Promise((resolve, reject) => {
-        const file = fs.createWriteStream(dest);
-        https.get(url, { headers: { 'Cookie': cookieString } }, response => {
-            response.pipe(file);
-            file.on('finish', () => {
-                file.close();
-                resolve();
-            });
-        }).on('error', err => {
-            fs.unlink(dest, () => {});
-            reject(err);
-        });
-    });
 }
 
 downloadAnsysData()
