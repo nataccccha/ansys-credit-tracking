@@ -17,7 +17,9 @@ async function downloadAnsysData() {
         fs.mkdirSync(downloadPath, { recursive: true });
     }
     
+    console.log('Download path:', downloadPath);
     console.log('Starting browser...');
+    
     const browser = await puppeteer.launch({
         headless: 'new',
         args: ['--no-sandbox', '--disable-setuid-sandbox']
@@ -25,117 +27,65 @@ async function downloadAnsysData() {
     
     const page = await browser.newPage();
     
+    // Set download behavior - this bypasses "Save As" dialog
     const client = await page.target().createCDPSession();
-    await client.send('Page.setDownloadBehavior', {
+    await client.send('Browser.setDownloadBehavior', {
         behavior: 'allow',
-        downloadPath: downloadPath
+        downloadPath: downloadPath,
+        eventsEnabled: true
     });
     
     try {
         // LOGIN
         console.log('Navigating to ANSYS licensing portal...');
         await page.goto('https://licensing.ansys.com', { waitUntil: 'networkidle2', timeout: 60000 });
-        
-        console.log('Current URL:', page.url());
-        console.log('Waiting for page to fully load...');
         await new Promise(r => setTimeout(r, 5000));
         
-        // Take screenshot to debug
-        await page.screenshot({ path: 'debug-login-page.png' });
-        console.log('Screenshot saved as debug-login-page.png');
-        
-        // Try multiple selectors for email
+        // Find and fill email
         console.log('Looking for email input...');
-        const emailSelectors = [
-            'input[type="email"]',
-            'input[name="email"]',
-            'input[id="email"]',
-            'input[name="username"]',
-            'input[id="username"]',
-            'input[placeholder*="email"]',
-            'input[placeholder*="Email"]',
-            'input[autocomplete="email"]',
-            'input[autocomplete="username"]',
-            'input'
-        ];
+        const emailInput = await page.$('input[type="email"]') || 
+                          await page.$('input[name="email"]') ||
+                          await page.$('input[name="username"]') ||
+                          await page.$('input:not([type="hidden"]):not([type="submit"])');
         
-        let emailInput = null;
-        for (const selector of emailSelectors) {
-            console.log(`Trying selector: ${selector}`);
-            emailInput = await page.$(selector);
-            if (emailInput) {
-                const inputType = await page.evaluate(el => el.type, emailInput);
-                const inputName = await page.evaluate(el => el.name, emailInput);
-                console.log(`Found input with type="${inputType}", name="${inputName}"`);
-                if (inputType !== 'hidden' && inputType !== 'submit') {
-                    console.log(`Using selector: ${selector}`);
-                    break;
-                }
-                emailInput = null;
-            }
-        }
-        
-        if (!emailInput) {
-            // List all inputs on the page for debugging
-            const allInputs = await page.$$('input');
-            console.log(`Found ${allInputs.length} input elements on page`);
-            for (let i = 0; i < allInputs.length; i++) {
-                const type = await page.evaluate(el => el.type, allInputs[i]);
-                const name = await page.evaluate(el => el.name, allInputs[i]);
-                const id = await page.evaluate(el => el.id, allInputs[i]);
-                console.log(`Input ${i}: type="${type}", name="${name}", id="${id}"`);
-            }
-            throw new Error('Could not find email input field');
-        }
-        
-        console.log('Entering email...');
-        await emailInput.click();
-        await emailInput.type(USERNAME);
-        
-        // Find and click submit button
-        console.log('Looking for submit button...');
-        const submitBtn = await page.$('button[type="submit"]');
-        if (submitBtn) {
-            await submitBtn.click();
+        if (emailInput) {
+            await emailInput.click();
+            await emailInput.type(USERNAME);
+            console.log('Email entered');
         } else {
-            // Try clicking any button with "Continue" or "Next" text
-            const buttons = await page.$$('button');
-            for (const btn of buttons) {
-                const text = await page.evaluate(el => el.textContent, btn);
-                if (text && (text.includes('Continue') || text.includes('Next') || text.includes('Sign'))) {
-                    await btn.click();
-                    break;
-                }
-            }
+            throw new Error('Could not find email input');
         }
         
+        // Click continue
+        await page.click('button[type="submit"]');
         await new Promise(r => setTimeout(r, 5000));
-        await page.screenshot({ path: 'debug-after-email.png' });
         
+        // Enter password
         console.log('Entering password...');
         await page.waitForSelector('input[type="password"]', { timeout: 15000 });
         await page.type('input[type="password"]', PASSWORD);
-        
-        const submitBtn2 = await page.$('button[type="submit"]');
-        if (submitBtn2) {
-            await submitBtn2.click();
-        }
-        
+        await page.click('button[type="submit"]');
         await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 30000 });
         console.log('Login successful!');
         
         // GO TO TRANSACTIONS
         console.log('Navigating to Usage Transactions...');
         await page.goto('https://licensing.ansys.com/transactions', { waitUntil: 'networkidle2' });
-        await new Promise(r => setTimeout(r, 3000));
+        await new Promise(r => setTimeout(r, 5000));
+        
+        // List existing files before download
+        console.log('Files before download:', fs.readdirSync(downloadPath));
         
         // DOWNLOAD YTD DATA
-        console.log('Downloading YTD data...');
+        console.log('=== Downloading YTD data ===');
         await selectDateRangeAndDownload(page, 'YTD', 'historical', downloadPath);
         
         // DOWNLOAD 5 DAYS DATA
-        console.log('Downloading 5 Days data...');
+        console.log('=== Downloading 5 Days data ===');
         await selectDateRangeAndDownload(page, '5 Days', 'recent', downloadPath);
+        
+        // List files after download
+        console.log('Files after all downloads:', fs.readdirSync(downloadPath));
         
         console.log('All downloads complete!');
         
@@ -149,6 +99,10 @@ async function downloadAnsysData() {
 }
 
 async function selectDateRangeAndDownload(page, dateOption, filePrefix, downloadPath) {
+    // Get files before this download
+    const filesBefore = fs.readdirSync(downloadPath);
+    console.log('Files before:', filesBefore);
+    
     // Click the date range button
     console.log('Opening date picker...');
     const buttons = await page.$$('button');
@@ -156,58 +110,86 @@ async function selectDateRangeAndDownload(page, dateOption, filePrefix, download
         const text = await page.evaluate(el => el.textContent, btn);
         if (text && text.includes('From') && text.includes('To')) {
             await btn.click();
+            console.log('Clicked date picker button');
             break;
         }
     }
     
-    await new Promise(r => setTimeout(r, 1500));
+    await new Promise(r => setTimeout(r, 2000));
     
     // Click on the date option
-    console.log(`Selecting "${dateOption}"...`);
-    const allElements = await page.$$('div, li, span, button, p');
+    console.log(`Looking for "${dateOption}" option...`);
+    const allElements = await page.$$('div, li, span, button, p, a');
+    let found = false;
     for (const el of allElements) {
         const text = await page.evaluate(e => e.textContent?.trim(), el);
         if (text === dateOption) {
             await el.click();
             console.log(`Clicked "${dateOption}"`);
+            found = true;
             break;
         }
     }
+    if (!found) {
+        console.log(`Warning: Could not find "${dateOption}" option`);
+    }
     
-    await new Promise(r => setTimeout(r, 3000));
+    await new Promise(r => setTimeout(r, 4000));
     
     // Click download button
-    console.log('Clicking download button...');
-    const allButtons = await page.$$('button');
+    console.log('Looking for download button...');
+    const allButtons = await page.$$('button, [role="button"]');
+    let downloadClicked = false;
     for (const btn of allButtons) {
-        const html = await page.evaluate(el => el.innerHTML.toLowerCase(), btn);
-        const ariaLabel = await page.evaluate(el => el.getAttribute('aria-label')?.toLowerCase() || '', btn);
-        if (html.includes('download') || ariaLabel.includes('download')) {
+        const html = await page.evaluate(el => el.outerHTML.toLowerCase(), btn);
+        if (html.includes('download') || html.includes('export') || html.includes('filedownload')) {
+            console.log('Found download button, clicking...');
             await btn.click();
-            console.log('Download clicked!');
+            downloadClicked = true;
             break;
         }
     }
     
-    await new Promise(r => setTimeout(r, 10000));
+    if (!downloadClicked) {
+        console.log('Warning: Could not find download button');
+        await page.screenshot({ path: `debug-${filePrefix}-nodownload.png` });
+    }
     
-    // Rename file
-    const files = fs.readdirSync(downloadPath);
-    console.log('Files:', files);
+    // Wait for download
+    console.log('Waiting for download to complete...');
+    await new Promise(r => setTimeout(r, 15000));
     
-    const csvFile = files.find(f => 
-        f.endsWith('.csv') && 
-        f.includes('ANSYS') &&
-        !f.startsWith('historical') && 
-        !f.startsWith('recent')
-    );
+    // Get files after download
+    const filesAfter = fs.readdirSync(downloadPath);
+    console.log('Files after:', filesAfter);
     
-    if (csvFile) {
-        const oldPath = path.join(downloadPath, csvFile);
+    // Find new file
+    const newFile = filesAfter.find(f => !filesBefore.includes(f) && f.endsWith('.csv'));
+    
+    if (newFile) {
+        const oldPath = path.join(downloadPath, newFile);
         const newPath = path.join(downloadPath, `${filePrefix}.csv`);
         if (fs.existsSync(newPath)) fs.unlinkSync(newPath);
         fs.renameSync(oldPath, newPath);
-        console.log(`Saved as ${filePrefix}.csv`);
+        console.log(`SUCCESS: Renamed "${newFile}" to "${filePrefix}.csv"`);
+    } else {
+        console.log(`Warning: No new CSV file found for ${filePrefix}`);
+        
+        // Try to find any ANSYS file that might work
+        const anyAnsysFile = filesAfter.find(f => 
+            f.toLowerCase().includes('ansys') && 
+            f.endsWith('.csv') &&
+            f !== 'historical.csv' &&
+            f !== 'recent.csv'
+        );
+        
+        if (anyAnsysFile) {
+            const oldPath = path.join(downloadPath, anyAnsysFile);
+            const newPath = path.join(downloadPath, `${filePrefix}.csv`);
+            if (fs.existsSync(newPath)) fs.unlinkSync(newPath);
+            fs.renameSync(oldPath, newPath);
+            console.log(`SUCCESS (fallback): Renamed "${anyAnsysFile}" to "${filePrefix}.csv"`);
+        }
     }
 }
 
