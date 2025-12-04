@@ -1,6 +1,7 @@
 const puppeteer = require('puppeteer');
 const path = require('path');
 const fs = require('fs');
+const https = require('https');
 
 const USERNAME = process.env.ANSYS_USERNAME;
 const PASSWORD = process.env.ANSYS_PASSWORD;
@@ -17,9 +18,7 @@ async function downloadAnsysData() {
         fs.mkdirSync(downloadPath, { recursive: true });
     }
     
-    console.log('Download path:', downloadPath);
     console.log('Starting browser...');
-    
     const browser = await puppeteer.launch({
         headless: 'new',
         args: ['--no-sandbox', '--disable-setuid-sandbox']
@@ -27,13 +26,8 @@ async function downloadAnsysData() {
     
     const page = await browser.newPage();
     
-    // Set download behavior - this bypasses "Save As" dialog
-    const client = await page.target().createCDPSession();
-    await client.send('Browser.setDownloadBehavior', {
-        behavior: 'allow',
-        downloadPath: downloadPath,
-        eventsEnabled: true
-    });
+    // Store cookies for later direct download
+    let cookies = [];
     
     try {
         // LOGIN
@@ -45,7 +39,7 @@ async function downloadAnsysData() {
         console.log('Looking for email input...');
         const emailInput = await page.$('input[type="email"]') || 
                           await page.$('input[name="email"]') ||
-                          await page.$('input[name="username"]') ||
+                          await page.$('input[id="email"]') ||
                           await page.$('input:not([type="hidden"]):not([type="submit"])');
         
         if (emailInput) {
@@ -56,11 +50,9 @@ async function downloadAnsysData() {
             throw new Error('Could not find email input');
         }
         
-        // Click continue
         await page.click('button[type="submit"]');
         await new Promise(r => setTimeout(r, 5000));
         
-        // Enter password
         console.log('Entering password...');
         await page.waitForSelector('input[type="password"]', { timeout: 15000 });
         await page.type('input[type="password"]', PASSWORD);
@@ -68,24 +60,22 @@ async function downloadAnsysData() {
         await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 30000 });
         console.log('Login successful!');
         
+        // Get cookies after login
+        cookies = await page.cookies();
+        console.log('Got session cookies');
+        
         // GO TO TRANSACTIONS
         console.log('Navigating to Usage Transactions...');
         await page.goto('https://licensing.ansys.com/transactions', { waitUntil: 'networkidle2' });
         await new Promise(r => setTimeout(r, 5000));
         
-        // List existing files before download
-        console.log('Files before download:', fs.readdirSync(downloadPath));
-        
         // DOWNLOAD YTD DATA
         console.log('=== Downloading YTD data ===');
-        await selectDateRangeAndDownload(page, 'YTD', 'historical', downloadPath);
+        await selectDateRangeAndDownload(page, 'YTD', 'historical', downloadPath, cookies);
         
-        // DOWNLOAD 5 DAYS DATA
+        // DOWNLOAD 5 DAYS DATA  
         console.log('=== Downloading 5 Days data ===');
-        await selectDateRangeAndDownload(page, '5 Days', 'recent', downloadPath);
-        
-        // List files after download
-        console.log('Files after all downloads:', fs.readdirSync(downloadPath));
+        await selectDateRangeAndDownload(page, '5 Days', 'recent', downloadPath, cookies);
         
         console.log('All downloads complete!');
         
@@ -98,11 +88,7 @@ async function downloadAnsysData() {
     }
 }
 
-async function selectDateRangeAndDownload(page, dateOption, filePrefix, downloadPath) {
-    // Get files before this download
-    const filesBefore = fs.readdirSync(downloadPath);
-    console.log('Files before:', filesBefore);
-    
+async function selectDateRangeAndDownload(page, dateOption, filePrefix, downloadPath, cookies) {
     // Click the date range button
     console.log('Opening date picker...');
     const buttons = await page.$$('button');
@@ -120,77 +106,94 @@ async function selectDateRangeAndDownload(page, dateOption, filePrefix, download
     // Click on the date option
     console.log(`Looking for "${dateOption}" option...`);
     const allElements = await page.$$('div, li, span, button, p, a');
-    let found = false;
     for (const el of allElements) {
         const text = await page.evaluate(e => e.textContent?.trim(), el);
         if (text === dateOption) {
             await el.click();
             console.log(`Clicked "${dateOption}"`);
-            found = true;
             break;
         }
-    }
-    if (!found) {
-        console.log(`Warning: Could not find "${dateOption}" option`);
     }
     
     await new Promise(r => setTimeout(r, 4000));
     
+    // Set up request interception to capture download URL
+    let downloadUrl = null;
+    
+    await page.setRequestInterception(true);
+    
+    page.on('request', request => {
+        const url = request.url();
+        if (url.includes('download') || url.includes('export') || url.includes('.csv')) {
+            console.log('Intercepted download URL:', url);
+            downloadUrl = url;
+        }
+        request.continue();
+    });
+    
     // Click download button
     console.log('Looking for download button...');
     const allButtons = await page.$$('button, [role="button"]');
-    let downloadClicked = false;
     for (const btn of allButtons) {
         const html = await page.evaluate(el => el.outerHTML.toLowerCase(), btn);
         if (html.includes('download') || html.includes('export') || html.includes('filedownload')) {
             console.log('Found download button, clicking...');
             await btn.click();
-            downloadClicked = true;
             break;
         }
     }
     
-    if (!downloadClicked) {
-        console.log('Warning: Could not find download button');
-        await page.screenshot({ path: `debug-${filePrefix}-nodownload.png` });
-    }
+    await new Promise(r => setTimeout(r, 5000));
     
-    // Wait for download
-    console.log('Waiting for download to complete...');
-    await new Promise(r => setTimeout(r, 15000));
+    // Disable interception
+    await page.setRequestInterception(false);
     
-    // Get files after download
-    const filesAfter = fs.readdirSync(downloadPath);
-    console.log('Files after:', filesAfter);
-    
-    // Find new file
-    const newFile = filesAfter.find(f => !filesBefore.includes(f) && f.endsWith('.csv'));
-    
-    if (newFile) {
-        const oldPath = path.join(downloadPath, newFile);
-        const newPath = path.join(downloadPath, `${filePrefix}.csv`);
-        if (fs.existsSync(newPath)) fs.unlinkSync(newPath);
-        fs.renameSync(oldPath, newPath);
-        console.log(`SUCCESS: Renamed "${newFile}" to "${filePrefix}.csv"`);
+    if (downloadUrl) {
+        console.log('Downloading from URL:', downloadUrl);
+        // Use cookies to download file directly
+        const cookieString = cookies.map(c => `${c.name}=${c.value}`).join('; ');
+        await downloadFile(downloadUrl, path.join(downloadPath, `${filePrefix}.csv`), cookieString);
+        console.log(`Saved ${filePrefix}.csv`);
     } else {
-        console.log(`Warning: No new CSV file found for ${filePrefix}`);
+        console.log('No download URL captured, trying alternate method...');
         
-        // Try to find any ANSYS file that might work
-        const anyAnsysFile = filesAfter.find(f => 
-            f.toLowerCase().includes('ansys') && 
-            f.endsWith('.csv') &&
-            f !== 'historical.csv' &&
-            f !== 'recent.csv'
-        );
+        // Try to get data from table and save as CSV
+        const tableData = await page.evaluate(() => {
+            const rows = document.querySelectorAll('table tr, [role="row"]');
+            const data = [];
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td, th, [role="cell"], [role="columnheader"]');
+                const rowData = [];
+                cells.forEach(cell => rowData.push(cell.textContent?.trim() || ''));
+                if (rowData.length > 0) data.push(rowData);
+            });
+            return data;
+        });
         
-        if (anyAnsysFile) {
-            const oldPath = path.join(downloadPath, anyAnsysFile);
-            const newPath = path.join(downloadPath, `${filePrefix}.csv`);
-            if (fs.existsSync(newPath)) fs.unlinkSync(newPath);
-            fs.renameSync(oldPath, newPath);
-            console.log(`SUCCESS (fallback): Renamed "${anyAnsysFile}" to "${filePrefix}.csv"`);
+        if (tableData.length > 0) {
+            const csv = tableData.map(row => row.join(',')).join('\n');
+            fs.writeFileSync(path.join(downloadPath, `${filePrefix}.csv`), csv);
+            console.log(`Created ${filePrefix}.csv from table data (${tableData.length} rows)`);
+        } else {
+            console.log('Warning: Could not get table data');
         }
     }
+}
+
+function downloadFile(url, dest, cookieString) {
+    return new Promise((resolve, reject) => {
+        const file = fs.createWriteStream(dest);
+        https.get(url, { headers: { 'Cookie': cookieString } }, response => {
+            response.pipe(file);
+            file.on('finish', () => {
+                file.close();
+                resolve();
+            });
+        }).on('error', err => {
+            fs.unlink(dest, () => {});
+            reject(err);
+        });
+    });
 }
 
 downloadAnsysData()
