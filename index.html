@@ -353,7 +353,7 @@
         }
 
         .sidebar-nav {
-            width: 180px;
+            width: 200px;
             flex-shrink: 0;
             display: flex;
             flex-direction: column;
@@ -374,6 +374,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            white-space: nowrap;
         }
 
         .sidebar-nav-item:hover {
@@ -623,11 +624,9 @@
         @keyframes alertPulse {
             0%, 100% { 
                 box-shadow: 0 4px 20px var(--glow-danger); 
-                transform: scale(1);
             }
             50% { 
                 box-shadow: 0 6px 30px var(--glow-danger); 
-                transform: scale(1.01);
             }
         }
 
@@ -639,11 +638,9 @@
         @keyframes warningPulse {
             0%, 100% { 
                 box-shadow: 0 4px 20px var(--glow-warning); 
-                transform: scale(1);
             }
             50% { 
                 box-shadow: 0 6px 30px var(--glow-warning); 
-                transform: scale(1.01);
             }
         }
 
@@ -655,11 +652,9 @@
         @keyframes accelPulse {
             0%, 100% { 
                 box-shadow: 0 4px 20px rgba(0, 150, 167, 0.3); 
-                transform: scale(1);
             }
             50% { 
                 box-shadow: 0 6px 30px rgba(0, 150, 167, 0.4); 
-                transform: scale(1.01);
             }
         }
 
