@@ -1465,11 +1465,11 @@
             <div style="margin-top: 16px; display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;">
                 <div style="padding: 10px 16px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; text-align: center;">
                     <span style="font-size: 0.6875rem; color: var(--text-secondary); display: block;">Current Balance</span>
-                    <span style="font-size: 0.875rem; font-weight: 600; color: var(--text-primary);" id="headerBalance">834.2 AEC</span>
+                    <span style="font-size: 0.875rem; font-weight: 600; color: var(--text-primary); display: block;" id="headerBalance">834.2 AEC</span>
                 </div>
                 <div style="padding: 10px 16px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; text-align: center;">
                     <span style="font-size: 0.6875rem; color: var(--text-secondary); display: block;">Balance Last Updated</span>
-                    <span style="font-size: 0.875rem; font-weight: 600; color: var(--text-primary);" id="balanceUpdateDate">December 3, 2024</span>
+                    <span style="font-size: 0.875rem; font-weight: 600; color: var(--text-primary); display: block;" id="balanceUpdateDate">December 3, 2024</span>
                 </div>
                 <div style="padding: 10px 16px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; text-align: center;" id="historicalUploadSection">
                     <span style="font-size: 0.6875rem; color: var(--text-secondary); display: block;">Historical Data</span>
@@ -1765,7 +1765,7 @@
                     <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 0.875rem;">
                         Current balance: <strong id="balanceWarning" style="color: var(--accent-warning);">0 AEC</strong><br>
                         Projected depletion: <strong id="depletionWarning" style="color: var(--accent-danger);"></strong><br>
-                        <span id="depletionWeeks" style="font-size: 1rem;"></span>
+                        <strong><span id="depletionWeeks" style="font-size: 0.875rem;"></span></strong>
                     </p>
                     <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
                         <button class="purchase-btn pulse" onclick="requestPurchase()" style="padding: 8px 16px; font-size: 0.875rem;">
