@@ -10,23 +10,6 @@ if (!USERNAME || !PASSWORD) {
     process.exit(1);
 }
 
-function getDateRanges() {
-    const today = new Date();
-    const ytdStart = new Date(today.getFullYear(), 0, 1);
-    const weekAgo = new Date(today);
-    weekAgo.setDate(today.getDate() - 7);
-    
-    const formatDate = (date) => {
-        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        return `${months[date.getMonth()]} ${String(date.getDate()).padStart(2, '0')} ${date.getFullYear()}`;
-    };
-    
-    return {
-        ytd: { start: formatDate(ytdStart), end: formatDate(today) },
-        recent: { start: formatDate(weekAgo), end: formatDate(today) }
-    };
-}
-
 async function downloadAnsysData() {
     const downloadPath = path.resolve('./data');
     
@@ -36,12 +19,13 @@ async function downloadAnsysData() {
     
     console.log('Starting browser...');
     const browser = await puppeteer.launch({
-        headless: false,  // Set to 'new' for headless, false to watch it run
+        headless: 'new',
         args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
     
     const page = await browser.newPage();
     
+    // Set up auto-download (no save dialog)
     const client = await page.target().createCDPSession();
     await client.send('Page.setDownloadBehavior', {
         behavior: 'allow',
@@ -49,46 +33,37 @@ async function downloadAnsysData() {
     });
     
     try {
-        // Step 1: Go to login page
+        // LOGIN
         console.log('Navigating to ANSYS licensing portal...');
         await page.goto('https://licensing.ansys.com', { waitUntil: 'networkidle2' });
         
-        // Step 2: Enter email
         console.log('Entering email...');
-        await page.waitForSelector('input[type="email"], input[name="email"], input[id="email"]', { timeout: 15000 });
-        await page.type('input[type="email"], input[name="email"], input[id="email"]', USERNAME);
+        await page.waitForSelector('input[type="email"]', { timeout: 15000 });
+        await page.type('input[type="email"]', USERNAME);
+        await page.click('button[type="submit"]');
+        await new Promise(r => setTimeout(r, 3000));
         
-        // Click Continue
-        await page.click('button[type="submit"], button:has-text("Continue")');
-        await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 15000 }).catch(() => {});
-        await page.waitForTimeout(2000);
-        
-        // Step 3: Enter password
         console.log('Entering password...');
         await page.waitForSelector('input[type="password"]', { timeout: 15000 });
         await page.type('input[type="password"]', PASSWORD);
-        
-        // Click Continue
-        await page.click('button[type="submit"], button:has-text("Continue")');
+        await page.click('button[type="submit"]');
         await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 30000 });
         console.log('Login successful!');
         
-        // Step 4: Navigate to Usage Transactions
+        // GO TO TRANSACTIONS
         console.log('Navigating to Usage Transactions...');
         await page.goto('https://licensing.ansys.com/transactions', { waitUntil: 'networkidle2' });
-        await page.waitForTimeout(3000);
+        await new Promise(r => setTimeout(r, 3000));
         
-        const dateRanges = getDateRanges();
+        // DOWNLOAD YTD DATA
+        console.log('Downloading YTD data...');
+        await selectDateRangeAndDownload(page, 'YTD', 'historical', downloadPath);
         
-        // Download YTD data
-        console.log(`Downloading YTD data (${dateRanges.ytd.start} to ${dateRanges.ytd.end})...`);
-        await setDateRangeAndDownload(page, dateRanges.ytd.start, dateRanges.ytd.end, 'historical', downloadPath);
+        // DOWNLOAD 5 DAYS DATA
+        console.log('Downloading 5 Days data...');
+        await selectDateRangeAndDownload(page, '5 Days', 'recent', downloadPath);
         
-        // Download Recent data  
-        console.log(`Downloading Recent data (${dateRanges.recent.start} to ${dateRanges.recent.end})...`);
-        await setDateRangeAndDownload(page, dateRanges.recent.start, dateRanges.recent.end, 'recent', downloadPath);
-        
-        console.log('Downloads complete!');
+        console.log('All downloads complete!');
         
     } catch (error) {
         console.error('Error during automation:', error);
@@ -99,66 +74,103 @@ async function downloadAnsysData() {
     }
 }
 
-async function setDateRangeAndDownload(page, startDate, endDate, filePrefix, downloadPath) {
-    // Click on date range picker (the button showing "From: ... To: ...")
+async function selectDateRangeAndDownload(page, dateOption, filePrefix, downloadPath) {
+    // Click the date range button (the "From: ... To: ..." button)
     console.log('Opening date picker...');
-    await page.waitForSelector('button:has-text("From"), [class*="date-picker"], [class*="DateRange"]', { timeout: 10000 });
+    const dateButton = await page.waitForSelector('button:has-text("From"), button:has-text("To:")', { timeout: 10000 }).catch(() => null);
     
-    const dateButton = await page.$('button:has-text("From")');
-    if (dateButton) {
+    if (!dateButton) {
+        // Try finding by looking for button with calendar icon or date text
+        const buttons = await page.$$('button');
+        for (const btn of buttons) {
+            const text = await page.evaluate(el => el.textContent, btn);
+            if (text && text.includes('From') && text.includes('To')) {
+                await btn.click();
+                break;
+            }
+        }
+    } else {
         await dateButton.click();
-        await page.waitForTimeout(1000);
     }
     
-    // Clear and set start date
-    const inputs = await page.$$('input[type="text"], input[placeholder*="date"]');
-    if (inputs.length >= 2) {
-        // Start date
-        await inputs[0].click({ clickCount: 3 });
-        await inputs[0].type(startDate);
-        
-        // End date
-        await inputs[1].click({ clickCount: 3 });
-        await inputs[1].type(endDate);
+    await new Promise(r => setTimeout(r, 1000));
+    
+    // Click on the date option (YTD, 5 Days, etc.)
+    console.log(`Selecting "${dateOption}"...`);
+    const options = await page.$$('div, li, span, button');
+    for (const option of options) {
+        const text = await page.evaluate(el => el.textContent?.trim(), option);
+        if (text === dateOption) {
+            await option.click();
+            console.log(`Clicked "${dateOption}"`);
+            break;
+        }
     }
     
-    // Click Apply or OK
-    const applyBtn = await page.$('button:has-text("Apply"), button:has-text("OK"), button:has-text("Done")');
-    if (applyBtn) {
-        await applyBtn.click();
-    }
-    
-    await page.waitForTimeout(3000); // Wait for table to reload
+    await new Promise(r => setTimeout(r, 3000)); // Wait for table to reload
     
     // Click download button
-    console.log('Clicking download...');
-    const downloadBtn = await page.$('[aria-label*="download"], [title*="Download"], [class*="download"], button:has([class*="download"])');
-    if (downloadBtn) {
-        await downloadBtn.click();
-    } else {
-        // Try finding the icon in the top right of the table area
-        const allButtons = await page.$$('button, [role="button"]');
+    console.log('Clicking download button...');
+    
+    // Look for the download icon/button in the top right
+    const downloadSelectors = [
+        '[aria-label*="download"]',
+        '[aria-label*="Download"]', 
+        '[title*="Download"]',
+        '[data-testid*="download"]',
+        'button svg[data-testid="FileDownloadIcon"]',
+        'button svg[data-icon="download"]'
+    ];
+    
+    let clicked = false;
+    for (const selector of downloadSelectors) {
+        const btn = await page.$(selector);
+        if (btn) {
+            await btn.click();
+            clicked = true;
+            console.log('Download button clicked!');
+            break;
+        }
+    }
+    
+    if (!clicked) {
+        // Try finding by icon content
+        const allButtons = await page.$$('button');
         for (const btn of allButtons) {
-            const html = await page.evaluate(el => el.outerHTML, btn);
-            if (html.includes('download') || html.includes('export') || html.includes('Download')) {
+            const html = await page.evaluate(el => el.innerHTML.toLowerCase(), btn);
+            const ariaLabel = await page.evaluate(el => el.getAttribute('aria-label')?.toLowerCase() || '', btn);
+            if (html.includes('download') || html.includes('filedownload') || ariaLabel.includes('download')) {
                 await btn.click();
+                console.log('Download button clicked (found by content)!');
+                clicked = true;
                 break;
             }
         }
     }
     
-    // Wait for download
-    await page.waitForTimeout(5000);
+    // Wait for download to complete
+    console.log('Waiting for download...');
+    await new Promise(r => setTimeout(r, 10000));
     
-    // Rename downloaded file
+    // Rename the downloaded file
     const files = fs.readdirSync(downloadPath);
-    const csvFile = files.find(f => f.endsWith('.csv') && !f.startsWith('historical') && !f.startsWith('recent'));
+    console.log('Files in download folder:', files);
+    
+    const csvFile = files.find(f => 
+        f.endsWith('.csv') && 
+        f.includes('ANSYS') &&
+        !f.startsWith('historical') && 
+        !f.startsWith('recent')
+    );
+    
     if (csvFile) {
         const oldPath = path.join(downloadPath, csvFile);
         const newPath = path.join(downloadPath, `${filePrefix}.csv`);
         if (fs.existsSync(newPath)) fs.unlinkSync(newPath);
         fs.renameSync(oldPath, newPath);
-        console.log(`Saved as ${filePrefix}.csv`);
+        console.log(`Renamed "${csvFile}" to "${filePrefix}.csv"`);
+    } else {
+        console.log('Warning: No new CSV file found to rename');
     }
 }
 
