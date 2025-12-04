@@ -1,228 +1,228 @@
-Start Time,End Time,Product,Count,Hours,Cost,Currency,Username,Hostname,Project,Session ID,Session Status,External IP,Version
-2025-11-26 23:04:08,2025-11-27 00:12:08,Ansys CFD Enterprise Solver,1,1.13,31.7,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,554cc529-fbee-44c9-a045-6e7d8a988bac,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-29 01:58:48,2025-11-29 01:58:59,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-28 17:28:09,2025-11-28 17:28:20,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-28 12:55:04,2025-11-28 12:55:14,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-28 21:32:36,2025-11-28 21:32:44,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-29 02:20:35,2025-11-29 02:20:46,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-28 15:33:58,2025-11-28 15:34:05,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-28 15:00:05,2025-11-28 15:00:14,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-29 01:11:00,2025-11-29 01:11:12,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-28 12:55:07,2025-11-28 12:55:14,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-28 17:37:53,2025-11-28 17:38:01,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-28 19:12:46,2025-11-28 19:12:57,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-28 13:29:02,2025-11-28 13:29:10,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-28 15:33:55,2025-11-28 15:34:05,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-28 21:43:31,2025-11-28 21:43:42,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-29 02:18:09,2025-11-29 02:19:22,Ansys Discovery Enterprise,1,0.02,0.4,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-28 19:42:18,2025-11-28 19:42:26,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-28 21:32:32,2025-11-28 21:32:44,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-29 02:37:18,2025-11-29 02:37:29,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-28 17:26:30,2025-11-28 17:26:41,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-28 17:37:50,2025-11-28 17:38:01,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-28 19:12:49,2025-11-28 19:12:57,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-28 17:29:41,2025-11-28 17:29:52,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-29 02:37:21,2025-11-29 02:37:29,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-29 01:11:03,2025-11-29 01:11:12,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-29 02:18:12,2025-11-29 02:19:19,Ansys BladeModeler,1,0.02,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-28 13:28:58,2025-11-28 13:29:10,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-29 02:20:38,2025-11-29 02:20:46,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-29 01:58:03,2025-11-29 01:58:14,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-28 17:26:33,2025-11-28 17:26:41,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-28 21:43:34,2025-11-28 21:43:42,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-28 17:28:12,2025-11-28 17:28:20,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-28 17:29:44,2025-11-28 17:29:52,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-29 01:58:06,2025-11-29 01:58:14,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-29 01:58:51,2025-11-29 01:58:59,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-28 19:42:16,2025-11-28 19:42:26,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-28 15:00:02,2025-11-28 15:00:14,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-29 02:34:04,2025-11-29 02:41:24,Ansys CFD PrepPost,1,0.12,1.7,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-29 01:54:27,2025-11-29 02:00:41,Ansys CFD PrepPost,1,0.1,1.5,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-29 02:19:45,2025-11-29 02:25:08,Ansys CFD PrepPost,1,0.09,1.3,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-28 12:52:32,2025-11-28 12:52:59,Ansys CFD PrepPost,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-28 17:23:10,2025-11-28 17:41:50,Ansys CFD PrepPost,1,0.31,4.4,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-28 15:28:50,2025-11-28 15:42:20,Ansys CFD PrepPost,1,0.23,3.2,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-29 00:56:04,2025-11-29 00:57:55,Ansys CFD PrepPost,1,0.03,0.4,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-28 13:20:37,2025-11-28 13:35:28,Ansys CFD PrepPost,1,0.25,3.5,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-29 01:03:45,2025-11-29 01:13:37,Ansys CFD PrepPost,1,0.16,2.3,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-28 21:27:44,2025-11-28 21:52:38,Ansys CFD PrepPost,1,0.42,5.8,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-28 19:08:20,2025-11-28 19:51:15,Ansys CFD PrepPost,1,0.72,10,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-28 14:59:43,2025-11-28 15:27:46,Ansys CFD PrepPost,1,0.47,6.5,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-28 12:54:25,2025-11-28 13:20:16,Ansys CFD PrepPost,1,0.43,6,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-29 02:41:27,2025-11-29 03:43:34,Ansys CFD Enterprise Solver,1,1.03,29,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-29 02:00:44,2025-11-29 02:16:35,Ansys CFD Enterprise Solver,1,0.26,7.4,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-29 01:13:27,2025-11-29 01:13:32,Ansys CFD Enterprise Solver,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-29 01:13:40,2025-11-29 01:54:10,Ansys CFD Enterprise Solver,1,0.68,18.9,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-28 17:41:53,2025-11-28 19:07:51,Ansys CFD Enterprise Solver,1,1.43,40.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-28 21:52:26,2025-11-28 21:52:31,Ansys CFD Enterprise Solver,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-28 17:41:38,2025-11-28 17:41:43,Ansys CFD Enterprise Solver,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-28 13:35:17,2025-11-28 13:35:22,Ansys CFD Enterprise Solver,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-29 02:41:14,2025-11-29 02:41:19,Ansys CFD Enterprise Solver,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-28 21:52:41,2025-11-29 00:54:07,Ansys CFD Enterprise Solver,1,3.02,84.7,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-28 13:35:32,2025-11-28 14:58:36,Ansys CFD Enterprise Solver,1,1.38,38.8,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-28 16:23:57,2025-11-28 17:22:51,Ansys CFD Enterprise Solver,1,0.98,27.5,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-29 02:25:11,2025-11-29 02:33:42,Ansys CFD Enterprise Solver,1,0.14,4,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-28 12:17:27,2025-11-28 12:52:24,Ansys CFD Enterprise Solver,1,0.58,16.3,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-28 15:42:23,2025-11-28 16:23:12,Ansys CFD Enterprise Solver,1,0.68,19,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-28 19:51:18,2025-11-28 21:25:24,Ansys CFD Enterprise Solver,1,1.57,43.9,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-29 02:24:58,2025-11-29 02:25:03,Ansys CFD Enterprise Solver,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-28 19:51:03,2025-11-28 19:51:08,Ansys CFD Enterprise Solver,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-28 12:01:42,2025-11-28 12:02:36,Ansys CFD Enterprise Solver,1,0.02,0.4,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-28 15:42:09,2025-11-28 15:42:14,Ansys CFD Enterprise Solver,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-29 02:00:31,2025-11-29 02:00:36,Ansys CFD Enterprise Solver,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,520287ef-828f-4e04-b470-8f264a68d083,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-30 20:03:38,2025-11-30 20:03:49,Ansys Mechanical Enterprise PrepPost,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,a5cd780b-ef8a-4c30-9563-1c1d5fae750d,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-30 20:04:21,2025-11-30 20:04:30,Ansys Mechanical Enterprise PrepPost,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,a5cd780b-ef8a-4c30-9563-1c1d5fae750d,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-30 20:03:52,2025-11-30 20:04:03,Ansys Mechanical Enterprise PrepPost,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,a5cd780b-ef8a-4c30-9563-1c1d5fae750d,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-30 20:04:07,2025-11-30 20:04:18,Ansys Mechanical Enterprise PrepPost,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,a5cd780b-ef8a-4c30-9563-1c1d5fae750d,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-30 20:20:05,2025-11-30 20:20:11,Ansys CFD Enterprise Solver,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,a5cd780b-ef8a-4c30-9563-1c1d5fae750d,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-30 20:20:19,2025-11-30 21:18:11,Ansys CFD Enterprise Solver,1,0.96,27,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,a5cd780b-ef8a-4c30-9563-1c1d5fae750d,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-30 20:06:49,2025-11-30 20:08:36,Ansys Discovery Enterprise,1,0.03,0.5,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,a5cd780b-ef8a-4c30-9563-1c1d5fae750d,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-30 22:23:15,2025-11-30 22:23:26,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,a5cd780b-ef8a-4c30-9563-1c1d5fae750d,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-30 21:21:07,2025-11-30 21:21:19,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,a5cd780b-ef8a-4c30-9563-1c1d5fae750d,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-30 22:29:50,2025-11-30 22:30:01,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,a5cd780b-ef8a-4c30-9563-1c1d5fae750d,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-30 21:35:29,2025-11-30 21:35:40,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,a5cd780b-ef8a-4c30-9563-1c1d5fae750d,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-30 21:54:19,2025-11-30 21:54:31,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,a5cd780b-ef8a-4c30-9563-1c1d5fae750d,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-30 20:06:52,2025-11-30 20:08:34,Ansys BladeModeler,1,0.03,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,a5cd780b-ef8a-4c30-9563-1c1d5fae750d,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-30 22:23:18,2025-11-30 22:23:26,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,a5cd780b-ef8a-4c30-9563-1c1d5fae750d,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-30 22:27:11,2025-11-30 22:27:42,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,a5cd780b-ef8a-4c30-9563-1c1d5fae750d,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-30 22:34:57,2025-11-30 22:35:09,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,a5cd780b-ef8a-4c30-9563-1c1d5fae750d,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-30 22:27:08,2025-11-30 22:27:44,Ansys Discovery Enterprise,1,0.01,0.2,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,a5cd780b-ef8a-4c30-9563-1c1d5fae750d,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-30 20:10:59,2025-11-30 20:11:11,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,a5cd780b-ef8a-4c30-9563-1c1d5fae750d,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-30 22:29:53,2025-11-30 22:30:01,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,a5cd780b-ef8a-4c30-9563-1c1d5fae750d,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-30 22:32:21,2025-11-30 22:33:53,Ansys Discovery Enterprise,1,0.03,0.5,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,a5cd780b-ef8a-4c30-9563-1c1d5fae750d,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-30 20:11:02,2025-11-30 20:11:11,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,a5cd780b-ef8a-4c30-9563-1c1d5fae750d,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-30 21:21:10,2025-11-30 21:21:19,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,a5cd780b-ef8a-4c30-9563-1c1d5fae750d,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-30 22:35:01,2025-11-30 22:35:09,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,a5cd780b-ef8a-4c30-9563-1c1d5fae750d,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-30 21:35:31,2025-11-30 21:35:40,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,a5cd780b-ef8a-4c30-9563-1c1d5fae750d,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-30 22:32:24,2025-11-30 22:33:51,Ansys BladeModeler,1,0.02,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,a5cd780b-ef8a-4c30-9563-1c1d5fae750d,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-30 21:54:22,2025-11-30 21:54:31,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,a5cd780b-ef8a-4c30-9563-1c1d5fae750d,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-30 21:18:31,2025-11-30 21:47:52,Ansys CFD PrepPost,1,0.49,6.8,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,a5cd780b-ef8a-4c30-9563-1c1d5fae750d,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-30 20:09:11,2025-11-30 20:20:16,Ansys CFD PrepPost,1,0.18,2.6,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,a5cd780b-ef8a-4c30-9563-1c1d5fae750d,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-30 22:13:28,2025-11-30 22:19:55,Ansys CFD PrepPost,1,0.11,1.5,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,a5cd780b-ef8a-4c30-9563-1c1d5fae750d,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-30 21:48:25,2025-11-30 22:12:58,Ansys CFD PrepPost,1,0.41,5.7,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,a5cd780b-ef8a-4c30-9563-1c1d5fae750d,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-30 22:20:28,2025-11-30 22:27:01,Ansys CFD PrepPost,1,0.11,1.5,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,a5cd780b-ef8a-4c30-9563-1c1d5fae750d,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-30 22:29:08,2025-11-30 22:31:25,Ansys CFD PrepPost,1,0.04,0.5,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,a5cd780b-ef8a-4c30-9563-1c1d5fae750d,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-30 22:28:07,2025-11-30 22:28:33,Ansys CFD PrepPost,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,a5cd780b-ef8a-4c30-9563-1c1d5fae750d,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-30 22:34:24,2025-11-30 22:36:19,Ansys CFD PrepPost,1,0.03,0.4,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,a5cd780b-ef8a-4c30-9563-1c1d5fae750d,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-30 22:37:12,2025-11-30 22:41:11,Ansys BladeModeler,1,0.07,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,a5a918d9-0797-4229-bd0d-789412c2e2ab,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-30 22:37:09,2025-11-30 22:41:13,Ansys Discovery Enterprise,1,0.07,1.2,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,a5a918d9-0797-4229-bd0d-789412c2e2ab,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-30 22:42:21,2025-11-30 22:42:29,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,a5a918d9-0797-4229-bd0d-789412c2e2ab,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-30 22:41:51,2025-11-30 22:44:31,Ansys CFD PrepPost,1,0.04,0.6,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,a5a918d9-0797-4229-bd0d-789412c2e2ab,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-30 22:42:18,2025-11-30 22:42:29,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,a5a918d9-0797-4229-bd0d-789412c2e2ab,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-30 22:44:39,2025-11-30 22:48:05,Ansys Discovery Enterprise,1,0.06,1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,a5a918d9-0797-4229-bd0d-789412c2e2ab,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-30 22:44:42,2025-11-30 22:48:03,Ansys BladeModeler,1,0.06,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,a5a918d9-0797-4229-bd0d-789412c2e2ab,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-30 22:50:23,2025-11-30 22:50:33,Ansys Geometry Interface for SolidWorks,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,63981076-3368-4439-b6db-ea1bc33a925f,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-12-01 00:30:37,2025-12-01 00:30:54,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,63981076-3368-4439-b6db-ea1bc33a925f,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-30 22:58:04,2025-11-30 22:58:15,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,63981076-3368-4439-b6db-ea1bc33a925f,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-30 22:50:11,2025-11-30 22:57:07,Ansys BladeModeler,1,0.12,0.2,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,63981076-3368-4439-b6db-ea1bc33a925f,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-12-01 00:30:34,2025-12-01 00:30:54,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,63981076-3368-4439-b6db-ea1bc33a925f,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-30 22:58:07,2025-11-30 22:58:15,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,63981076-3368-4439-b6db-ea1bc33a925f,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-30 22:50:09,2025-11-30 22:57:09,Ansys Discovery Enterprise,1,0.12,2.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,63981076-3368-4439-b6db-ea1bc33a925f,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-30 22:57:33,2025-11-30 23:25:46,Ansys CFD PrepPost,1,0.47,6.6,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,63981076-3368-4439-b6db-ea1bc33a925f,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-12-01 00:36:02,2025-12-01 00:39:52,Ansys CFD PrepPost,1,0.06,0.9,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,63981076-3368-4439-b6db-ea1bc33a925f,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-12-01 00:40:35,2025-12-01 00:53:02,Ansys CFD PrepPost,1,0.21,2.9,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,63981076-3368-4439-b6db-ea1bc33a925f,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-12-01 00:34:13,2025-12-01 00:34:37,Ansys CFD PrepPost,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,63981076-3368-4439-b6db-ea1bc33a925f,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-12-01 00:57:55,2025-12-01 00:58:20,Ansys Mechanical Enterprise Solver,1,0.01,0.2,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,63981076-3368-4439-b6db-ea1bc33a925f,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-12-01 01:07:11,2025-12-01 01:07:39,Ansys Mechanical Enterprise Solver,1,0.01,0.2,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,63981076-3368-4439-b6db-ea1bc33a925f,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-12-01 00:54:18,2025-12-01 00:54:52,Ansys Mechanical Enterprise Solver,1,0.01,0.3,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,63981076-3368-4439-b6db-ea1bc33a925f,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-12-01 01:00:27,2025-12-01 01:08:52,Ansys CFD Enterprise Solver,1,0.14,3.9,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,63981076-3368-4439-b6db-ea1bc33a925f,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-30 23:25:34,2025-11-30 23:25:39,Ansys CFD Enterprise Solver,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,63981076-3368-4439-b6db-ea1bc33a925f,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-11-30 23:25:49,2025-12-01 00:29:04,Ansys CFD Enterprise Solver,1,1.05,29.5,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,63981076-3368-4439-b6db-ea1bc33a925f,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-12-01 01:11:52,2025-12-01 01:20:03,Ansys Mechanical Enterprise PrepPost,1,0.14,1.9,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,63981076-3368-4439-b6db-ea1bc33a925f,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-12-01 00:30:18,2025-12-01 01:09:21,Ansys Mechanical Enterprise PrepPost,1,0.65,9.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,63981076-3368-4439-b6db-ea1bc33a925f,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-12-01 01:09:35,2025-12-01 01:11:35,Ansys Mechanical Enterprise PrepPost,1,0.03,0.5,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,63981076-3368-4439-b6db-ea1bc33a925f,COMPLETED,"98.210.102.215,136.226.6.56",22.2
-2025-12-01 10:01:54,2025-12-01 10:02:01,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,74ee0f83-42b5-4654-a0bd-2478c3e54f33,COMPLETED,"75.101.125.194,136.226.6.174",22.2
-2025-12-01 10:03:43,2025-12-01 10:03:55,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,74ee0f83-42b5-4654-a0bd-2478c3e54f33,COMPLETED,"75.101.125.194,136.226.6.174",22.2
-2025-12-01 10:03:46,2025-12-01 10:03:55,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,74ee0f83-42b5-4654-a0bd-2478c3e54f33,COMPLETED,"75.101.125.194,136.226.6.174",22.2
-2025-12-01 10:01:57,2025-12-01 10:02:01,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,74ee0f83-42b5-4654-a0bd-2478c3e54f33,COMPLETED,"75.101.125.194,136.226.6.174",22.2
-2025-12-01 10:03:01,2025-12-01 10:10:15,Ansys CFD PrepPost,1,0.12,1.7,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,74ee0f83-42b5-4654-a0bd-2478c3e54f33,COMPLETED,"75.101.125.194,136.226.6.174",22.2
-2025-12-01 11:24:03,2025-12-01 11:26:24,Ansys CFD Enterprise Solver,1,0.04,1.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,74ee0f83-42b5-4654-a0bd-2478c3e54f33,COMPLETED,"75.101.125.194,136.226.6.174",22.2
-2025-12-01 10:10:18,2025-12-01 10:54:10,Ansys CFD Enterprise Solver,1,0.73,20.5,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,74ee0f83-42b5-4654-a0bd-2478c3e54f33,COMPLETED,"75.101.125.194,136.226.6.174",22.2
-2025-12-01 11:30:08,2025-12-01 13:48:17,Ansys CFD Enterprise Solver,1,2.3,64.5,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,74ee0f83-42b5-4654-a0bd-2478c3e54f33,COMPLETED,"75.101.125.194,136.226.6.174",22.2
-2025-12-01 10:10:05,2025-12-01 10:10:10,Ansys CFD Enterprise Solver,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,74ee0f83-42b5-4654-a0bd-2478c3e54f33,COMPLETED,"75.101.125.194,136.226.6.174",22.2
-2025-12-01 19:37:40,2025-12-01 20:01:26,Ansys CFD Enterprise Solver,1,0.4,11.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,99a326c3-797d-4cbb-b9f1-f3a64694528d,COMPLETED,"75.101.125.194,136.226.6.174",22.2
-2025-12-02 15:38:29,2025-12-02 15:45:11,Ansys Discovery Enterprise,1,0.11,2,AEC,tutley,tutley-lt2.corp.arete.com,,93427a08-9773-4bce-8a36-4a900e4b8b68,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 16:33:52,2025-12-02 16:39:05,Ansys Discovery Enterprise,1,0.09,1.6,AEC,tutley,tutley-lt2.corp.arete.com,,4b51ca87-5e9b-4cdd-936d-9b4ae087c2c6,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 15:50:18,2025-12-02 16:27:25,Ansys Discovery Enterprise,1,0.62,11.1,AEC,tutley,tutley-lt2.corp.arete.com,,4b51ca87-5e9b-4cdd-936d-9b4ae087c2c6,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 16:39:30,2025-12-02 16:40:36,Ansys Discovery Enterprise,1,0.02,0.3,AEC,tutley,tutley-lt2.corp.arete.com,,4b51ca87-5e9b-4cdd-936d-9b4ae087c2c6,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 16:27:45,2025-12-02 16:31:20,Ansys Discovery Enterprise,1,0.06,1.1,AEC,tutley,tutley-lt2.corp.arete.com,,4b51ca87-5e9b-4cdd-936d-9b4ae087c2c6,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 16:27:32,2025-12-02 16:34:33,Ansys Mechanical Enterprise PrepPost,1,0.12,1.6,AEC,tutley,tutley-lt2.corp.arete.com,,4b51ca87-5e9b-4cdd-936d-9b4ae087c2c6,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 16:39:15,2025-12-02 16:43:20,Ansys Mechanical Enterprise PrepPost,1,0.07,1,AEC,tutley,tutley-lt2.corp.arete.com,,4b51ca87-5e9b-4cdd-936d-9b4ae087c2c6,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 17:27:31,2025-12-02 17:50:02,Ansys Zemax OpticStudio Enterprise,1,0.38,7.5,AEC,tutley,tutley-lt2.corp.arete.com,,87ec2401-d0ee-46d2-a4a6-10524e08aba3,COMPLETED,"216.110.163.194,136.226.20.113",23.2
-2025-12-02 18:08:57,2025-12-02 18:27:34,Ansys Zemax OpticStudio Enterprise,1,0.31,6.2,AEC,tutley,tutley-lt2.corp.arete.com,,8d915ec4-e057-4052-b411-fe48a279f28a,COMPLETED,"216.110.163.194,136.226.20.113",23.2
-2025-12-02 18:49:50,2025-12-02 18:52:38,Ansys Zemax OpticStudio Enterprise,1,0.05,0.9,AEC,tutley,tutley-lt2.corp.arete.com,,52994725-6cb5-4d62-9e91-5557e91c587d,COMPLETED,"216.110.163.194,136.226.20.113",23.2
-2025-12-02 16:46:28,2025-12-02 16:47:13,Ansys Discovery Enterprise,1,0.01,0.2,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 17:50:43,2025-12-02 18:04:54,Ansys Discovery Enterprise,1,0.24,4.3,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 17:09:55,2025-12-02 17:11:05,Ansys Discovery Enterprise,1,0.02,0.4,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 18:52:42,2025-12-02 18:56:54,Ansys Discovery Enterprise,1,0.07,1.3,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 18:45:40,2025-12-02 18:46:20,Ansys Discovery Enterprise,1,0.01,0.2,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 18:42:17,2025-12-02 18:43:21,Ansys Discovery Enterprise,1,0.02,0.3,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 17:06:24,2025-12-02 17:09:22,Ansys Discovery Enterprise,1,0.05,0.9,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 18:57:45,2025-12-02 18:58:20,Ansys Discovery Enterprise,1,0.01,0.2,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 18:44:18,2025-12-02 18:45:21,Ansys Discovery Enterprise,1,0.02,0.3,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 18:05:45,2025-12-02 18:06:53,Ansys Discovery Enterprise,1,0.02,0.3,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 18:28:46,2025-12-02 18:41:43,Ansys Discovery Enterprise,1,0.22,3.9,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 18:57:16,2025-12-02 19:02:14,Ansys Discovery Enterprise,1,0.08,1.5,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,654ba16c-3850-45c1-8b9c-2cfa6e38de9a,COMPLETED,"75.101.125.194,136.226.6.174",22.2
-2025-12-02 19:03:40,2025-12-02 19:03:51,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,654ba16c-3850-45c1-8b9c-2cfa6e38de9a,COMPLETED,"75.101.125.194,136.226.6.174",22.2
-2025-12-02 19:03:42,2025-12-02 19:03:51,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,654ba16c-3850-45c1-8b9c-2cfa6e38de9a,COMPLETED,"75.101.125.194,136.226.6.174",22.2
-2025-12-02 18:57:19,2025-12-02 19:02:12,Ansys BladeModeler,1,0.08,0.2,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,654ba16c-3850-45c1-8b9c-2cfa6e38de9a,COMPLETED,"75.101.125.194,136.226.6.174",22.2
-2025-12-02 19:03:03,2025-12-02 19:08:38,Ansys CFD PrepPost,1,0.09,1.3,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,654ba16c-3850-45c1-8b9c-2cfa6e38de9a,COMPLETED,"75.101.125.194,136.226.6.174",22.2
-2025-12-02 19:09:32,2025-12-02 19:16:01,Ansys CFD PrepPost,1,0.11,1.5,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,654ba16c-3850-45c1-8b9c-2cfa6e38de9a,COMPLETED,"75.101.125.194,136.226.6.174",22.2
-2025-12-02 19:22:42,2025-12-02 19:41:14,Ansys Zemax OpticStudio Enterprise,1,0.31,6.2,AEC,tutley,tutley-lt2.corp.arete.com,,4e7b0908-d106-4324-ad12-1ad0418a5144,COMPLETED,"216.110.163.194,136.226.20.113",23.2
-2025-12-02 16:58:34,2025-12-02 16:58:38,Ansys Mechanical Enterprise Solver,1,0.01,0.1,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 16:59:46,2025-12-02 16:59:49,Ansys Mechanical Enterprise Solver,1,0.01,0.1,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 17:00:32,2025-12-02 17:00:36,Ansys Mechanical Enterprise Solver,1,0.01,0.1,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 17:19:54,2025-12-02 17:20:17,Ansys Mechanical Enterprise Solver,1,0.01,0.2,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 17:17:19,2025-12-02 17:17:22,Ansys Mechanical Enterprise Solver,1,0.01,0.1,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 17:12:31,2025-12-02 17:12:36,Ansys Mechanical Enterprise Solver,1,0.01,0.1,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 17:03:55,2025-12-02 17:03:59,Ansys Mechanical Enterprise Solver,1,0.01,0.1,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 17:02:40,2025-12-02 17:02:43,Ansys Mechanical Enterprise Solver,1,0.01,0.1,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 18:51:31,2025-12-02 18:51:34,Ansys Mechanical Enterprise Solver,1,0.01,0.1,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 19:02:37,2025-12-02 19:02:42,Ansys Mechanical Enterprise Solver,1,0.01,0.1,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 17:18:43,2025-12-02 17:19:14,Ansys Mechanical Enterprise Solver,1,0.01,0.2,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 18:07:48,2025-12-02 18:08:39,Ansys Mechanical Enterprise Solver,1,0.01,0.4,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 18:49:48,2025-12-02 18:49:50,Ansys Mechanical Enterprise Solver,1,0.01,0.1,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 18:19:08,2025-12-02 18:20:01,Ansys Mechanical Enterprise Solver,1,0.01,0.4,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 17:21:18,2025-12-02 17:22:07,Ansys Mechanical Enterprise Solver,1,0.01,0.4,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 18:07:13,2025-12-02 18:07:40,Ansys Mechanical Enterprise Solver,1,0.01,0.2,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 19:11:25,2025-12-02 19:12:14,Ansys Mechanical Enterprise Solver,1,0.01,0.4,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 18:18:35,2025-12-02 18:19:00,Ansys Mechanical Enterprise Solver,1,0.01,0.2,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 19:07:34,2025-12-02 19:08:01,Ansys Mechanical Enterprise Solver,1,0.01,0.2,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 19:19:47,2025-12-02 19:20:38,Ansys Mechanical Enterprise Solver,1,0.01,0.4,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 18:49:35,2025-12-02 18:49:40,Ansys Mechanical Enterprise Solver,1,0.01,0.1,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 19:16:14,2025-12-02 19:17:05,Ansys Mechanical Enterprise Solver,1,0.01,0.4,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 18:19:22,2025-12-02 18:19:55,Ansys HPC,14,0.01,0.3,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 17:21:33,2025-12-02 17:22:03,Ansys HPC,14,0.01,0.3,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 19:16:28,2025-12-02 19:16:59,Ansys HPC,14,0.01,0.3,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 18:08:02,2025-12-02 18:08:34,Ansys HPC,14,0.01,0.3,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 17:20:05,2025-12-02 17:20:14,Ansys HPC,14,0.01,0.1,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 18:18:47,2025-12-02 18:18:57,Ansys HPC,14,0.01,0.1,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 18:07:25,2025-12-02 18:07:35,Ansys HPC,14,0.01,0.1,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 19:11:40,2025-12-02 19:12:09,Ansys HPC,14,0.01,0.3,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 19:42:17,2025-12-02 19:43:07,Ansys Mechanical Enterprise Solver,1,0.01,0.4,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 17:18:58,2025-12-02 17:19:11,Ansys HPC,14,0.01,0.1,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 19:07:45,2025-12-02 19:07:58,Ansys HPC,14,0.01,0.1,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 19:42:30,2025-12-02 19:43:03,Ansys HPC,14,0.01,0.3,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 19:20:02,2025-12-02 19:20:33,Ansys HPC,14,0.01,0.3,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 17:14:24,2025-12-02 17:14:27,Ansys Mechanical Enterprise Solver,1,0.01,0.1,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 19:42:30,2025-12-02 19:46:24,Ansys Zemax OpticStudio Enterprise,1,0.07,1.3,AEC,tutley,tutley-lt2.corp.arete.com,,7f67ccfc-3a3e-41de-9aaf-fe84f004fc3c,COMPLETED,"216.110.163.194,136.226.20.113",23.2
-2025-12-02 16:46:14,2025-12-02 16:47:50,Ansys Mechanical Enterprise PrepPost,1,0.03,0.4,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 18:46:46,2025-12-02 19:48:13,Ansys GRANTA Materials Data for Simulation,1,1.02,33.8,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 18:42:01,2025-12-02 19:48:12,Ansys Mechanical Enterprise PrepPost,1,1.1,15.4,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 17:09:39,2025-12-02 18:29:58,Ansys Mechanical Enterprise PrepPost,1,1.34,18.7,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 16:49:17,2025-12-02 17:06:22,Ansys GRANTA Materials Data for Simulation,1,0.28,9.4,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 16:48:06,2025-12-02 17:06:20,Ansys Mechanical Enterprise PrepPost,1,0.3,4.3,AEC,tutley,tutley-lt2.corp.arete.com,,59d72a89-a06a-447c-b59c-16843707be41,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 19:15:52,2025-12-02 19:15:56,Ansys CFD Enterprise Solver,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,654ba16c-3850-45c1-8b9c-2cfa6e38de9a,COMPLETED,"75.101.125.194,136.226.6.174",22.2
-2025-12-02 19:16:04,2025-12-02 20:00:26,Ansys CFD Enterprise Solver,1,0.74,20.7,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,654ba16c-3850-45c1-8b9c-2cfa6e38de9a,COMPLETED,"75.101.125.194,136.226.6.174",22.2
-2025-12-02 20:06:07,2025-12-02 20:06:15,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,0b0c1dfc-075d-4130-9088-982964d88247,COMPLETED,"75.101.125.194,136.226.6.174",22.2
-2025-12-02 20:06:04,2025-12-02 20:06:15,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,0b0c1dfc-075d-4130-9088-982964d88247,COMPLETED,"75.101.125.194,136.226.6.174",22.2
-2025-12-02 20:05:18,2025-12-02 20:09:35,Ansys CFD PrepPost,1,0.07,1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,0b0c1dfc-075d-4130-9088-982964d88247,COMPLETED,"75.101.125.194,136.226.6.174",22.2
-2025-12-02 20:10:30,2025-12-02 20:11:05,Ansys HPC,14,0.01,0.3,AEC,tutley,tutley-lt2.corp.arete.com,,32613a4b-94e8-4e48-afc2-b5d95dddeb85,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 20:09:42,2025-12-02 20:10:08,Ansys Mechanical Enterprise Solver,1,0.01,0.2,AEC,tutley,tutley-lt2.corp.arete.com,,32613a4b-94e8-4e48-afc2-b5d95dddeb85,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 20:02:49,2025-12-02 20:14:36,Ansys Mechanical Enterprise PrepPost,1,0.2,2.7,AEC,tutley,tutley-lt2.corp.arete.com,,32613a4b-94e8-4e48-afc2-b5d95dddeb85,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 20:10:16,2025-12-02 20:11:10,Ansys Mechanical Enterprise Solver,1,0.02,0.4,AEC,tutley,tutley-lt2.corp.arete.com,,32613a4b-94e8-4e48-afc2-b5d95dddeb85,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 20:09:55,2025-12-02 20:10:06,Ansys HPC,14,0.01,0.1,AEC,tutley,tutley-lt2.corp.arete.com,,32613a4b-94e8-4e48-afc2-b5d95dddeb85,COMPLETED,"216.110.163.194,136.226.20.113",25.1
-2025-12-02 20:02:11,2025-12-02 20:03:39,Ansys CFD Enterprise Solver,1,0.02,0.7,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,0b0c1dfc-075d-4130-9088-982964d88247,COMPLETED,"75.101.125.194,136.226.6.174",22.2
-2025-12-02 20:24:32,2025-12-02 20:29:00,Ansys CFD Enterprise Solver,1,0.07,2.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,0b0c1dfc-075d-4130-9088-982964d88247,COMPLETED,"75.101.125.194,136.226.6.174",22.2
-2025-12-02 20:09:37,2025-12-02 20:23:50,Ansys CFD Enterprise Solver,1,0.24,6.6,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,0b0c1dfc-075d-4130-9088-982964d88247,COMPLETED,"75.101.125.194,136.226.6.174",22.2
-2025-12-02 20:09:25,2025-12-02 20:09:30,Ansys CFD Enterprise Solver,1,0.01,0.1,AEC,sgutteridge,SGutteridge-LT.corp.arete.com,,0b0c1dfc-075d-4130-9088-982964d88247,COMPLETED,"75.101.125.194,136.226.6.174",22.2
+Start Time,End Time,Product,Count,Hours,Cost,Currency,Username
+11/26/2025 23:04,11/27/2025 0:12,Ansys CFD Enterprise Solver,1,1.13,31.7,AEC,sgutteridge
+11/29/2025 1:58,11/29/2025 1:58,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge
+11/28/2025 17:28,11/28/2025 17:28,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge
+11/28/2025 12:55,11/28/2025 12:55,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge
+11/28/2025 21:32,11/28/2025 21:32,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge
+11/29/2025 2:20,11/29/2025 2:20,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge
+11/28/2025 15:33,11/28/2025 15:34,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge
+11/28/2025 15:00,11/28/2025 15:00,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge
+11/29/2025 1:11,11/29/2025 1:11,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge
+11/28/2025 12:55,11/28/2025 12:55,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge
+11/28/2025 17:37,11/28/2025 17:38,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge
+11/28/2025 19:12,11/28/2025 19:12,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge
+11/28/2025 13:29,11/28/2025 13:29,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge
+11/28/2025 15:33,11/28/2025 15:34,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge
+11/28/2025 21:43,11/28/2025 21:43,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge
+11/29/2025 2:18,11/29/2025 2:19,Ansys Discovery Enterprise,1,0.02,0.4,AEC,sgutteridge
+11/28/2025 19:42,11/28/2025 19:42,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge
+11/28/2025 21:32,11/28/2025 21:32,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge
+11/29/2025 2:37,11/29/2025 2:37,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge
+11/28/2025 17:26,11/28/2025 17:26,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge
+11/28/2025 17:37,11/28/2025 17:38,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge
+11/28/2025 19:12,11/28/2025 19:12,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge
+11/28/2025 17:29,11/28/2025 17:29,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge
+11/29/2025 2:37,11/29/2025 2:37,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge
+11/29/2025 1:11,11/29/2025 1:11,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge
+11/29/2025 2:18,11/29/2025 2:19,Ansys BladeModeler,1,0.02,0.1,AEC,sgutteridge
+11/28/2025 13:28,11/28/2025 13:29,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge
+11/29/2025 2:20,11/29/2025 2:20,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge
+11/29/2025 1:58,11/29/2025 1:58,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge
+11/28/2025 17:26,11/28/2025 17:26,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge
+11/28/2025 21:43,11/28/2025 21:43,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge
+11/28/2025 17:28,11/28/2025 17:28,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge
+11/28/2025 17:29,11/28/2025 17:29,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge
+11/29/2025 1:58,11/29/2025 1:58,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge
+11/29/2025 1:58,11/29/2025 1:58,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge
+11/28/2025 19:42,11/28/2025 19:42,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge
+11/28/2025 15:00,11/28/2025 15:00,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge
+11/29/2025 2:34,11/29/2025 2:41,Ansys CFD PrepPost,1,0.12,1.7,AEC,sgutteridge
+11/29/2025 1:54,11/29/2025 2:00,Ansys CFD PrepPost,1,0.1,1.5,AEC,sgutteridge
+11/29/2025 2:19,11/29/2025 2:25,Ansys CFD PrepPost,1,0.09,1.3,AEC,sgutteridge
+11/28/2025 12:52,11/28/2025 12:52,Ansys CFD PrepPost,1,0.01,0.1,AEC,sgutteridge
+11/28/2025 17:23,11/28/2025 17:41,Ansys CFD PrepPost,1,0.31,4.4,AEC,sgutteridge
+11/28/2025 15:28,11/28/2025 15:42,Ansys CFD PrepPost,1,0.23,3.2,AEC,sgutteridge
+11/29/2025 0:56,11/29/2025 0:57,Ansys CFD PrepPost,1,0.03,0.4,AEC,sgutteridge
+11/28/2025 13:20,11/28/2025 13:35,Ansys CFD PrepPost,1,0.25,3.5,AEC,sgutteridge
+11/29/2025 1:03,11/29/2025 1:13,Ansys CFD PrepPost,1,0.16,2.3,AEC,sgutteridge
+11/28/2025 21:27,11/28/2025 21:52,Ansys CFD PrepPost,1,0.42,5.8,AEC,sgutteridge
+11/28/2025 19:08,11/28/2025 19:51,Ansys CFD PrepPost,1,0.72,10,AEC,sgutteridge
+11/28/2025 14:59,11/28/2025 15:27,Ansys CFD PrepPost,1,0.47,6.5,AEC,sgutteridge
+11/28/2025 12:54,11/28/2025 13:20,Ansys CFD PrepPost,1,0.43,6,AEC,sgutteridge
+11/29/2025 2:41,11/29/2025 3:43,Ansys CFD Enterprise Solver,1,1.03,29,AEC,sgutteridge
+11/29/2025 2:00,11/29/2025 2:16,Ansys CFD Enterprise Solver,1,0.26,7.4,AEC,sgutteridge
+11/29/2025 1:13,11/29/2025 1:13,Ansys CFD Enterprise Solver,1,0.01,0.1,AEC,sgutteridge
+11/29/2025 1:13,11/29/2025 1:54,Ansys CFD Enterprise Solver,1,0.68,18.9,AEC,sgutteridge
+11/28/2025 17:41,11/28/2025 19:07,Ansys CFD Enterprise Solver,1,1.43,40.1,AEC,sgutteridge
+11/28/2025 21:52,11/28/2025 21:52,Ansys CFD Enterprise Solver,1,0.01,0.1,AEC,sgutteridge
+11/28/2025 17:41,11/28/2025 17:41,Ansys CFD Enterprise Solver,1,0.01,0.1,AEC,sgutteridge
+11/28/2025 13:35,11/28/2025 13:35,Ansys CFD Enterprise Solver,1,0.01,0.1,AEC,sgutteridge
+11/29/2025 2:41,11/29/2025 2:41,Ansys CFD Enterprise Solver,1,0.01,0.1,AEC,sgutteridge
+11/28/2025 21:52,11/29/2025 0:54,Ansys CFD Enterprise Solver,1,3.02,84.7,AEC,sgutteridge
+11/28/2025 13:35,11/28/2025 14:58,Ansys CFD Enterprise Solver,1,1.38,38.8,AEC,sgutteridge
+11/28/2025 16:23,11/28/2025 17:22,Ansys CFD Enterprise Solver,1,0.98,27.5,AEC,sgutteridge
+11/29/2025 2:25,11/29/2025 2:33,Ansys CFD Enterprise Solver,1,0.14,4,AEC,sgutteridge
+11/28/2025 12:17,11/28/2025 12:52,Ansys CFD Enterprise Solver,1,0.58,16.3,AEC,sgutteridge
+11/28/2025 15:42,11/28/2025 16:23,Ansys CFD Enterprise Solver,1,0.68,19,AEC,sgutteridge
+11/28/2025 19:51,11/28/2025 21:25,Ansys CFD Enterprise Solver,1,1.57,43.9,AEC,sgutteridge
+11/29/2025 2:24,11/29/2025 2:25,Ansys CFD Enterprise Solver,1,0.01,0.1,AEC,sgutteridge
+11/28/2025 19:51,11/28/2025 19:51,Ansys CFD Enterprise Solver,1,0.01,0.1,AEC,sgutteridge
+11/28/2025 12:01,11/28/2025 12:02,Ansys CFD Enterprise Solver,1,0.02,0.4,AEC,sgutteridge
+11/28/2025 15:42,11/28/2025 15:42,Ansys CFD Enterprise Solver,1,0.01,0.1,AEC,sgutteridge
+11/29/2025 2:00,11/29/2025 2:00,Ansys CFD Enterprise Solver,1,0.01,0.1,AEC,sgutteridge
+11/30/2025 20:03,11/30/2025 20:03,Ansys Mechanical Enterprise PrepPost,1,0.01,0.1,AEC,sgutteridge
+11/30/2025 20:04,11/30/2025 20:04,Ansys Mechanical Enterprise PrepPost,1,0.01,0.1,AEC,sgutteridge
+11/30/2025 20:03,11/30/2025 20:04,Ansys Mechanical Enterprise PrepPost,1,0.01,0.1,AEC,sgutteridge
+11/30/2025 20:04,11/30/2025 20:04,Ansys Mechanical Enterprise PrepPost,1,0.01,0.1,AEC,sgutteridge
+11/30/2025 20:20,11/30/2025 20:20,Ansys CFD Enterprise Solver,1,0.01,0.1,AEC,sgutteridge
+11/30/2025 20:20,11/30/2025 21:18,Ansys CFD Enterprise Solver,1,0.96,27,AEC,sgutteridge
+11/30/2025 20:06,11/30/2025 20:08,Ansys Discovery Enterprise,1,0.03,0.5,AEC,sgutteridge
+11/30/2025 22:23,11/30/2025 22:23,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge
+11/30/2025 21:21,11/30/2025 21:21,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge
+11/30/2025 22:29,11/30/2025 22:30,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge
+11/30/2025 21:35,11/30/2025 21:35,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge
+11/30/2025 21:54,11/30/2025 21:54,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge
+11/30/2025 20:06,11/30/2025 20:08,Ansys BladeModeler,1,0.03,0.1,AEC,sgutteridge
+11/30/2025 22:23,11/30/2025 22:23,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge
+11/30/2025 22:27,11/30/2025 22:27,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge
+11/30/2025 22:34,11/30/2025 22:35,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge
+11/30/2025 22:27,11/30/2025 22:27,Ansys Discovery Enterprise,1,0.01,0.2,AEC,sgutteridge
+11/30/2025 20:10,11/30/2025 20:11,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge
+11/30/2025 22:29,11/30/2025 22:30,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge
+11/30/2025 22:32,11/30/2025 22:33,Ansys Discovery Enterprise,1,0.03,0.5,AEC,sgutteridge
+11/30/2025 20:11,11/30/2025 20:11,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge
+11/30/2025 21:21,11/30/2025 21:21,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge
+11/30/2025 22:35,11/30/2025 22:35,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge
+11/30/2025 21:35,11/30/2025 21:35,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge
+11/30/2025 22:32,11/30/2025 22:33,Ansys BladeModeler,1,0.02,0.1,AEC,sgutteridge
+11/30/2025 21:54,11/30/2025 21:54,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge
+11/30/2025 21:18,11/30/2025 21:47,Ansys CFD PrepPost,1,0.49,6.8,AEC,sgutteridge
+11/30/2025 20:09,11/30/2025 20:20,Ansys CFD PrepPost,1,0.18,2.6,AEC,sgutteridge
+11/30/2025 22:13,11/30/2025 22:19,Ansys CFD PrepPost,1,0.11,1.5,AEC,sgutteridge
+11/30/2025 21:48,11/30/2025 22:12,Ansys CFD PrepPost,1,0.41,5.7,AEC,sgutteridge
+11/30/2025 22:20,11/30/2025 22:27,Ansys CFD PrepPost,1,0.11,1.5,AEC,sgutteridge
+11/30/2025 22:29,11/30/2025 22:31,Ansys CFD PrepPost,1,0.04,0.5,AEC,sgutteridge
+11/30/2025 22:28,11/30/2025 22:28,Ansys CFD PrepPost,1,0.01,0.1,AEC,sgutteridge
+11/30/2025 22:34,11/30/2025 22:36,Ansys CFD PrepPost,1,0.03,0.4,AEC,sgutteridge
+11/30/2025 22:37,11/30/2025 22:41,Ansys BladeModeler,1,0.07,0.1,AEC,sgutteridge
+11/30/2025 22:37,11/30/2025 22:41,Ansys Discovery Enterprise,1,0.07,1.2,AEC,sgutteridge
+11/30/2025 22:42,11/30/2025 22:42,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge
+11/30/2025 22:41,11/30/2025 22:44,Ansys CFD PrepPost,1,0.04,0.6,AEC,sgutteridge
+11/30/2025 22:42,11/30/2025 22:42,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge
+11/30/2025 22:44,11/30/2025 22:48,Ansys Discovery Enterprise,1,0.06,1,AEC,sgutteridge
+11/30/2025 22:44,11/30/2025 22:48,Ansys BladeModeler,1,0.06,0.1,AEC,sgutteridge
+11/30/2025 22:50,11/30/2025 22:50,Ansys Geometry Interface for SolidWorks,1,0.01,0.1,AEC,sgutteridge
+12/1/2025 0:30,12/1/2025 0:30,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge
+11/30/2025 22:58,11/30/2025 22:58,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge
+11/30/2025 22:50,11/30/2025 22:57,Ansys BladeModeler,1,0.12,0.2,AEC,sgutteridge
+12/1/2025 0:30,12/1/2025 0:30,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge
+11/30/2025 22:58,11/30/2025 22:58,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge
+11/30/2025 22:50,11/30/2025 22:57,Ansys Discovery Enterprise,1,0.12,2.1,AEC,sgutteridge
+11/30/2025 22:57,11/30/2025 23:25,Ansys CFD PrepPost,1,0.47,6.6,AEC,sgutteridge
+12/1/2025 0:36,12/1/2025 0:39,Ansys CFD PrepPost,1,0.06,0.9,AEC,sgutteridge
+12/1/2025 0:40,12/1/2025 0:53,Ansys CFD PrepPost,1,0.21,2.9,AEC,sgutteridge
+12/1/2025 0:34,12/1/2025 0:34,Ansys CFD PrepPost,1,0.01,0.1,AEC,sgutteridge
+12/1/2025 0:57,12/1/2025 0:58,Ansys Mechanical Enterprise Solver,1,0.01,0.2,AEC,sgutteridge
+12/1/2025 1:07,12/1/2025 1:07,Ansys Mechanical Enterprise Solver,1,0.01,0.2,AEC,sgutteridge
+12/1/2025 0:54,12/1/2025 0:54,Ansys Mechanical Enterprise Solver,1,0.01,0.3,AEC,sgutteridge
+12/1/2025 1:00,12/1/2025 1:08,Ansys CFD Enterprise Solver,1,0.14,3.9,AEC,sgutteridge
+11/30/2025 23:25,11/30/2025 23:25,Ansys CFD Enterprise Solver,1,0.01,0.1,AEC,sgutteridge
+11/30/2025 23:25,12/1/2025 0:29,Ansys CFD Enterprise Solver,1,1.05,29.5,AEC,sgutteridge
+12/1/2025 1:11,12/1/2025 1:20,Ansys Mechanical Enterprise PrepPost,1,0.14,1.9,AEC,sgutteridge
+12/1/2025 0:30,12/1/2025 1:09,Ansys Mechanical Enterprise PrepPost,1,0.65,9.1,AEC,sgutteridge
+12/1/2025 1:09,12/1/2025 1:11,Ansys Mechanical Enterprise PrepPost,1,0.03,0.5,AEC,sgutteridge
+12/1/2025 10:01,12/1/2025 10:02,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge
+12/1/2025 10:03,12/1/2025 10:03,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge
+12/1/2025 10:03,12/1/2025 10:03,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge
+12/1/2025 10:01,12/1/2025 10:02,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge
+12/1/2025 10:03,12/1/2025 10:10,Ansys CFD PrepPost,1,0.12,1.7,AEC,sgutteridge
+12/1/2025 11:24,12/1/2025 11:26,Ansys CFD Enterprise Solver,1,0.04,1.1,AEC,sgutteridge
+12/1/2025 10:10,12/1/2025 10:54,Ansys CFD Enterprise Solver,1,0.73,20.5,AEC,sgutteridge
+12/1/2025 11:30,12/1/2025 13:48,Ansys CFD Enterprise Solver,1,2.3,64.5,AEC,sgutteridge
+12/1/2025 10:10,12/1/2025 10:10,Ansys CFD Enterprise Solver,1,0.01,0.1,AEC,sgutteridge
+12/1/2025 19:37,12/1/2025 20:01,Ansys CFD Enterprise Solver,1,0.4,11.1,AEC,sgutteridge
+12/2/2025 15:38,12/2/2025 15:45,Ansys Discovery Enterprise,1,0.11,2,AEC,tutley
+12/2/2025 16:33,12/2/2025 16:39,Ansys Discovery Enterprise,1,0.09,1.6,AEC,tutley
+12/2/2025 15:50,12/2/2025 16:27,Ansys Discovery Enterprise,1,0.62,11.1,AEC,tutley
+12/2/2025 16:39,12/2/2025 16:40,Ansys Discovery Enterprise,1,0.02,0.3,AEC,tutley
+12/2/2025 16:27,12/2/2025 16:31,Ansys Discovery Enterprise,1,0.06,1.1,AEC,tutley
+12/2/2025 16:27,12/2/2025 16:34,Ansys Mechanical Enterprise PrepPost,1,0.12,1.6,AEC,tutley
+12/2/2025 16:39,12/2/2025 16:43,Ansys Mechanical Enterprise PrepPost,1,0.07,1,AEC,tutley
+12/2/2025 17:27,12/2/2025 17:50,Ansys Zemax OpticStudio Enterprise,1,0.38,7.5,AEC,tutley
+12/2/2025 18:08,12/2/2025 18:27,Ansys Zemax OpticStudio Enterprise,1,0.31,6.2,AEC,tutley
+12/2/2025 18:49,12/2/2025 18:52,Ansys Zemax OpticStudio Enterprise,1,0.05,0.9,AEC,tutley
+12/2/2025 16:46,12/2/2025 16:47,Ansys Discovery Enterprise,1,0.01,0.2,AEC,tutley
+12/2/2025 17:50,12/2/2025 18:04,Ansys Discovery Enterprise,1,0.24,4.3,AEC,tutley
+12/2/2025 17:09,12/2/2025 17:11,Ansys Discovery Enterprise,1,0.02,0.4,AEC,tutley
+12/2/2025 18:52,12/2/2025 18:56,Ansys Discovery Enterprise,1,0.07,1.3,AEC,tutley
+12/2/2025 18:45,12/2/2025 18:46,Ansys Discovery Enterprise,1,0.01,0.2,AEC,tutley
+12/2/2025 18:42,12/2/2025 18:43,Ansys Discovery Enterprise,1,0.02,0.3,AEC,tutley
+12/2/2025 17:06,12/2/2025 17:09,Ansys Discovery Enterprise,1,0.05,0.9,AEC,tutley
+12/2/2025 18:57,12/2/2025 18:58,Ansys Discovery Enterprise,1,0.01,0.2,AEC,tutley
+12/2/2025 18:44,12/2/2025 18:45,Ansys Discovery Enterprise,1,0.02,0.3,AEC,tutley
+12/2/2025 18:05,12/2/2025 18:06,Ansys Discovery Enterprise,1,0.02,0.3,AEC,tutley
+12/2/2025 18:28,12/2/2025 18:41,Ansys Discovery Enterprise,1,0.22,3.9,AEC,tutley
+12/2/2025 18:57,12/2/2025 19:02,Ansys Discovery Enterprise,1,0.08,1.5,AEC,sgutteridge
+12/2/2025 19:03,12/2/2025 19:03,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge
+12/2/2025 19:03,12/2/2025 19:03,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge
+12/2/2025 18:57,12/2/2025 19:02,Ansys BladeModeler,1,0.08,0.2,AEC,sgutteridge
+12/2/2025 19:03,12/2/2025 19:08,Ansys CFD PrepPost,1,0.09,1.3,AEC,sgutteridge
+12/2/2025 19:09,12/2/2025 19:16,Ansys CFD PrepPost,1,0.11,1.5,AEC,sgutteridge
+12/2/2025 19:22,12/2/2025 19:41,Ansys Zemax OpticStudio Enterprise,1,0.31,6.2,AEC,tutley
+12/2/2025 16:58,12/2/2025 16:58,Ansys Mechanical Enterprise Solver,1,0.01,0.1,AEC,tutley
+12/2/2025 16:59,12/2/2025 16:59,Ansys Mechanical Enterprise Solver,1,0.01,0.1,AEC,tutley
+12/2/2025 17:00,12/2/2025 17:00,Ansys Mechanical Enterprise Solver,1,0.01,0.1,AEC,tutley
+12/2/2025 17:19,12/2/2025 17:20,Ansys Mechanical Enterprise Solver,1,0.01,0.2,AEC,tutley
+12/2/2025 17:17,12/2/2025 17:17,Ansys Mechanical Enterprise Solver,1,0.01,0.1,AEC,tutley
+12/2/2025 17:12,12/2/2025 17:12,Ansys Mechanical Enterprise Solver,1,0.01,0.1,AEC,tutley
+12/2/2025 17:03,12/2/2025 17:03,Ansys Mechanical Enterprise Solver,1,0.01,0.1,AEC,tutley
+12/2/2025 17:02,12/2/2025 17:02,Ansys Mechanical Enterprise Solver,1,0.01,0.1,AEC,tutley
+12/2/2025 18:51,12/2/2025 18:51,Ansys Mechanical Enterprise Solver,1,0.01,0.1,AEC,tutley
+12/2/2025 19:02,12/2/2025 19:02,Ansys Mechanical Enterprise Solver,1,0.01,0.1,AEC,tutley
+12/2/2025 17:18,12/2/2025 17:19,Ansys Mechanical Enterprise Solver,1,0.01,0.2,AEC,tutley
+12/2/2025 18:07,12/2/2025 18:08,Ansys Mechanical Enterprise Solver,1,0.01,0.4,AEC,tutley
+12/2/2025 18:49,12/2/2025 18:49,Ansys Mechanical Enterprise Solver,1,0.01,0.1,AEC,tutley
+12/2/2025 18:19,12/2/2025 18:20,Ansys Mechanical Enterprise Solver,1,0.01,0.4,AEC,tutley
+12/2/2025 17:21,12/2/2025 17:22,Ansys Mechanical Enterprise Solver,1,0.01,0.4,AEC,tutley
+12/2/2025 18:07,12/2/2025 18:07,Ansys Mechanical Enterprise Solver,1,0.01,0.2,AEC,tutley
+12/2/2025 19:11,12/2/2025 19:12,Ansys Mechanical Enterprise Solver,1,0.01,0.4,AEC,tutley
+12/2/2025 18:18,12/2/2025 18:19,Ansys Mechanical Enterprise Solver,1,0.01,0.2,AEC,tutley
+12/2/2025 19:07,12/2/2025 19:08,Ansys Mechanical Enterprise Solver,1,0.01,0.2,AEC,tutley
+12/2/2025 19:19,12/2/2025 19:20,Ansys Mechanical Enterprise Solver,1,0.01,0.4,AEC,tutley
+12/2/2025 18:49,12/2/2025 18:49,Ansys Mechanical Enterprise Solver,1,0.01,0.1,AEC,tutley
+12/2/2025 19:16,12/2/2025 19:17,Ansys Mechanical Enterprise Solver,1,0.01,0.4,AEC,tutley
+12/2/2025 18:19,12/2/2025 18:19,Ansys HPC,14,0.01,0.3,AEC,tutley
+12/2/2025 17:21,12/2/2025 17:22,Ansys HPC,14,0.01,0.3,AEC,tutley
+12/2/2025 19:16,12/2/2025 19:16,Ansys HPC,14,0.01,0.3,AEC,tutley
+12/2/2025 18:08,12/2/2025 18:08,Ansys HPC,14,0.01,0.3,AEC,tutley
+12/2/2025 17:20,12/2/2025 17:20,Ansys HPC,14,0.01,0.1,AEC,tutley
+12/2/2025 18:18,12/2/2025 18:18,Ansys HPC,14,0.01,0.1,AEC,tutley
+12/2/2025 18:07,12/2/2025 18:07,Ansys HPC,14,0.01,0.1,AEC,tutley
+12/2/2025 19:11,12/2/2025 19:12,Ansys HPC,14,0.01,0.3,AEC,tutley
+12/2/2025 19:42,12/2/2025 19:43,Ansys Mechanical Enterprise Solver,1,0.01,0.4,AEC,tutley
+12/2/2025 17:18,12/2/2025 17:19,Ansys HPC,14,0.01,0.1,AEC,tutley
+12/2/2025 19:07,12/2/2025 19:07,Ansys HPC,14,0.01,0.1,AEC,tutley
+12/2/2025 19:42,12/2/2025 19:43,Ansys HPC,14,0.01,0.3,AEC,tutley
+12/2/2025 19:20,12/2/2025 19:20,Ansys HPC,14,0.01,0.3,AEC,tutley
+12/2/2025 17:14,12/2/2025 17:14,Ansys Mechanical Enterprise Solver,1,0.01,0.1,AEC,tutley
+12/2/2025 19:42,12/2/2025 19:46,Ansys Zemax OpticStudio Enterprise,1,0.07,1.3,AEC,tutley
+12/2/2025 16:46,12/2/2025 16:47,Ansys Mechanical Enterprise PrepPost,1,0.03,0.4,AEC,tutley
+12/2/2025 18:46,12/2/2025 19:48,Ansys GRANTA Materials Data for Simulation,1,1.02,33.8,AEC,tutley
+12/2/2025 18:42,12/2/2025 19:48,Ansys Mechanical Enterprise PrepPost,1,1.1,15.4,AEC,tutley
+12/2/2025 17:09,12/2/2025 18:29,Ansys Mechanical Enterprise PrepPost,1,1.34,18.7,AEC,tutley
+12/2/2025 16:49,12/2/2025 17:06,Ansys GRANTA Materials Data for Simulation,1,0.28,9.4,AEC,tutley
+12/2/2025 16:48,12/2/2025 17:06,Ansys Mechanical Enterprise PrepPost,1,0.3,4.3,AEC,tutley
+12/2/2025 19:15,12/2/2025 19:15,Ansys CFD Enterprise Solver,1,0.01,0.1,AEC,sgutteridge
+12/2/2025 19:16,12/2/2025 20:00,Ansys CFD Enterprise Solver,1,0.74,20.7,AEC,sgutteridge
+12/2/2025 20:06,12/2/2025 20:06,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge
+12/2/2025 20:06,12/2/2025 20:06,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge
+12/2/2025 20:05,12/2/2025 20:09,Ansys CFD PrepPost,1,0.07,1,AEC,sgutteridge
+12/2/2025 20:10,12/2/2025 20:11,Ansys HPC,14,0.01,0.3,AEC,tutley
+12/2/2025 20:09,12/2/2025 20:10,Ansys Mechanical Enterprise Solver,1,0.01,0.2,AEC,tutley
+12/2/2025 20:02,12/2/2025 20:14,Ansys Mechanical Enterprise PrepPost,1,0.2,2.7,AEC,tutley
+12/2/2025 20:10,12/2/2025 20:11,Ansys Mechanical Enterprise Solver,1,0.02,0.4,AEC,tutley
+12/2/2025 20:09,12/2/2025 20:10,Ansys HPC,14,0.01,0.1,AEC,tutley
+12/2/2025 20:02,12/2/2025 20:03,Ansys CFD Enterprise Solver,1,0.02,0.7,AEC,sgutteridge
+12/2/2025 20:24,12/2/2025 20:29,Ansys CFD Enterprise Solver,1,0.07,2.1,AEC,sgutteridge
+12/2/2025 20:09,12/2/2025 20:23,Ansys CFD Enterprise Solver,1,0.24,6.6,AEC,sgutteridge
+12/2/2025 20:09,12/2/2025 20:09,Ansys CFD Enterprise Solver,1,0.01,0.1,AEC,sgutteridge
