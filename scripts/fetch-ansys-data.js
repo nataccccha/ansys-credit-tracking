@@ -25,7 +25,6 @@ async function downloadAnsysData() {
     
     const page = await browser.newPage();
     
-    // Set up auto-download (no save dialog)
     const client = await page.target().createCDPSession();
     await client.send('Page.setDownloadBehavior', {
         behavior: 'allow',
@@ -35,18 +34,93 @@ async function downloadAnsysData() {
     try {
         // LOGIN
         console.log('Navigating to ANSYS licensing portal...');
-        await page.goto('https://licensing.ansys.com', { waitUntil: 'networkidle2' });
+        await page.goto('https://licensing.ansys.com', { waitUntil: 'networkidle2', timeout: 60000 });
+        
+        console.log('Current URL:', page.url());
+        console.log('Waiting for page to fully load...');
+        await new Promise(r => setTimeout(r, 5000));
+        
+        // Take screenshot to debug
+        await page.screenshot({ path: 'debug-login-page.png' });
+        console.log('Screenshot saved as debug-login-page.png');
+        
+        // Try multiple selectors for email
+        console.log('Looking for email input...');
+        const emailSelectors = [
+            'input[type="email"]',
+            'input[name="email"]',
+            'input[id="email"]',
+            'input[name="username"]',
+            'input[id="username"]',
+            'input[placeholder*="email"]',
+            'input[placeholder*="Email"]',
+            'input[autocomplete="email"]',
+            'input[autocomplete="username"]',
+            'input'
+        ];
+        
+        let emailInput = null;
+        for (const selector of emailSelectors) {
+            console.log(`Trying selector: ${selector}`);
+            emailInput = await page.$(selector);
+            if (emailInput) {
+                const inputType = await page.evaluate(el => el.type, emailInput);
+                const inputName = await page.evaluate(el => el.name, emailInput);
+                console.log(`Found input with type="${inputType}", name="${inputName}"`);
+                if (inputType !== 'hidden' && inputType !== 'submit') {
+                    console.log(`Using selector: ${selector}`);
+                    break;
+                }
+                emailInput = null;
+            }
+        }
+        
+        if (!emailInput) {
+            // List all inputs on the page for debugging
+            const allInputs = await page.$$('input');
+            console.log(`Found ${allInputs.length} input elements on page`);
+            for (let i = 0; i < allInputs.length; i++) {
+                const type = await page.evaluate(el => el.type, allInputs[i]);
+                const name = await page.evaluate(el => el.name, allInputs[i]);
+                const id = await page.evaluate(el => el.id, allInputs[i]);
+                console.log(`Input ${i}: type="${type}", name="${name}", id="${id}"`);
+            }
+            throw new Error('Could not find email input field');
+        }
         
         console.log('Entering email...');
-        await page.waitForSelector('input[type="email"]', { timeout: 15000 });
-        await page.type('input[type="email"]', USERNAME);
-        await page.click('button[type="submit"]');
-        await new Promise(r => setTimeout(r, 3000));
+        await emailInput.click();
+        await emailInput.type(USERNAME);
+        
+        // Find and click submit button
+        console.log('Looking for submit button...');
+        const submitBtn = await page.$('button[type="submit"]');
+        if (submitBtn) {
+            await submitBtn.click();
+        } else {
+            // Try clicking any button with "Continue" or "Next" text
+            const buttons = await page.$$('button');
+            for (const btn of buttons) {
+                const text = await page.evaluate(el => el.textContent, btn);
+                if (text && (text.includes('Continue') || text.includes('Next') || text.includes('Sign'))) {
+                    await btn.click();
+                    break;
+                }
+            }
+        }
+        
+        await new Promise(r => setTimeout(r, 5000));
+        await page.screenshot({ path: 'debug-after-email.png' });
         
         console.log('Entering password...');
         await page.waitForSelector('input[type="password"]', { timeout: 15000 });
         await page.type('input[type="password"]', PASSWORD);
-        await page.click('button[type="submit"]');
+        
+        const submitBtn2 = await page.$('button[type="submit"]');
+        if (submitBtn2) {
+            await submitBtn2.click();
+        }
+        
         await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 30000 });
         console.log('Login successful!');
         
@@ -75,86 +149,51 @@ async function downloadAnsysData() {
 }
 
 async function selectDateRangeAndDownload(page, dateOption, filePrefix, downloadPath) {
-    // Click the date range button (the "From: ... To: ..." button)
+    // Click the date range button
     console.log('Opening date picker...');
-    const dateButton = await page.waitForSelector('button:has-text("From"), button:has-text("To:")', { timeout: 10000 }).catch(() => null);
-    
-    if (!dateButton) {
-        // Try finding by looking for button with calendar icon or date text
-        const buttons = await page.$$('button');
-        for (const btn of buttons) {
-            const text = await page.evaluate(el => el.textContent, btn);
-            if (text && text.includes('From') && text.includes('To')) {
-                await btn.click();
-                break;
-            }
+    const buttons = await page.$$('button');
+    for (const btn of buttons) {
+        const text = await page.evaluate(el => el.textContent, btn);
+        if (text && text.includes('From') && text.includes('To')) {
+            await btn.click();
+            break;
         }
-    } else {
-        await dateButton.click();
     }
     
-    await new Promise(r => setTimeout(r, 1000));
+    await new Promise(r => setTimeout(r, 1500));
     
-    // Click on the date option (YTD, 5 Days, etc.)
+    // Click on the date option
     console.log(`Selecting "${dateOption}"...`);
-    const options = await page.$$('div, li, span, button');
-    for (const option of options) {
-        const text = await page.evaluate(el => el.textContent?.trim(), option);
+    const allElements = await page.$$('div, li, span, button, p');
+    for (const el of allElements) {
+        const text = await page.evaluate(e => e.textContent?.trim(), el);
         if (text === dateOption) {
-            await option.click();
+            await el.click();
             console.log(`Clicked "${dateOption}"`);
             break;
         }
     }
     
-    await new Promise(r => setTimeout(r, 3000)); // Wait for table to reload
+    await new Promise(r => setTimeout(r, 3000));
     
     // Click download button
     console.log('Clicking download button...');
-    
-    // Look for the download icon/button in the top right
-    const downloadSelectors = [
-        '[aria-label*="download"]',
-        '[aria-label*="Download"]', 
-        '[title*="Download"]',
-        '[data-testid*="download"]',
-        'button svg[data-testid="FileDownloadIcon"]',
-        'button svg[data-icon="download"]'
-    ];
-    
-    let clicked = false;
-    for (const selector of downloadSelectors) {
-        const btn = await page.$(selector);
-        if (btn) {
+    const allButtons = await page.$$('button');
+    for (const btn of allButtons) {
+        const html = await page.evaluate(el => el.innerHTML.toLowerCase(), btn);
+        const ariaLabel = await page.evaluate(el => el.getAttribute('aria-label')?.toLowerCase() || '', btn);
+        if (html.includes('download') || ariaLabel.includes('download')) {
             await btn.click();
-            clicked = true;
-            console.log('Download button clicked!');
+            console.log('Download clicked!');
             break;
         }
     }
     
-    if (!clicked) {
-        // Try finding by icon content
-        const allButtons = await page.$$('button');
-        for (const btn of allButtons) {
-            const html = await page.evaluate(el => el.innerHTML.toLowerCase(), btn);
-            const ariaLabel = await page.evaluate(el => el.getAttribute('aria-label')?.toLowerCase() || '', btn);
-            if (html.includes('download') || html.includes('filedownload') || ariaLabel.includes('download')) {
-                await btn.click();
-                console.log('Download button clicked (found by content)!');
-                clicked = true;
-                break;
-            }
-        }
-    }
-    
-    // Wait for download to complete
-    console.log('Waiting for download...');
     await new Promise(r => setTimeout(r, 10000));
     
-    // Rename the downloaded file
+    // Rename file
     const files = fs.readdirSync(downloadPath);
-    console.log('Files in download folder:', files);
+    console.log('Files:', files);
     
     const csvFile = files.find(f => 
         f.endsWith('.csv') && 
@@ -168,9 +207,7 @@ async function selectDateRangeAndDownload(page, dateOption, filePrefix, download
         const newPath = path.join(downloadPath, `${filePrefix}.csv`);
         if (fs.existsSync(newPath)) fs.unlinkSync(newPath);
         fs.renameSync(oldPath, newPath);
-        console.log(`Renamed "${csvFile}" to "${filePrefix}.csv"`);
-    } else {
-        console.log('Warning: No new CSV file found to rename');
+        console.log(`Saved as ${filePrefix}.csv`);
     }
 }
 
