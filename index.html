@@ -456,11 +456,16 @@
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: 10px;
-            padding: 12px;
+            padding: 16px 12px;
             transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             box-shadow: var(--shadow-sm);
             text-align: center;
             min-width: 0;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
         }
 
         .stat-card:hover {
@@ -1452,7 +1457,7 @@
             </div>
         </header>
 
-        <div class="calculator-upload-grid" style="display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 16px;">
+        <div class="calculator-upload-grid" style="display: grid; grid-template-columns: 1fr; gap: 12px;">
             <!-- Calculator -->
                 <div class="master-section">
                     <div class="master-section-header" onclick="toggleSection('calculatorContent', 'calculatorIcon')">
@@ -1593,16 +1598,16 @@
                     <div class="stats-grid">
                         <div class="stat-card">
                             <div class="stat-label">Calculated Thresholds</div>
-                            <div style="margin-top: 10px;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 0;">
+                            <div style="margin-top: 10px; width: 100%;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 8px;">
                                     <span style="font-size: 0.75rem; color: var(--text-secondary);">Critical</span>
                                     <span id="criticalWeeklyRate" style="font-size: 0.875rem; font-weight: 600; color: var(--accent-danger);">-</span>
                                 </div>
-                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 0;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 8px;">
                                     <span style="font-size: 0.75rem; color: var(--text-secondary);">Warning</span>
                                     <span id="warningWeeklyRate" style="font-size: 0.875rem; font-weight: 600; color: var(--accent-warning);">-</span>
                                 </div>
-                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 0;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 8px;">
                                     <span style="font-size: 0.75rem; color: var(--text-secondary);">Safe</span>
                                     <span id="safeWeeklyRate" style="font-size: 0.875rem; font-weight: 600; color: var(--accent-success);">-</span>
                                 </div>
@@ -1698,7 +1703,7 @@
             </div>
         
             <!-- Administrative Tools Section -->
-            <div class="master-section" style="margin-top: 20px;">
+            <div class="master-section">
             <div class="master-section-header" onclick="toggleSection('adminToolsContent', 'adminToolsIcon')">
                 <h2>🔧 Administrative Tools</h2>
                 <span class="collapse-icon collapsed" id="adminToolsIcon">▼</span>
