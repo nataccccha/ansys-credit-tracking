@@ -461,11 +461,6 @@
             box-shadow: var(--shadow-sm);
             text-align: center;
             min-width: 0;
-            min-height: 120px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
         }
 
         .stat-card:hover {
@@ -596,7 +591,7 @@
         }
 
         .period-badge.historical {
-            background: rgba(175, 82, 222, 0.12);
+            background: rgba(0, 91, 127, 0.15);
             color: var(--accent-teal);
         }
 
@@ -646,8 +641,8 @@
         }
 
         @keyframes accelPulse {
-            0%, 100% { box-shadow: 0 0 20px rgba(168, 85, 247, 0.3); }
-            50% { box-shadow: 0 0 40px rgba(168, 85, 247, 0.3); }
+            0%, 100% { box-shadow: 0 0 20px rgba(0, 150, 167, 0.3); }
+            50% { box-shadow: 0 0 40px rgba(0, 150, 167, 0.4); }
         }
 
         .alert-header {
@@ -997,27 +992,32 @@
         .pivot-table thead {
             position: sticky;
             top: 0;
-            background: var(--bg-card);
             z-index: 10;
         }
 
         .pivot-table th {
             text-align: right;
             padding: 8px 12px;
-            background: var(--bg-secondary);
-            color: var(--text-secondary);
+            background: rgba(0, 122, 255, 0.1);
+            color: var(--accent-info);
             font-weight: 600;
             letter-spacing: -0.01em;
             font-size: 1rem;
-            border-bottom: 2px solid var(--border);
+            border-bottom: 2px solid var(--accent-info);
         }
 
         .pivot-table th:first-child {
             text-align: left;
             position: sticky;
             left: 0;
-            background: var(--bg-secondary);
+            background: rgba(0, 122, 255, 0.15);
             z-index: 11;
+        }
+
+        .pivot-table th:last-child {
+            background: rgba(0, 91, 127, 0.15);
+            color: var(--accent-teal);
+            border-bottom-color: var(--accent-teal);
         }
 
         .pivot-table td {
@@ -1032,8 +1032,15 @@
             font-weight: 600;
             position: sticky;
             left: 0;
-            background: var(--bg-card);
+            background: rgba(100, 116, 139, 0.08);
             z-index: 5;
+            color: var(--text-primary);
+        }
+
+        .pivot-table td:last-child {
+            background: rgba(0, 91, 127, 0.08);
+            font-weight: 600;
+            color: var(--accent-teal);
         }
 
         .pivot-table tr:hover td {
@@ -1041,17 +1048,39 @@
         }
 
         .pivot-table tr:hover td:first-child {
-            background: var(--bg-secondary);
+            background: rgba(100, 116, 139, 0.15);
         }
 
-        .pivot-table .total-row {
+        .pivot-table tr:hover td:last-child {
+            background: rgba(0, 91, 127, 0.15);
+        }
+
+        .pivot-table .total-row td {
             font-weight: 600;
-            background: var(--bg-secondary);
-            border-top: 2px solid var(--border);
+            background: rgba(52, 199, 89, 0.1);
+            border-top: 2px solid var(--accent-success);
+            color: var(--accent-success);
+        }
+
+        .pivot-table .total-row td:first-child {
+            background: rgba(52, 199, 89, 0.15);
+        }
+
+        .pivot-table .total-row td:last-child {
+            background: rgba(52, 199, 89, 0.2);
+            color: var(--accent-success);
         }
 
         .pivot-table .total-row:hover td {
-            background: var(--bg-secondary);
+            background: rgba(52, 199, 89, 0.15);
+        }
+
+        .pivot-table .total-row:hover td:first-child {
+            background: rgba(52, 199, 89, 0.2);
+        }
+
+        .pivot-table .total-row:hover td:last-child {
+            background: rgba(52, 199, 89, 0.25);
         }
 
         .pivot-table-container {
@@ -1434,21 +1463,21 @@
             <h1>ANSYS AEC Usage</h1>
             <p class="subtitle">Real-time credit monitoring & insights</p>
             <div style="margin-top: 16px; display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;">
-                <div style="padding: 10px 16px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px;">
+                <div style="padding: 10px 16px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; text-align: center;">
                     <span style="font-size: 0.6875rem; color: var(--text-secondary); display: block;">Current Balance</span>
                     <span style="font-size: 0.875rem; font-weight: 600; color: var(--text-primary);" id="headerBalance">834.2 AEC</span>
                 </div>
-                <div style="padding: 10px 16px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px;">
+                <div style="padding: 10px 16px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; text-align: center;">
                     <span style="font-size: 0.6875rem; color: var(--text-secondary); display: block;">Balance Last Updated</span>
                     <span style="font-size: 0.875rem; font-weight: 600; color: var(--text-primary);" id="balanceUpdateDate">December 3, 2024</span>
                 </div>
-                <div style="padding: 10px 16px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px;" id="historicalUploadSection">
+                <div style="padding: 10px 16px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; text-align: center;" id="historicalUploadSection">
                     <span style="font-size: 0.6875rem; color: var(--text-secondary); display: block;">Historical Data</span>
                     <span style="font-size: 0.75rem; color: var(--accent-success);" id="historicalStatus"></span>
                     <span style="font-size: 0.75rem; font-weight: 600; color: var(--text-primary); display: block;" id="historicalDateRange"></span>
                     <input type="file" id="historicalFile" accept=".csv" style="display: none;">
                 </div>
-                <div style="padding: 10px 16px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px;" id="recentUploadSection">
+                <div style="padding: 10px 16px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; text-align: center;" id="recentUploadSection">
                     <span style="font-size: 0.6875rem; color: var(--text-secondary); display: block;">Recent Data</span>
                     <span style="font-size: 0.75rem; color: var(--accent-success);" id="recentStatus"></span>
                     <span style="font-size: 0.75rem; font-weight: 600; color: var(--text-primary); display: block;" id="recentDateRange"></span>
