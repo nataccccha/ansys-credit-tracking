@@ -19,13 +19,16 @@ jobs:
           node-version: '20'
       
       - name: Install dependencies
-        run: npm install puppeteer
+        run: |
+          npm install puppeteer
+          sudo apt-get update
+          sudo apt-get install -y xvfb
           
       - name: Fetch ANSYS data
         env:
           ANSYS_USERNAME: ${{ secrets.ANSYS_USERNAME }}
           ANSYS_PASSWORD: ${{ secrets.ANSYS_PASSWORD }}
-        run: node scripts/fetch-ansys-data.js
+        run: xvfb-run --auto-servernum node scripts/fetch-ansys-data.js
       
       - name: Commit and push data
         run: |
