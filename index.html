@@ -621,8 +621,14 @@
         }
 
         @keyframes alertPulse {
-            0%, 100% { box-shadow: 0 0 20px var(--glow-danger); }
-            50% { box-shadow: 0 0 40px var(--glow-danger); }
+            0%, 100% { 
+                box-shadow: 0 4px 20px var(--glow-danger); 
+                transform: scale(1);
+            }
+            50% { 
+                box-shadow: 0 6px 30px var(--glow-danger); 
+                transform: scale(1.01);
+            }
         }
 
         .alert-card.warning {
@@ -631,8 +637,14 @@
         }
 
         @keyframes warningPulse {
-            0%, 100% { box-shadow: 0 0 20px var(--glow-warning); }
-            50% { box-shadow: 0 0 40px var(--glow-warning); }
+            0%, 100% { 
+                box-shadow: 0 4px 20px var(--glow-warning); 
+                transform: scale(1);
+            }
+            50% { 
+                box-shadow: 0 6px 30px var(--glow-warning); 
+                transform: scale(1.01);
+            }
         }
 
         .alert-card.accelerating {
@@ -641,8 +653,14 @@
         }
 
         @keyframes accelPulse {
-            0%, 100% { box-shadow: 0 0 20px rgba(0, 150, 167, 0.3); }
-            50% { box-shadow: 0 0 40px rgba(0, 150, 167, 0.4); }
+            0%, 100% { 
+                box-shadow: 0 4px 20px rgba(0, 150, 167, 0.3); 
+                transform: scale(1);
+            }
+            50% { 
+                box-shadow: 0 6px 30px rgba(0, 150, 167, 0.4); 
+                transform: scale(1.01);
+            }
         }
 
         .alert-header {
