@@ -33,6 +33,16 @@ jobs:
           ANSYS_PASSWORD: ${{ secrets.ANSYS_PASSWORD }}
         run: xvfb-run --auto-servernum node scripts/fetch-ansys-data.js
       
+      - name: Upload debug screenshots
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: debug-screenshots
+          path: |
+            *.png
+            data/
+          retention-days: 5
+      
       - name: Commit and push data
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
