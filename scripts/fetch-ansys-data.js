@@ -108,6 +108,9 @@ async function downloadAnsysData() {
         }
         console.log('Transactions page loaded!');
         
+        // Take screenshot to debug table structure
+        await page.screenshot({ path: 'debug-table-structure.png', fullPage: true });
+        
         // SCRAPE 1 YEAR DATA (rolling 12 months)
         console.log('=== Scraping 1 Year data ===');
         await scrapeData(page, '1 Year', 'historical', downloadPath);
@@ -153,6 +156,9 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
     console.log(`Selected ${dateOption}`);
     await new Promise(r => setTimeout(r, 5000));
     
+    // Take screenshot after selecting date
+    await page.screenshot({ path: `debug-after-${filePrefix}-select.png`, fullPage: true });
+    
     // Get total pages
     const pageInfo = await page.evaluate(() => {
         const text = document.body.innerText;
@@ -161,6 +167,39 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
     });
     console.log(`Total pages: ${pageInfo}`);
     
+    // Debug: log HTML structure
+    const tableDebug = await page.evaluate(() => {
+        const info = {
+            tables: document.querySelectorAll('table').length,
+            tbodies: document.querySelectorAll('tbody').length,
+            trs: document.querySelectorAll('tr').length,
+            tds: document.querySelectorAll('td').length,
+            ths: document.querySelectorAll('th').length,
+            roleRows: document.querySelectorAll('[role="row"]').length,
+            roleCells: document.querySelectorAll('[role="cell"]').length,
+            roleColumnHeaders: document.querySelectorAll('[role="columnheader"]').length,
+            divWithData: document.querySelectorAll('div[data-field]').length,
+            muiTableCells: document.querySelectorAll('.MuiTableCell-root').length
+        };
+        
+        // Try to get sample of what's in a row
+        const firstRow = document.querySelector('tbody tr');
+        if (firstRow) {
+            info.sampleRowHTML = firstRow.innerHTML.substring(0, 500);
+        }
+        
+        // Check for MUI DataGrid
+        const dataGrid = document.querySelector('.MuiDataGrid-root');
+        if (dataGrid) {
+            info.hasMuiDataGrid = true;
+            const gridRows = dataGrid.querySelectorAll('.MuiDataGrid-row');
+            info.muiGridRows = gridRows.length;
+        }
+        
+        return info;
+    });
+    console.log('Table structure debug:', JSON.stringify(tableDebug, null, 2));
+    
     // Scrape all pages
     let allData = [];
     let headers = [];
@@ -168,33 +207,96 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
     for (let pageNum = 1; pageNum <= pageInfo; pageNum++) {
         console.log(`Scraping page ${pageNum}/${pageInfo}...`);
         
-        // Get table data from current page
+        // Wait for table to be populated
+        await new Promise(r => setTimeout(r, 2000));
+        
+        // Get table data - try multiple approaches
         const pageData = await page.evaluate(() => {
-            const rows = [];
-            const headerCells = document.querySelectorAll('th, [role="columnheader"]');
-            const headers = Array.from(headerCells).map(h => h.textContent?.trim() || '');
+            let headers = [];
+            let rows = [];
             
-            const dataRows = document.querySelectorAll('tbody tr, [role="row"]');
-            dataRows.forEach(row => {
-                const cells = row.querySelectorAll('td, [role="cell"]');
-                if (cells.length > 0) {
-                    const rowData = Array.from(cells).map(c => c.textContent?.trim() || '');
-                    rows.push(rowData);
+            // APPROACH 1: Standard HTML table
+            const table = document.querySelector('table');
+            if (table) {
+                const headerCells = table.querySelectorAll('thead th, thead td');
+                headers = Array.from(headerCells).map(h => h.textContent?.trim() || '');
+                
+                const bodyRows = table.querySelectorAll('tbody tr');
+                bodyRows.forEach(row => {
+                    const cells = row.querySelectorAll('td');
+                    if (cells.length > 0) {
+                        const rowData = Array.from(cells).map(c => c.textContent?.trim() || '');
+                        rows.push(rowData);
+                    }
+                });
+            }
+            
+            // APPROACH 2: MUI DataGrid
+            if (rows.length === 0) {
+                const dataGrid = document.querySelector('.MuiDataGrid-root');
+                if (dataGrid) {
+                    // Get headers
+                    const headerCells = dataGrid.querySelectorAll('.MuiDataGrid-columnHeader');
+                    headers = Array.from(headerCells).map(h => h.textContent?.trim() || '');
+                    
+                    // Get data rows
+                    const gridRows = dataGrid.querySelectorAll('.MuiDataGrid-row');
+                    gridRows.forEach(row => {
+                        const cells = row.querySelectorAll('.MuiDataGrid-cell');
+                        if (cells.length > 0) {
+                            const rowData = Array.from(cells).map(c => c.textContent?.trim() || '');
+                            rows.push(rowData);
+                        }
+                    });
                 }
-            });
+            }
             
-            return { headers, rows };
+            // APPROACH 3: Role-based selectors
+            if (rows.length === 0) {
+                const roleHeaders = document.querySelectorAll('[role="columnheader"]');
+                headers = Array.from(roleHeaders).map(h => h.textContent?.trim() || '');
+                
+                const roleRows = document.querySelectorAll('[role="row"]');
+                roleRows.forEach((row, index) => {
+                    if (index === 0) return; // Skip header row
+                    const cells = row.querySelectorAll('[role="cell"], [role="gridcell"]');
+                    if (cells.length > 0) {
+                        const rowData = Array.from(cells).map(c => c.textContent?.trim() || '');
+                        rows.push(rowData);
+                    }
+                });
+            }
+            
+            // APPROACH 4: Generic div-based table (common in React apps)
+            if (rows.length === 0) {
+                // Look for repeated div structures
+                const allDivs = document.querySelectorAll('div');
+                const rowLike = [];
+                
+                allDivs.forEach(div => {
+                    const text = div.textContent?.trim() || '';
+                    // Look for divs containing date-like patterns (the Start Time column)
+                    if (text.match(/\d{4}-\d{2}-\d{2}/) && div.children.length < 3) {
+                        rowLike.push(div.closest('div[class]')?.parentElement);
+                    }
+                });
+            }
+            
+            return { headers, rows, headerCount: headers.length, rowCount: rows.length };
         });
         
-        if (pageNum === 1) {
+        console.log(`Page ${pageNum}: Found ${pageData.headerCount} headers, ${pageData.rowCount} rows`);
+        
+        if (pageNum === 1 && pageData.headers.length > 0) {
             headers = pageData.headers;
+            console.log('Headers:', headers);
         }
+        
         allData = allData.concat(pageData.rows);
         
         // Go to next page if not last
         if (pageNum < pageInfo) {
             await page.evaluate(() => {
-                // Try various next page button selectors
                 const selectors = [
                     '[aria-label="next page"]',
                     '[aria-label="Next page"]',
@@ -211,7 +313,6 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
                     }
                 }
                 
-                // Try finding by text/icon
                 const buttons = document.querySelectorAll('button');
                 for (const btn of buttons) {
                     const text = btn.textContent?.trim();
@@ -229,6 +330,12 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
     }
     
     console.log(`Scraped ${allData.length} rows total`);
+    
+    // If we still have no data, use default headers
+    if (headers.length === 0) {
+        headers = ['Start Time', 'End Time', 'Product', 'Count', 'Hours', 'Cost', 'Currency', 'Username'];
+        console.log('Using default headers:', headers);
+    }
     
     // Convert to CSV
     const csvContent = [
