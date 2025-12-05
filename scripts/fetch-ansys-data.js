@@ -172,20 +172,46 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
     
     console.log(`Total pages: ${totalPages}, Total rows expected: ${totalRows}`);
     
-    // Debug: Take screenshot and log all buttons
-    await page.screenshot({ path: `debug-${filePrefix}-pagination.png` });
-    
-    const buttonInfo = await page.evaluate(() => {
-        const buttons = document.querySelectorAll('button');
-        return Array.from(buttons).map((btn, i) => ({
-            index: i,
-            text: btn.textContent?.trim().substring(0, 20),
-            ariaLabel: btn.getAttribute('aria-label'),
-            disabled: btn.disabled,
-            className: btn.className?.substring(0, 50)
-        })).filter(b => b.text === '>' || b.text === '›' || b.ariaLabel?.toLowerCase().includes('next'));
+    // Find the next button by looking at pagination area
+    // The buttons are: |< < > >| - we want the 3rd one (index 2)
+    const paginationInfo = await page.evaluate(() => {
+        // Find element containing "Page X of Y"
+        const allElements = Array.from(document.querySelectorAll('*'));
+        let paginationContainer = null;
+        
+        for (const el of allElements) {
+            const text = el.textContent || '';
+            if (text.match(/Page\s+\d+\s+of\s+\d+/) && el.children.length < 10) {
+                paginationContainer = el.closest('div');
+                break;
+            }
+        }
+        
+        if (!paginationContainer) {
+            return { found: false, buttons: [] };
+        }
+        
+        // Get all buttons in this container and nearby
+        const parentDiv = paginationContainer.parentElement || paginationContainer;
+        const buttons = parentDiv.querySelectorAll('button');
+        
+        const buttonData = Array.from(buttons).map((btn, i) => {
+            const rect = btn.getBoundingClientRect();
+            return {
+                index: i,
+                x: rect.x,
+                y: rect.y,
+                width: rect.width,
+                height: rect.height,
+                disabled: btn.disabled,
+                html: btn.innerHTML.substring(0, 100)
+            };
+        });
+        
+        return { found: true, buttonCount: buttons.length, buttons: buttonData };
     });
-    console.log('Pagination buttons found:', JSON.stringify(buttonInfo));
+    
+    console.log(`Pagination: ${paginationInfo.buttonCount} buttons found`);
     
     // Scrape all pages
     let allData = [];
@@ -223,71 +249,64 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
         
         // Go to next page
         if (pageNum < totalPages) {
-            // Click next using keyboard navigation as fallback
+            // Click the "next" button - it's the 3rd button in pagination (index 2)
+            // Buttons are: |< (first), < (prev), > (next), >| (last)
             const clicked = await page.evaluate(() => {
-                // Find all buttons
-                const buttons = Array.from(document.querySelectorAll('button'));
+                // Find the pagination container
+                const allElements = Array.from(document.querySelectorAll('*'));
+                let paginationContainer = null;
                 
-                // Look for button with just ">" text
-                for (const btn of buttons) {
-                    const text = btn.textContent?.trim();
-                    if (text === '>' && !btn.disabled) {
-                        btn.click();
-                        return 'clicked > button';
+                for (const el of allElements) {
+                    const text = el.textContent || '';
+                    if (text.match(/Page\s+\d+\s+of\s+\d+/) && el.children.length < 10) {
+                        paginationContainer = el.closest('div')?.parentElement;
+                        break;
                     }
                 }
                 
-                // Look for button with aria-label containing "next"
-                for (const btn of buttons) {
-                    const aria = btn.getAttribute('aria-label')?.toLowerCase() || '';
-                    if (aria.includes('next') && !btn.disabled) {
-                        btn.click();
-                        return 'clicked aria-label next';
-                    }
+                if (!paginationContainer) {
+                    return 'no pagination container';
                 }
                 
-                // Look for the button AFTER "Page X of Y" text
-                const pageText = document.body.innerText;
-                const pageMatch = pageText.match(/Page\s+\d+\s+of\s+\d+/i);
-                if (pageMatch) {
-                    // Find element containing this text
-                    const allElements = document.querySelectorAll('*');
-                    for (const el of allElements) {
-                        if (el.textContent?.includes('Page') && el.textContent?.includes('of')) {
-                            // Look for sibling buttons
-                            const parent = el.closest('div');
-                            if (parent) {
-                                const siblingBtns = parent.querySelectorAll('button');
-                                // The ">" button should be one of the last buttons
-                                const btnsArray = Array.from(siblingBtns);
-                                for (let i = btnsArray.length - 1; i >= 0; i--) {
-                                    const btn = btnsArray[i];
-                                    const text = btn.textContent?.trim();
-                                    if ((text === '>' || text === '›') && !btn.disabled) {
-                                        btn.click();
-                                        return 'clicked sibling button';
-                                    }
-                                }
-                            }
-                        }
+                // Get all buttons
+                const buttons = Array.from(paginationContainer.querySelectorAll('button'));
+                
+                // Filter to only small icon-like buttons (pagination buttons are usually small)
+                const paginationButtons = buttons.filter(btn => {
+                    const rect = btn.getBoundingClientRect();
+                    return rect.width < 60 && rect.width > 20;
+                });
+                
+                // Sort by x position (left to right)
+                paginationButtons.sort((a, b) => {
+                    return a.getBoundingClientRect().x - b.getBoundingClientRect().x;
+                });
+                
+                // The "next" button should be the 3rd one (index 2) in: |< < > >|
+                // Or the 2nd one (index 1) if there are only 2 visible: < >
+                if (paginationButtons.length >= 4) {
+                    const nextBtn = paginationButtons[2]; // 3rd button
+                    if (!nextBtn.disabled) {
+                        nextBtn.click();
+                        return `clicked button index 2 of ${paginationButtons.length}`;
                     }
+                    return 'button 2 is disabled';
+                } else if (paginationButtons.length >= 2) {
+                    const nextBtn = paginationButtons[1]; // 2nd button
+                    if (!nextBtn.disabled) {
+                        nextBtn.click();
+                        return `clicked button index 1 of ${paginationButtons.length}`;
+                    }
+                    return 'button 1 is disabled';
                 }
                 
-                return 'no button found';
+                return `only ${paginationButtons.length} pagination buttons found`;
             });
             
-            console.log(`  Next page: ${clicked}`);
+            console.log(`  Next: ${clicked}`);
             
             // Wait for page to change
-            await new Promise(r => setTimeout(r, 2000));
-            
-            // Verify page changed by checking the "X to Y" text
-            const newRange = await page.evaluate(() => {
-                const text = document.body.innerText;
-                const match = text.match(/(\d+)\s+to\s+(\d+)\s+of/i);
-                return match ? parseInt(match[1]) : 0;
-            });
-            console.log(`  First row now: ${newRange}`);
+            await new Promise(r => setTimeout(r, 2500));
         }
     }
     
