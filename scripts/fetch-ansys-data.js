@@ -47,24 +47,16 @@ async function downloadAnsysData() {
         await page.goto('https://licensing.ansys.com', { waitUntil: 'networkidle0', timeout: 60000 });
         await new Promise(function(r) { setTimeout(r, 3000); });
         
-        // Enter email using Puppeteer's type method
+        // Enter email
         console.log('Entering email...');
+        await page.waitForSelector('input[type="email"], input[type="text"], input[name="email"]', { timeout: 30000 });
         
-        // Wait for email input to appear
-        await page.waitForSelector('input[type="email"], input[type="text"], input[name="email"], input[placeholder*="mail"]', { timeout: 30000 });
-        
-        // Try multiple selectors for email input
-        var emailEntered = await page.evaluate(function(email) {
-            // Try various selectors
+        await page.evaluate(function(email) {
             var selectors = [
                 'input[type="email"]',
                 'input[name="email"]',
-                'input[placeholder*="mail"]',
-                'input[placeholder*="Mail"]',
-                'input[autocomplete="email"]',
-                'input[autocomplete="username"]'
+                'input[placeholder*="mail"]'
             ];
-            
             for (var i = 0; i < selectors.length; i++) {
                 var input = document.querySelector(selectors[i]);
                 if (input) {
@@ -72,134 +64,82 @@ async function downloadAnsysData() {
                     input.value = email;
                     input.dispatchEvent(new Event('input', { bubbles: true }));
                     input.dispatchEvent(new Event('change', { bubbles: true }));
-                    return 'found with selector: ' + selectors[i];
+                    return;
                 }
             }
-            
-            // Fallback: find any visible text input
             var inputs = document.querySelectorAll('input');
             for (var i = 0; i < inputs.length; i++) {
                 var input = inputs[i];
                 var rect = input.getBoundingClientRect();
-                var type = input.type || 'text';
-                if (rect.width > 100 && rect.height > 20 && (type === 'text' || type === 'email')) {
+                if (rect.width > 100 && rect.height > 20) {
                     input.focus();
                     input.value = email;
                     input.dispatchEvent(new Event('input', { bubbles: true }));
                     input.dispatchEvent(new Event('change', { bubbles: true }));
-                    return 'found visible input at index ' + i;
+                    return;
                 }
             }
-            
-            return 'no email input found';
         }, USERNAME);
         
-        console.log('Email entry: ' + emailEntered);
-        
-        // Take screenshot to verify
-        await page.screenshot({ path: 'debug-01-after-email.png' });
-        
-        // Click Continue button
         await new Promise(function(r) { setTimeout(r, 1000); });
         
-        var continueClicked = await page.evaluate(function() {
-            // Look for Continue button
+        // Click Continue
+        await page.evaluate(function() {
             var buttons = document.querySelectorAll('button');
             for (var i = 0; i < buttons.length; i++) {
-                var btn = buttons[i];
-                var text = (btn.textContent || '').trim().toLowerCase();
+                var text = (buttons[i].textContent || '').trim().toLowerCase();
                 if (text === 'continue' || text === 'next' || text === 'submit') {
-                    btn.click();
-                    return 'clicked button: ' + text;
+                    buttons[i].click();
+                    return;
                 }
             }
-            
-            // Try submit button
             var submitBtn = document.querySelector('button[type="submit"]');
-            if (submitBtn) {
-                submitBtn.click();
-                return 'clicked submit button';
-            }
-            
-            return 'no continue button found';
+            if (submitBtn) submitBtn.click();
         });
-        
-        console.log('Continue button: ' + continueClicked);
         
         await new Promise(function(r) { setTimeout(r, 5000); });
         
-        // Take screenshot after clicking continue
-        await page.screenshot({ path: 'debug-02-after-continue.png' });
-        
-        console.log('Waiting for password field...');
+        // Enter password
+        console.log('Entering password...');
         for (var i = 0; i < 15; i++) {
             var hasPassword = await page.evaluate(function() { return !!document.querySelector('input[type="password"]'); });
-            if (hasPassword) {
-                console.log('Password field found!');
-                break;
-            }
-            console.log('Waiting for password... attempt ' + (i + 1));
+            if (hasPassword) break;
             await new Promise(function(r) { setTimeout(r, 2000); });
         }
         
-        console.log('Entering password...');
-        var passwordEntered = await page.evaluate(function(pwd) {
+        await page.evaluate(function(pwd) {
             var pwdInput = document.querySelector('input[type="password"]');
             if (pwdInput) {
                 pwdInput.focus();
                 pwdInput.value = pwd;
                 pwdInput.dispatchEvent(new Event('input', { bubbles: true }));
                 pwdInput.dispatchEvent(new Event('change', { bubbles: true }));
-                return 'password entered';
             }
-            return 'no password field found';
         }, PASSWORD);
         
-        console.log('Password entry: ' + passwordEntered);
-        
-        // Click sign in / submit
         await new Promise(function(r) { setTimeout(r, 1000); });
         
-        var signInClicked = await page.evaluate(function() {
+        // Click sign in
+        await page.evaluate(function() {
             var buttons = document.querySelectorAll('button');
             for (var i = 0; i < buttons.length; i++) {
-                var btn = buttons[i];
-                var text = (btn.textContent || '').trim().toLowerCase();
-                if (text.includes('sign in') || text.includes('login') || text.includes('log in') || text === 'continue' || text === 'submit') {
-                    btn.click();
-                    return 'clicked: ' + text;
+                var text = (buttons[i].textContent || '').trim().toLowerCase();
+                if (text.includes('sign in') || text.includes('login') || text === 'continue') {
+                    buttons[i].click();
+                    return;
                 }
             }
-            
             var submitBtn = document.querySelector('button[type="submit"]');
-            if (submitBtn) {
-                submitBtn.click();
-                return 'clicked submit';
-            }
-            
-            return 'no sign in button found';
+            if (submitBtn) submitBtn.click();
         });
         
-        console.log('Sign in button: ' + signInClicked);
-        
         await new Promise(function(r) { setTimeout(r, 10000); });
-        
-        // Take screenshot after login
-        await page.screenshot({ path: 'debug-03-after-login.png' });
-        
-        console.log('Current URL: ' + page.url());
         console.log('Login successful!');
         
         // RECENT DATA FIRST
         console.log('=== Scraping 5 Days data ===');
         await page.goto('https://licensing.ansys.com/transactions', { waitUntil: 'networkidle0', timeout: 120000 });
-        
-        // Wait for page to load
-        console.log('Waiting for transactions page...');
         await new Promise(function(r) { setTimeout(r, 5000); });
-        
-        await page.screenshot({ path: 'debug-04-transactions.png' });
-        
         await waitForTableLoad(page);
         recentRows = await scrapeData(page, '5 Days', 'recent', downloadPath);
         
@@ -247,47 +187,71 @@ async function waitForTableLoad(page) {
 }
 
 async function scrapeData(page, dateOption, filePrefix, downloadPath) {
-    // Check page state
-    var pageState = await page.evaluate(function() {
-        return {
-            hasFrom: document.body.innerText.includes('From'),
-            hasStartTime: document.body.innerText.includes('Start Time'),
-            rowCount: document.querySelectorAll('[role="row"]').length
-        };
+    // Get initial row count info
+    var initialInfo = await page.evaluate(function() {
+        var text = document.body.innerText;
+        var match = text.match(/\d+\s+to\s+\d+\s+of\s+([\d,]+)/i);
+        return match ? match[0] : 'not found';
     });
-    console.log('Page state: ' + JSON.stringify(pageState));
+    console.log('Initial page info: ' + initialInfo);
     
     // Click date picker
-    var datePickerClicked = await page.evaluate(function() {
+    console.log('Clicking date picker...');
+    await page.evaluate(function() {
         var buttons = document.querySelectorAll('button');
         for (var i = 0; i < buttons.length; i++) {
-            var btn = buttons[i];
-            var text = btn.textContent || '';
+            var text = buttons[i].textContent || '';
             if (text.includes('From') && text.includes('To')) {
-                btn.click();
-                return 'clicked';
+                buttons[i].click();
+                return;
             }
         }
-        return 'not found';
     });
-    console.log('Date picker: ' + datePickerClicked);
     await new Promise(function(r) { setTimeout(r, 2000); });
     
+    // Take screenshot of date picker dropdown
+    await page.screenshot({ path: 'debug-datepicker-' + filePrefix + '.png' });
+    
     // Select date option
+    console.log('Selecting ' + dateOption + '...');
     var optionClicked = await page.evaluate(function(option) {
-        var elements = document.querySelectorAll('*');
+        var elements = document.querySelectorAll('li, div, span, button');
         for (var i = 0; i < elements.length; i++) {
             var el = elements[i];
-            if (el.textContent && el.textContent.trim() === option && el.children.length === 0) {
+            var text = (el.textContent || '').trim();
+            if (text === option) {
                 el.click();
-                return 'clicked ' + option;
+                return 'clicked: ' + option;
             }
         }
         return 'not found: ' + option;
     }, dateOption);
     console.log('Date option: ' + optionClicked);
     
-    await new Promise(function(r) { setTimeout(r, 5000); });
+    // Wait for table to reload - check for "Loading" or wait for row count to change
+    console.log('Waiting for table to reload...');
+    await new Promise(function(r) { setTimeout(r, 2000); });
+    
+    // Wait for loading to finish
+    for (var i = 0; i < 20; i++) {
+        var state = await page.evaluate(function() {
+            var text = document.body.innerText;
+            return {
+                loading: text.includes('Loading'),
+                rowInfo: text.match(/\d+\s+to\s+\d+\s+of\s+([\d,]+)/i) ? text.match(/\d+\s+to\s+\d+\s+of\s+([\d,]+)/i)[0] : 'not found'
+            };
+        });
+        
+        if (!state.loading && state.rowInfo !== 'not found') {
+            console.log('Table loaded: ' + state.rowInfo);
+            break;
+        }
+        console.log('Waiting... loading=' + state.loading + ', rowInfo=' + state.rowInfo);
+        await new Promise(function(r) { setTimeout(r, 1000); });
+    }
+    
+    // Extra wait for data to fully load
+    await new Promise(function(r) { setTimeout(r, 3000); });
     
     // Get page info
     var pageInfo = await page.evaluate(function() {
@@ -303,6 +267,11 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
     var totalRows = pageInfo.totalRows;
     
     console.log('Total pages: ' + totalPages + ', Total rows expected: ' + totalRows);
+    
+    // If still 0 rows, take a screenshot
+    if (totalRows === 0) {
+        await page.screenshot({ path: 'debug-zero-rows-' + filePrefix + '.png' });
+    }
     
     var allData = [];
     
