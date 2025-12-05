@@ -128,61 +128,114 @@ async function downloadAnsysData() {
 }
 
 async function waitForTableLoad(page) {
+    console.log('Waiting for table to load...');
     for (var i = 0; i < 30; i++) {
         var hasContent = await page.evaluate(function() {
             return document.body.innerText.includes('Start Time');
         });
-        if (hasContent) break;
+        if (hasContent) {
+            console.log('Table headers found!');
+            break;
+        }
         await new Promise(function(r) { setTimeout(r, 2000); });
     }
+    
+    // Wait for actual row data
+    for (var i = 0; i < 15; i++) {
+        var rowCount = await page.evaluate(function() {
+            return document.querySelectorAll('[role="row"]').length;
+        });
+        console.log('Row elements found: ' + rowCount);
+        if (rowCount > 1) break;
+        await new Promise(function(r) { setTimeout(r, 2000); });
+    }
+    
     console.log('Page loaded!');
 }
 
 async function scrapeData(page, dateOption, filePrefix, downloadPath) {
+    // Take screenshot before clicking date picker
+    await page.screenshot({ path: 'debug-before-datepicker-' + filePrefix + '.png' });
+    
+    // Check current page state
+    var pageState = await page.evaluate(function() {
+        var text = document.body.innerText;
+        return {
+            hasFrom: text.includes('From'),
+            hasTo: text.includes('To'),
+            hasStartTime: text.includes('Start Time'),
+            rowCount: document.querySelectorAll('[role="row"]').length,
+            pageInfo: text.match(/\d+\s+to\s+\d+\s+of\s+[\d,]+/i) ? text.match(/\d+\s+to\s+\d+\s+of\s+[\d,]+/i)[0] : 'not found'
+        };
+    });
+    console.log('Page state: ' + JSON.stringify(pageState));
+    
     // Click date picker
-    await page.evaluate(function() {
+    var datePickerClicked = await page.evaluate(function() {
         var buttons = document.querySelectorAll('button');
         for (var i = 0; i < buttons.length; i++) {
             var btn = buttons[i];
             if (btn.textContent && btn.textContent.includes('From') && btn.textContent.includes('To')) {
                 btn.click();
-                return;
+                return 'clicked button with From/To';
             }
         }
+        return 'no date picker button found';
     });
+    console.log('Date picker: ' + datePickerClicked);
     await new Promise(function(r) { setTimeout(r, 2000); });
     
+    // Take screenshot after clicking date picker
+    await page.screenshot({ path: 'debug-after-datepicker-' + filePrefix + '.png' });
+    
     // Select date option
-    await page.evaluate(function(option) {
+    var optionClicked = await page.evaluate(function(option) {
         var elements = document.querySelectorAll('*');
         for (var i = 0; i < elements.length; i++) {
             var el = elements[i];
             if (el.textContent && el.textContent.trim() === option && el.children.length === 0) {
                 el.click();
-                return;
+                return 'clicked ' + option;
             }
         }
+        return 'option not found: ' + option;
     }, dateOption);
-    console.log('Selected ' + dateOption);
+    console.log('Date option: ' + optionClicked);
     
     // Wait for table to reload
+    console.log('Waiting for table to reload...');
     await new Promise(function(r) { setTimeout(r, 3000); });
-    for (var i = 0; i < 10; i++) {
+    
+    // Wait for loading to finish
+    for (var i = 0; i < 15; i++) {
         var loading = await page.evaluate(function() { return document.body.innerText.includes('Loading'); });
         if (!loading) break;
+        console.log('Still loading...');
         await new Promise(function(r) { setTimeout(r, 1000); });
     }
-    await new Promise(function(r) { setTimeout(r, 2000); });
+    await new Promise(function(r) { setTimeout(r, 3000); });
+    
+    // Take screenshot after loading
+    await page.screenshot({ path: 'debug-after-load-' + filePrefix + '.png' });
     
     // Get page info
     var pageInfo = await page.evaluate(function() {
         var text = document.body.innerText;
-        var rowMatch = text.match(/\d+\s+to\s+\d+\s+of\s+([\d,]+)/i);
-        var totalRows = rowMatch ? parseInt(rowMatch[1].replace(/,/g, '')) : 0;
-        var pageMatch = text.match(/Page\s+\d+\s+of\s+(\d+)/i);
-        var totalPages = pageMatch ? parseInt(pageMatch[1]) : 1;
-        return { totalPages: totalPages, totalRows: totalRows };
+        var rowMatch = text.match(/(\d+)\s+to\s+(\d+)\s+of\s+([\d,]+)/i);
+        var totalRows = rowMatch ? parseInt(rowMatch[3].replace(/,/g, '')) : 0;
+        var pageMatch = text.match(/Page\s+(\d+)\s+of\s+(\d+)/i);
+        var totalPages = pageMatch ? parseInt(pageMatch[2]) : 1;
+        var currentPage = pageMatch ? parseInt(pageMatch[1]) : 1;
+        return { 
+            totalPages: totalPages, 
+            totalRows: totalRows,
+            currentPage: currentPage,
+            rowMatchText: rowMatch ? rowMatch[0] : 'not found',
+            pageMatchText: pageMatch ? pageMatch[0] : 'not found'
+        };
     });
+    
+    console.log('Page info: ' + JSON.stringify(pageInfo));
     
     var totalPages = pageInfo.totalPages;
     var totalRows = pageInfo.totalRows;
@@ -222,6 +275,13 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
             
             return rows;
         }, HEADERS.length);
+        
+        if (pageNum === 1) {
+            console.log('First page data rows: ' + pageData.length);
+            if (pageData.length > 0) {
+                console.log('First row: ' + JSON.stringify(pageData[0]));
+            }
+        }
         
         // Check if data actually changed
         var currentFirstCell = pageData.length > 0 ? pageData[0][0] : '';
