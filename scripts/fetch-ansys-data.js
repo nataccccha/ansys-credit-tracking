@@ -96,13 +96,13 @@ async function downloadAnsysData() {
         console.log('=== Scraping 1 Year data ===');
         await page.goto('https://licensing.ansys.com/transactions', { waitUntil: 'networkidle0', timeout: 120000 });
         await waitForTableLoad(page);
-        await scrapeData(page, '1 Year', 'historical', downloadPath);
+        await scrapeData(page, '1 Year', 'historical', downloadPath, true); // debug=true
         
         // SCRAPE 5 DAYS DATA
         console.log('=== Scraping 5 Days data ===');
         await page.goto('https://licensing.ansys.com/transactions', { waitUntil: 'networkidle0', timeout: 120000 });
         await waitForTableLoad(page);
-        await scrapeData(page, '5 Days', 'recent', downloadPath);
+        await scrapeData(page, '5 Days', 'recent', downloadPath, false);
         
         console.log('All data scraped successfully!');
         
@@ -126,7 +126,7 @@ async function waitForTableLoad(page) {
     console.log('Page loaded!');
 }
 
-async function scrapeData(page, dateOption, filePrefix, downloadPath) {
+async function scrapeData(page, dateOption, filePrefix, downloadPath, debug) {
     // Click date picker
     await page.evaluate(() => {
         const buttons = document.querySelectorAll('button');
@@ -173,29 +173,35 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
     console.log(`Total pages: ${totalPages}, Total rows expected: ${totalRows}`);
     
     // DEBUG: Log ALL buttons on page
-    if (filePrefix === 'recent') { // Only debug once
-        const allButtonsInfo = await page.evaluate(() => {
-            const buttons = document.querySelectorAll('button');
-            return Array.from(buttons).map((btn, i) => {
-                const rect = btn.getBoundingClientRect();
-                return {
-                    i,
-                    x: Math.round(rect.x),
-                    y: Math.round(rect.y),
-                    w: Math.round(rect.width),
-                    h: Math.round(rect.height),
-                    disabled: btn.disabled,
-                    aria: btn.getAttribute('aria-label'),
-                    text: btn.innerText?.substring(0, 20).replace(/\n/g, ' '),
-                    hasSvg: btn.querySelector('svg') !== null
-                };
-            }).filter(b => b.y > 500); // Only buttons in lower half of page
+    console.log('========== DEBUG: ALL BUTTONS ==========');
+    const allButtonsInfo = await page.evaluate(() => {
+        const buttons = document.querySelectorAll('button');
+        return Array.from(buttons).map((btn, i) => {
+            const rect = btn.getBoundingClientRect();
+            return {
+                i,
+                x: Math.round(rect.x),
+                y: Math.round(rect.y),
+                w: Math.round(rect.width),
+                h: Math.round(rect.height),
+                disabled: btn.disabled,
+                aria: btn.getAttribute('aria-label'),
+                title: btn.getAttribute('title'),
+                text: btn.innerText?.substring(0, 30).replace(/\n/g, ' ').trim(),
+                hasSvg: btn.querySelector('svg') !== null,
+                classes: btn.className?.substring(0, 50)
+            };
         });
-        console.log('Buttons in lower half of page:');
-        allButtonsInfo.forEach(b => {
-            console.log(`  [${b.i}] x:${b.x} y:${b.y} ${b.w}x${b.h} aria:"${b.aria}" text:"${b.text}" svg:${b.hasSvg} disabled:${b.disabled}`);
-        });
-    }
+    });
+    
+    console.log(`Total buttons on page: ${allButtonsInfo.length}`);
+    console.log('Buttons with aria-label or in lower half (y > 500):');
+    allButtonsInfo.forEach(b => {
+        if (b.aria || b.y > 500) {
+            console.log(`  [${b.i}] pos:(${b.x},${b.y}) size:${b.w}x${b.h} aria:"${b.aria}" title:"${b.title}" text:"${b.text}" svg:${b.hasSvg} disabled:${b.disabled}`);
+        }
+    });
+    console.log('========== END DEBUG ==========');
     
     // Scrape all pages
     let allData = [];
@@ -233,10 +239,9 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
         
         // Go to next page
         if (pageNum < totalPages) {
-            // Try clicking by aria-label using Puppeteer's native click
             let clicked = false;
             
-            // Method 1: Try aria-label selectors
+            // Try all aria-label variations
             const ariaSelectors = [
                 'button[aria-label="Go to next page"]',
                 'button[aria-label="Next page"]', 
@@ -260,43 +265,10 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
                 } catch (e) {}
             }
             
-            // Method 2: Click by index - find button with specific position
-            if (!clicked) {
-                const nextBtnIndex = await page.evaluate(() => {
-                    const buttons = document.querySelectorAll('button');
-                    for (let i = 0; i < buttons.length; i++) {
-                        const btn = buttons[i];
-                        const aria = btn.getAttribute('aria-label') || '';
-                        if (aria.toLowerCase().includes('next') && !btn.disabled) {
-                            return i;
-                        }
-                    }
-                    return -1;
-                });
-                
-                if (nextBtnIndex >= 0) {
-                    const buttons = await page.$$('button');
-                    await buttons[nextBtnIndex].click();
-                    clicked = true;
-                    console.log(`  Clicked button index ${nextBtnIndex}`);
-                }
-            }
-            
-            // Method 3: Use keyboard - Tab to pagination and press right arrow
-            if (!clicked) {
-                // Click somewhere on page first to focus
-                await page.keyboard.press('Tab');
-                await page.keyboard.press('Tab');
-                await page.keyboard.press('Tab');
-                // Try pressing Enter on what might be the next button
-                console.log(`  Trying keyboard navigation...`);
-            }
-            
             if (!clicked) {
                 console.log(`  WARNING: Could not find next button`);
             }
             
-            // Wait for page to change
             await new Promise(r => setTimeout(r, 2500));
         }
     }
@@ -340,3 +312,13 @@ downloadAnsysData()
         console.error('Failed:', error);
         process.exit(1);
     });
+```
+
+Now it will print:
+```
+========== DEBUG: ALL BUTTONS ==========
+Total buttons on page: X
+Buttons with aria-label or in lower half (y > 500):
+  [0] pos:(1200,650) size:32x32 aria:"..." title:"..." text:"..." svg:true disabled:false
+  ...
+========== END DEBUG ==========
