@@ -1496,6 +1496,11 @@
                     <span style="font-size: 0.75rem; font-weight: 600; color: var(--text-primary); display: block;" id="recentDateRange"></span>
                     <input type="file" id="recentFile" accept=".csv" style="display: none;">
                 </div>
+                <div style="padding: 10px 16px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; text-align: center;" id="lastFetchedSection">
+                    <span style="font-size: 0.6875rem; color: var(--text-secondary); display: block;">Last Fetched</span>
+                    <span style="font-size: 0.75rem; color: var(--accent-info);" id="lastFetchedStatus">—</span>
+                    <span style="font-size: 0.75rem; font-weight: 600; color: var(--text-primary); display: block;" id="lastFetchedTime">Not yet</span>
+                </div>
             </div>
         </header>
 
@@ -1806,6 +1811,7 @@
         // CSV File URLs - Update these with your hosted file locations
         const HISTORICAL_CSV_URL = "https://raw.githubusercontent.com/nataccccha/ansys-credit-tracking/refs/heads/main/data/historical.csv";
         const RECENT_CSV_URL = "https://raw.githubusercontent.com/nataccccha/ansys-credit-tracking/refs/heads/main/data/recent.csv";
+        const LAST_UPDATED_URL = "https://raw.githubusercontent.com/nataccccha/ansys-credit-tracking/refs/heads/main/data/last_updated.json";
         const AUTO_LOAD_CSV = true;    // Set to true to automatically load CSV files on page load
 
         // Dark mode toggle
@@ -1857,8 +1863,42 @@
             if (AUTO_LOAD_CSV && HISTORICAL_CSV_URL && RECENT_CSV_URL) {
                 loadCSVFromURL(HISTORICAL_CSV_URL, 'historical');
                 loadCSVFromURL(RECENT_CSV_URL, 'recent');
+                
+                // Load last updated timestamp
+                if (LAST_UPDATED_URL) {
+                    loadLastUpdated();
+                }
             }
         });
+        
+        // Load last updated timestamp from server
+        async function loadLastUpdated() {
+            try {
+                const response = await fetch(LAST_UPDATED_URL + '?t=' + Date.now()); // Cache bust
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.timestamp) {
+                        const date = new Date(data.timestamp);
+                        const options = { 
+                            month: 'short', 
+                            day: 'numeric', 
+                            year: 'numeric',
+                            hour: 'numeric',
+                            minute: '2-digit',
+                            hour12: true
+                        };
+                        const formatted = date.toLocaleDateString('en-US', options);
+                        document.getElementById('lastFetchedTime').textContent = formatted;
+                        document.getElementById('lastFetchedStatus').textContent = '✓ Auto-updated';
+                        document.getElementById('lastFetchedStatus').style.color = 'var(--accent-success)';
+                    }
+                }
+            } catch (e) {
+                console.log('Could not load last_updated.json:', e);
+                document.getElementById('lastFetchedStatus').textContent = '⚠ Manual upload';
+                document.getElementById('lastFetchedStatus').style.color = 'var(--accent-warning)';
+            }
+        }
 
         // Software consumption rates (AEC per hour) from official ANSYS table
         const softwareRates = {
