@@ -190,13 +190,12 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
     console.log('Total pages: ' + totalPages + ', Total rows expected: ' + totalRows);
     
     var allData = [];
+    var lastFirstCell = '';
     
     for (var pageNum = 1; pageNum <= totalPages; pageNum++) {
         if (pageNum % 20 === 1 || pageNum === totalPages) {
             console.log('Scraping page ' + pageNum + '/' + totalPages + '...');
         }
-        
-        await new Promise(function(r) { setTimeout(r, 1000); });
         
         // Get table data
         var pageData = await page.evaluate(function(numCols) {
@@ -224,49 +223,69 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
             return rows;
         }, HEADERS.length);
         
+        // Check if data actually changed
+        var currentFirstCell = pageData.length > 0 ? pageData[0][0] : '';
+        if (pageNum > 1 && currentFirstCell === lastFirstCell) {
+            console.log('  WARNING: Data did not change, waiting longer...');
+            await new Promise(function(r) { setTimeout(r, 2000); });
+            
+            // Try getting data again
+            pageData = await page.evaluate(function(numCols) {
+                var rows = [];
+                var rowElements = document.querySelectorAll('[role="row"]');
+                
+                for (var i = 0; i < rowElements.length; i++) {
+                    if (i === 0) continue;
+                    var row = rowElements[i];
+                    
+                    var cells = row.querySelectorAll('[role="cell"]');
+                    if (cells.length === 0) cells = row.querySelectorAll('[role="gridcell"]');
+                    if (cells.length === 0) cells = row.querySelectorAll('td');
+                    
+                    if (cells.length > 0) {
+                        var rowData = [];
+                        for (var j = 0; j < Math.min(cells.length, numCols); j++) {
+                            var text = (cells[j].textContent || '').trim().replace(/\n/g, ' ').replace(/\s+/g, ' ');
+                            rowData.push(text);
+                        }
+                        rows.push(rowData);
+                    }
+                }
+                
+                return rows;
+            }, HEADERS.length);
+            currentFirstCell = pageData.length > 0 ? pageData[0][0] : '';
+        }
+        lastFirstCell = currentFirstCell;
+        
         allData = allData.concat(pageData);
         
         // Go to next page
         if (pageNum < totalPages) {
             // Click the AG-Grid "Next Page" button
-            var clicked = await page.evaluate(function() {
-                // Method 1: Find by aria-label
+            await page.evaluate(function() {
                 var nextBtn = document.querySelector('[aria-label="Next Page"]');
                 if (nextBtn && !nextBtn.classList.contains('ag-disabled')) {
                     nextBtn.click();
-                    return 'clicked aria-label Next Page';
                 }
-                
-                // Method 2: Find by class
-                var agButtons = document.querySelectorAll('.ag-paging-button');
-                for (var i = 0; i < agButtons.length; i++) {
-                    var btn = agButtons[i];
-                    var aria = btn.getAttribute('aria-label') || '';
-                    if (aria === 'Next Page' && !btn.classList.contains('ag-disabled')) {
-                        btn.click();
-                        return 'clicked ag-paging-button Next Page';
-                    }
-                }
-                
-                // Method 3: Find any element with "Next Page" aria-label
-                var allElements = document.querySelectorAll('[aria-label]');
-                for (var i = 0; i < allElements.length; i++) {
-                    var el = allElements[i];
-                    if (el.getAttribute('aria-label') === 'Next Page') {
-                        el.click();
-                        return 'clicked element with aria-label Next Page';
-                    }
-                }
-                
-                return 'no next button found';
             });
             
-            if (pageNum <= 3 || clicked.includes('no')) {
-                console.log('  ' + clicked);
+            // Wait for page number to change
+            var expectedPage = pageNum + 1;
+            for (var waitAttempt = 0; waitAttempt < 10; waitAttempt++) {
+                await new Promise(function(r) { setTimeout(r, 500); });
+                var currentPageNum = await page.evaluate(function() {
+                    var text = document.body.innerText;
+                    var match = text.match(/Page\s+(\d+)\s+of/i);
+                    return match ? parseInt(match[1]) : 0;
+                });
+                if (currentPageNum === expectedPage) {
+                    break;
+                }
             }
             
-            // Wait for page to update
-            await new Promise(function(r) { setTimeout(r, 1500); });
+            // Additional wait for data to load
+            await new Promise(function(r) { setTimeout(r, 1000); });
         }
     }
     
