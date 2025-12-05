@@ -52,11 +52,7 @@ async function downloadAnsysData() {
         await page.waitForSelector('input[type="email"], input[type="text"], input[name="email"]', { timeout: 30000 });
         
         await page.evaluate(function(email) {
-            var selectors = [
-                'input[type="email"]',
-                'input[name="email"]',
-                'input[placeholder*="mail"]'
-            ];
+            var selectors = ['input[type="email"]', 'input[name="email"]', 'input[placeholder*="mail"]'];
             for (var i = 0; i < selectors.length; i++) {
                 var input = document.querySelector(selectors[i]);
                 if (input) {
@@ -187,14 +183,6 @@ async function waitForTableLoad(page) {
 }
 
 async function scrapeData(page, dateOption, filePrefix, downloadPath) {
-    // Get initial row count info
-    var initialInfo = await page.evaluate(function() {
-        var text = document.body.innerText;
-        var match = text.match(/\d+\s+to\s+\d+\s+of\s+([\d,]+)/i);
-        return match ? match[0] : 'not found';
-    });
-    console.log('Initial page info: ' + initialInfo);
-    
     // Click date picker
     console.log('Clicking date picker...');
     await page.evaluate(function() {
@@ -209,30 +197,24 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
     });
     await new Promise(function(r) { setTimeout(r, 2000); });
     
-    // Take screenshot of date picker dropdown
-    await page.screenshot({ path: 'debug-datepicker-' + filePrefix + '.png' });
-    
     // Select date option
     console.log('Selecting ' + dateOption + '...');
-    var optionClicked = await page.evaluate(function(option) {
+    await page.evaluate(function(option) {
         var elements = document.querySelectorAll('li, div, span, button');
         for (var i = 0; i < elements.length; i++) {
             var el = elements[i];
             var text = (el.textContent || '').trim();
             if (text === option) {
                 el.click();
-                return 'clicked: ' + option;
+                return;
             }
         }
-        return 'not found: ' + option;
     }, dateOption);
-    console.log('Date option: ' + optionClicked);
     
-    // Wait for table to reload - check for "Loading" or wait for row count to change
+    // Wait for table to reload
     console.log('Waiting for table to reload...');
     await new Promise(function(r) { setTimeout(r, 2000); });
     
-    // Wait for loading to finish
     for (var i = 0; i < 20; i++) {
         var state = await page.evaluate(function() {
             var text = document.body.innerText;
@@ -246,11 +228,9 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
             console.log('Table loaded: ' + state.rowInfo);
             break;
         }
-        console.log('Waiting... loading=' + state.loading + ', rowInfo=' + state.rowInfo);
         await new Promise(function(r) { setTimeout(r, 1000); });
     }
     
-    // Extra wait for data to fully load
     await new Promise(function(r) { setTimeout(r, 3000); });
     
     // Get page info
@@ -268,17 +248,21 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
     
     console.log('Total pages: ' + totalPages + ', Total rows expected: ' + totalRows);
     
-    // If still 0 rows, take a screenshot
-    if (totalRows === 0) {
-        await page.screenshot({ path: 'debug-zero-rows-' + filePrefix + '.png' });
-    }
-    
     var allData = [];
+    var lastFirstCell = '';
+    var stuckCount = 0;
     
     for (var pageNum = 1; pageNum <= totalPages; pageNum++) {
         if (pageNum % 20 === 1 || pageNum === totalPages) {
             console.log('Scraping page ' + pageNum + '/' + totalPages + '...');
         }
+        
+        // Get current page number from UI
+        var currentPageNum = await page.evaluate(function() {
+            var text = document.body.innerText;
+            var match = text.match(/Page\s+(\d+)\s+of/i);
+            return match ? parseInt(match[1]) : 0;
+        });
         
         var pageData = await page.evaluate(function(numCols) {
             var rows = [];
@@ -304,16 +288,49 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
             return rows;
         }, HEADERS.length);
         
+        // Check if we're stuck on same data
+        var currentFirstCell = pageData.length > 0 ? pageData[0][0] : '';
+        if (currentFirstCell === lastFirstCell && pageNum > 1) {
+            stuckCount++;
+            if (stuckCount >= 3) {
+                console.log('Stuck on same page, stopping early');
+                break;
+            }
+        } else {
+            stuckCount = 0;
+        }
+        lastFirstCell = currentFirstCell;
+        
         allData = allData.concat(pageData);
         
         if (pageNum < totalPages) {
-            await page.evaluate(function() {
-                var nextBtn = document.querySelector('[aria-label="Next Page"]');
-                if (nextBtn && !nextBtn.classList.contains('ag-disabled')) {
-                    nextBtn.click();
+            // Use Puppeteer's native click
+            var nextBtn = await page.$('[aria-label="Next Page"]:not(.ag-disabled)');
+            if (nextBtn) {
+                await nextBtn.click();
+                
+                // Wait for page number to change
+                var expectedPage = pageNum + 1;
+                for (var w = 0; w < 15; w++) {
+                    await new Promise(function(r) { setTimeout(r, 500); });
+                    var newPageNum = await page.evaluate(function() {
+                        var text = document.body.innerText;
+                        var match = text.match(/Page\s+(\d+)\s+of/i);
+                        return match ? parseInt(match[1]) : 0;
+                    });
+                    if (newPageNum === expectedPage) {
+                        break;
+                    }
+                    if (w === 14) {
+                        console.log('Page did not change from ' + currentPageNum + ' to ' + expectedPage);
+                    }
                 }
-            });
-            await new Promise(function(r) { setTimeout(r, 2000); });
+                
+                // Wait for data to load
+                await new Promise(function(r) { setTimeout(r, 1000); });
+            } else {
+                console.log('Next button not found or disabled');
+            }
         }
     }
     
