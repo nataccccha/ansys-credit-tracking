@@ -35,21 +35,21 @@ async function downloadAnsysData() {
     await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
     await page.setViewport({ width: 1920, height: 1080 });
     
-    await page.evaluateOnNewDocument(() => {
-        Object.defineProperty(navigator, 'webdriver', { get: () => false });
+    await page.evaluateOnNewDocument(function() {
+        Object.defineProperty(navigator, 'webdriver', { get: function() { return false; } });
     });
     
     try {
-        // LOGIN
         console.log('Navigating to ANSYS licensing portal...');
         await page.goto('https://licensing.ansys.com', { waitUntil: 'networkidle0', timeout: 60000 });
-        await new Promise(r => setTimeout(r, 3000));
+        await new Promise(function(r) { setTimeout(r, 3000); });
         
         console.log('Entering email...');
-        await page.evaluate((email) => {
-            const inputs = document.querySelectorAll('input');
-            for (const input of inputs) {
-                const rect = input.getBoundingClientRect();
+        await page.evaluate(function(email) {
+            var inputs = document.querySelectorAll('input');
+            for (var i = 0; i < inputs.length; i++) {
+                var input = inputs[i];
+                var rect = input.getBoundingClientRect();
                 if (rect.width > 0 && rect.height > 0 && input.type !== 'hidden' && input.type !== 'submit') {
                     input.focus();
                     input.value = email;
@@ -60,22 +60,22 @@ async function downloadAnsysData() {
             }
         }, USERNAME);
         
-        await page.evaluate(() => {
-            const btn = document.querySelector('button[type="submit"]');
+        await page.evaluate(function() {
+            var btn = document.querySelector('button[type="submit"]');
             if (btn) btn.click();
         });
         
-        await new Promise(r => setTimeout(r, 5000));
+        await new Promise(function(r) { setTimeout(r, 5000); });
         
         console.log('Entering password...');
-        for (let i = 0; i < 15; i++) {
-            const hasPassword = await page.evaluate(() => !!document.querySelector('input[type="password"]'));
+        for (var i = 0; i < 15; i++) {
+            var hasPassword = await page.evaluate(function() { return !!document.querySelector('input[type="password"]'); });
             if (hasPassword) break;
-            await new Promise(r => setTimeout(r, 2000));
+            await new Promise(function(r) { setTimeout(r, 2000); });
         }
         
-        await page.evaluate((pwd) => {
-            const pwdInput = document.querySelector('input[type="password"]');
+        await page.evaluate(function(pwd) {
+            var pwdInput = document.querySelector('input[type="password"]');
             if (pwdInput) {
                 pwdInput.focus();
                 pwdInput.value = pwd;
@@ -84,25 +84,23 @@ async function downloadAnsysData() {
             }
         }, PASSWORD);
         
-        await page.evaluate(() => {
-            const btn = document.querySelector('button[type="submit"]');
+        await page.evaluate(function() {
+            var btn = document.querySelector('button[type="submit"]');
             if (btn) btn.click();
         });
         
-        await new Promise(r => setTimeout(r, 10000));
+        await new Promise(function(r) { setTimeout(r, 10000); });
         console.log('Login successful!');
         
-        // SCRAPE 1 YEAR DATA
         console.log('=== Scraping 1 Year data ===');
         await page.goto('https://licensing.ansys.com/transactions', { waitUntil: 'networkidle0', timeout: 120000 });
         await waitForTableLoad(page);
-        await scrapeData(page, '1 Year', 'historical', downloadPath, true); // debug=true
+        await scrapeData(page, '1 Year', 'historical', downloadPath);
         
-        // SCRAPE 5 DAYS DATA
         console.log('=== Scraping 5 Days data ===');
         await page.goto('https://licensing.ansys.com/transactions', { waitUntil: 'networkidle0', timeout: 120000 });
         await waitForTableLoad(page);
-        await scrapeData(page, '5 Days', 'recent', downloadPath, false);
+        await scrapeData(page, '5 Days', 'recent', downloadPath);
         
         console.log('All data scraped successfully!');
         
@@ -116,70 +114,73 @@ async function downloadAnsysData() {
 }
 
 async function waitForTableLoad(page) {
-    for (let i = 0; i < 30; i++) {
-        const hasContent = await page.evaluate(() => {
+    for (var i = 0; i < 30; i++) {
+        var hasContent = await page.evaluate(function() {
             return document.body.innerText.includes('Start Time');
         });
         if (hasContent) break;
-        await new Promise(r => setTimeout(r, 2000));
+        await new Promise(function(r) { setTimeout(r, 2000); });
     }
     console.log('Page loaded!');
 }
 
-async function scrapeData(page, dateOption, filePrefix, downloadPath, debug) {
-    // Click date picker
-    await page.evaluate(() => {
-        const buttons = document.querySelectorAll('button');
-        for (const btn of buttons) {
+async function scrapeData(page, dateOption, filePrefix, downloadPath) {
+    await page.evaluate(function() {
+        var buttons = document.querySelectorAll('button');
+        for (var i = 0; i < buttons.length; i++) {
+            var btn = buttons[i];
             if (btn.textContent && btn.textContent.includes('From') && btn.textContent.includes('To')) {
                 btn.click();
                 return;
             }
         }
     });
-    await new Promise(r => setTimeout(r, 2000));
+    await new Promise(function(r) { setTimeout(r, 2000); });
     
-    // Select date option
-    await page.evaluate((option) => {
-        const elements = document.querySelectorAll('*');
-        for (const el of elements) {
-            if (el.textContent?.trim() === option && el.children.length === 0) {
+    await page.evaluate(function(option) {
+        var elements = document.querySelectorAll('*');
+        for (var i = 0; i < elements.length; i++) {
+            var el = elements[i];
+            if (el.textContent && el.textContent.trim() === option && el.children.length === 0) {
                 el.click();
                 return;
             }
         }
     }, dateOption);
-    console.log(`Selected ${dateOption}`);
+    console.log('Selected ' + dateOption);
     
-    // Wait for table to reload
-    await new Promise(r => setTimeout(r, 3000));
-    for (let i = 0; i < 10; i++) {
-        const loading = await page.evaluate(() => document.body.innerText.includes('Loading'));
+    await new Promise(function(r) { setTimeout(r, 3000); });
+    for (var i = 0; i < 10; i++) {
+        var loading = await page.evaluate(function() { return document.body.innerText.includes('Loading'); });
         if (!loading) break;
-        await new Promise(r => setTimeout(r, 1000));
+        await new Promise(function(r) { setTimeout(r, 1000); });
     }
-    await new Promise(r => setTimeout(r, 2000));
+    await new Promise(function(r) { setTimeout(r, 2000); });
     
-    // Get page info
-    const { totalPages, totalRows } = await page.evaluate(() => {
-        const text = document.body.innerText;
-        const rowMatch = text.match(/\d+\s+to\s+\d+\s+of\s+([\d,]+)/i);
-        const totalRows = rowMatch ? parseInt(rowMatch[1].replace(/,/g, '')) : 0;
-        const pageMatch = text.match(/Page\s+\d+\s+of\s+(\d+)/i);
-        const totalPages = pageMatch ? parseInt(pageMatch[1]) : 1;
-        return { totalPages, totalRows };
+    var pageInfo = await page.evaluate(function() {
+        var text = document.body.innerText;
+        var rowMatch = text.match(/\d+\s+to\s+\d+\s+of\s+([\d,]+)/i);
+        var totalRows = rowMatch ? parseInt(rowMatch[1].replace(/,/g, '')) : 0;
+        var pageMatch = text.match(/Page\s+\d+\s+of\s+(\d+)/i);
+        var totalPages = pageMatch ? parseInt(pageMatch[1]) : 1;
+        return { totalPages: totalPages, totalRows: totalRows };
     });
     
-    console.log(`Total pages: ${totalPages}, Total rows expected: ${totalRows}`);
+    var totalPages = pageInfo.totalPages;
+    var totalRows = pageInfo.totalRows;
     
-    // DEBUG: Log ALL buttons on page
-    console.log('========== DEBUG: ALL BUTTONS ==========');
-    const allButtonsInfo = await page.evaluate(() => {
-        const buttons = document.querySelectorAll('button');
-        return Array.from(buttons).map((btn, i) => {
-            const rect = btn.getBoundingClientRect();
-            return {
-                i,
+    console.log('Total pages: ' + totalPages + ', Total rows expected: ' + totalRows);
+    
+    // DEBUG: Log ALL buttons
+    console.log('========== DEBUG: ALL 6 BUTTONS ==========');
+    var allButtonsInfo = await page.evaluate(function() {
+        var buttons = document.querySelectorAll('button');
+        var result = [];
+        for (var i = 0; i < buttons.length; i++) {
+            var btn = buttons[i];
+            var rect = btn.getBoundingClientRect();
+            result.push({
+                i: i,
                 x: Math.round(rect.x),
                 y: Math.round(rect.y),
                 w: Math.round(rect.width),
@@ -187,128 +188,182 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath, debug) {
                 disabled: btn.disabled,
                 aria: btn.getAttribute('aria-label'),
                 title: btn.getAttribute('title'),
-                text: btn.innerText?.substring(0, 30).replace(/\n/g, ' ').trim(),
-                hasSvg: btn.querySelector('svg') !== null,
-                classes: btn.className?.substring(0, 50)
-            };
-        });
+                text: (btn.innerText || '').substring(0, 30).replace(/\n/g, ' ').trim(),
+                hasSvg: btn.querySelector('svg') !== null
+            });
+        }
+        return result;
     });
     
-    console.log(`Total buttons on page: ${allButtonsInfo.length}`);
-    console.log('Buttons with aria-label or in lower half (y > 500):');
-    allButtonsInfo.forEach(b => {
-        if (b.aria || b.y > 500) {
-            console.log(`  [${b.i}] pos:(${b.x},${b.y}) size:${b.w}x${b.h} aria:"${b.aria}" title:"${b.title}" text:"${b.text}" svg:${b.hasSvg} disabled:${b.disabled}`);
+    for (var i = 0; i < allButtonsInfo.length; i++) {
+        var b = allButtonsInfo[i];
+        console.log('  [' + b.i + '] pos:(' + b.x + ',' + b.y + ') size:' + b.w + 'x' + b.h + ' aria:"' + b.aria + '" title:"' + b.title + '" text:"' + b.text + '" svg:' + b.hasSvg + ' disabled:' + b.disabled);
+    }
+    
+    // Also check for other clickable elements (divs, spans, a tags with role=button or pagination-related)
+    console.log('========== DEBUG: OTHER CLICKABLE ELEMENTS ==========');
+    var otherClickables = await page.evaluate(function() {
+        var result = [];
+        // Check for elements with role="button"
+        var roleButtons = document.querySelectorAll('[role="button"]');
+        for (var i = 0; i < roleButtons.length; i++) {
+            var el = roleButtons[i];
+            var rect = el.getBoundingClientRect();
+            if (rect.y > 400) { // Lower part of page
+                result.push({
+                    tag: el.tagName,
+                    x: Math.round(rect.x),
+                    y: Math.round(rect.y),
+                    w: Math.round(rect.width),
+                    h: Math.round(rect.height),
+                    aria: el.getAttribute('aria-label'),
+                    text: (el.innerText || '').substring(0, 20).trim(),
+                    classes: (el.className || '').substring(0, 50)
+                });
+            }
         }
+        // Check for <a> tags in pagination area
+        var links = document.querySelectorAll('a');
+        for (var i = 0; i < links.length; i++) {
+            var el = links[i];
+            var rect = el.getBoundingClientRect();
+            if (rect.y > 400 && rect.width < 100) { // Small links in lower part
+                result.push({
+                    tag: 'A',
+                    x: Math.round(rect.x),
+                    y: Math.round(rect.y),
+                    w: Math.round(rect.width),
+                    h: Math.round(rect.height),
+                    aria: el.getAttribute('aria-label'),
+                    text: (el.innerText || '').substring(0, 20).trim(),
+                    href: (el.href || '').substring(0, 30)
+                });
+            }
+        }
+        // Check for anything with "page" or "next" in class/id
+        var pageElements = document.querySelectorAll('[class*="page"], [class*="Page"], [class*="pagination"], [class*="Pagination"], [id*="page"], [id*="Page"]');
+        for (var i = 0; i < pageElements.length; i++) {
+            var el = pageElements[i];
+            var rect = el.getBoundingClientRect();
+            if (rect.width > 0 && rect.height > 0) {
+                result.push({
+                    tag: el.tagName,
+                    x: Math.round(rect.x),
+                    y: Math.round(rect.y),
+                    w: Math.round(rect.width),
+                    h: Math.round(rect.height),
+                    classes: (el.className || '').substring(0, 80),
+                    id: el.id || ''
+                });
+            }
+        }
+        return result;
     });
+    
+    for (var i = 0; i < otherClickables.length; i++) {
+        var el = otherClickables[i];
+        console.log('  ' + el.tag + ' pos:(' + el.x + ',' + el.y + ') size:' + el.w + 'x' + el.h + ' aria:"' + (el.aria || '') + '" text:"' + (el.text || '') + '" class:"' + (el.classes || '') + '"');
+    }
     console.log('========== END DEBUG ==========');
     
-    // Scrape all pages
-    let allData = [];
+    var allData = [];
     
-    for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
-        console.log(`Scraping page ${pageNum}/${totalPages}...`);
+    for (var pageNum = 1; pageNum <= totalPages; pageNum++) {
+        console.log('Scraping page ' + pageNum + '/' + totalPages + '...');
         
-        await new Promise(r => setTimeout(r, 1500));
+        await new Promise(function(r) { setTimeout(r, 1500); });
         
-        // Get table data
-        const pageData = await page.evaluate((numCols) => {
-            const rows = [];
-            const rowElements = document.querySelectorAll('[role="row"]');
+        var pageData = await page.evaluate(function(numCols) {
+            var rows = [];
+            var rowElements = document.querySelectorAll('[role="row"]');
             
-            rowElements.forEach((row, index) => {
-                if (index === 0) return;
+            for (var i = 0; i < rowElements.length; i++) {
+                if (i === 0) continue;
+                var row = rowElements[i];
                 
-                let cells = row.querySelectorAll('[role="cell"]');
+                var cells = row.querySelectorAll('[role="cell"]');
                 if (cells.length === 0) cells = row.querySelectorAll('[role="gridcell"]');
                 if (cells.length === 0) cells = row.querySelectorAll('td');
                 
                 if (cells.length > 0) {
-                    const rowData = Array.from(cells)
-                        .slice(0, numCols)
-                        .map(c => (c.textContent?.trim() || '').replace(/\n/g, ' ').replace(/\s+/g, ' '));
+                    var rowData = [];
+                    for (var j = 0; j < Math.min(cells.length, numCols); j++) {
+                        var text = (cells[j].textContent || '').trim().replace(/\n/g, ' ').replace(/\s+/g, ' ');
+                        rowData.push(text);
+                    }
                     rows.push(rowData);
                 }
-            });
+            }
             
             return rows;
         }, HEADERS.length);
         
-        console.log(`  Got ${pageData.length} rows`);
+        console.log('  Got ' + pageData.length + ' rows');
         allData = allData.concat(pageData);
         
-        // Go to next page
         if (pageNum < totalPages) {
-            let clicked = false;
-            
-            // Try all aria-label variations
-            const ariaSelectors = [
-                'button[aria-label="Go to next page"]',
-                'button[aria-label="Next page"]', 
-                'button[aria-label="next page"]',
-                'button[aria-label*="next"]',
-                'button[aria-label*="Next"]'
-            ];
-            
-            for (const selector of ariaSelectors) {
-                try {
-                    const btn = await page.$(selector);
-                    if (btn) {
-                        const isDisabled = await btn.evaluate(el => el.disabled);
-                        if (!isDisabled) {
-                            await btn.click();
-                            clicked = true;
-                            console.log(`  Clicked: ${selector}`);
-                            break;
-                        }
+            // Try clicking the 3rd button (index 2) - should be "next" in |< < > >| layout
+            var clicked = await page.evaluate(function() {
+                var buttons = document.querySelectorAll('button');
+                // Most pagination has 4-6 buttons: first, prev, next, last (and maybe page numbers)
+                // The "next" button is usually the 3rd one
+                if (buttons.length >= 4) {
+                    var nextBtn = buttons[2]; // Try index 2
+                    if (!nextBtn.disabled) {
+                        nextBtn.click();
+                        return 'clicked button index 2';
                     }
-                } catch (e) {}
-            }
+                }
+                if (buttons.length >= 3) {
+                    var nextBtn = buttons[buttons.length - 2]; // Second to last
+                    if (!nextBtn.disabled) {
+                        nextBtn.click();
+                        return 'clicked second to last button';
+                    }
+                }
+                return 'no click';
+            });
             
-            if (!clicked) {
-                console.log(`  WARNING: Could not find next button`);
-            }
-            
-            await new Promise(r => setTimeout(r, 2500));
+            console.log('  ' + clicked);
+            await new Promise(function(r) { setTimeout(r, 2500); });
         }
     }
     
-    console.log(`Scraped ${allData.length} rows total (expected ${totalRows})`);
+    console.log('Scraped ' + allData.length + ' rows total (expected ' + totalRows + ')');
     
-    // Deduplicate
-    const uniqueData = [];
-    const seen = new Set();
-    for (const row of allData) {
-        const key = row.join('|');
-        if (!seen.has(key)) {
-            seen.add(key);
-            uniqueData.push(row);
+    var uniqueData = [];
+    var seen = {};
+    for (var i = 0; i < allData.length; i++) {
+        var key = allData[i].join('|');
+        if (!seen[key]) {
+            seen[key] = true;
+            uniqueData.push(allData[i]);
         }
     }
-    console.log(`After dedup: ${uniqueData.length} unique rows`);
+    console.log('After dedup: ' + uniqueData.length + ' unique rows');
     
-    // Convert to CSV
-    const csvContent = [
-        HEADERS.join(','),
-        ...uniqueData.map(row => {
-            while (row.length < HEADERS.length) row.push('');
-            return row.slice(0, HEADERS.length)
-                .map(cell => `"${(cell || '').replace(/"/g, '""')}"`)
-                .join(',');
-        })
-    ].join('\n');
+    var csvLines = [HEADERS.join(',')];
+    for (var i = 0; i < uniqueData.length; i++) {
+        var row = uniqueData[i];
+        while (row.length < HEADERS.length) row.push('');
+        var csvRow = row.slice(0, HEADERS.length).map(function(cell) {
+            return '"' + (cell || '').replace(/"/g, '""') + '"';
+        }).join(',');
+        csvLines.push(csvRow);
+    }
     
-    const filePath = path.join(downloadPath, `${filePrefix}.csv`);
+    var csvContent = csvLines.join('\n');
+    var filePath = path.join(downloadPath, filePrefix + '.csv');
     fs.writeFileSync(filePath, csvContent);
-    console.log(`Saved ${filePrefix}.csv (${uniqueData.length} rows)`);
+    console.log('Saved ' + filePrefix + '.csv (' + uniqueData.length + ' rows)');
 }
 
 downloadAnsysData()
-    .then(() => {
+    .then(function() {
         console.log('Done!');
         process.exit(0);
     })
-    .catch((error) => {
+    .catch(function(error) {
         console.error('Failed:', error);
         process.exit(1);
     });
