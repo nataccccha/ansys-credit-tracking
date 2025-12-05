@@ -1878,17 +1878,14 @@
                 if (response.ok) {
                     const data = await response.json();
                     if (data.timestamp) {
-                        const date = new Date(data.timestamp);
-                        const options = { 
-                            month: 'short', 
-                            day: 'numeric', 
-                            year: 'numeric',
-                            hour: 'numeric',
-                            minute: '2-digit',
-                            hour12: true
-                        };
-                        const formatted = date.toLocaleDateString('en-US', options);
-                        document.getElementById('lastFetchedTime').textContent = formatted;
+                        const fetchedDate = new Date(data.timestamp);
+                        updateRelativeTime(fetchedDate);
+                        
+                        // Update every minute
+                        setInterval(function() {
+                            updateRelativeTime(fetchedDate);
+                        }, 60000);
+                        
                         document.getElementById('lastFetchedStatus').textContent = '✓ Auto-updated';
                         document.getElementById('lastFetchedStatus').style.color = 'var(--accent-success)';
                     }
@@ -1898,6 +1895,29 @@
                 document.getElementById('lastFetchedStatus').textContent = '⚠ Manual upload';
                 document.getElementById('lastFetchedStatus').style.color = 'var(--accent-warning)';
             }
+        }
+        
+        function updateRelativeTime(fetchedDate) {
+            const now = new Date();
+            const diffMs = now - fetchedDate;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMins / 60);
+            const diffDays = Math.floor(diffHours / 24);
+            
+            let timeText;
+            if (diffDays > 0) {
+                const remainingHours = diffHours % 24;
+                timeText = diffDays + 'd ' + remainingHours + 'h ago';
+            } else if (diffHours > 0) {
+                const remainingMins = diffMins % 60;
+                timeText = diffHours + 'h ' + remainingMins + 'm ago';
+            } else if (diffMins > 0) {
+                timeText = diffMins + ' min ago';
+            } else {
+                timeText = 'Just now';
+            }
+            
+            document.getElementById('lastFetchedTime').textContent = timeText;
         }
 
         // Software consumption rates (AEC per hour) from official ANSYS table
