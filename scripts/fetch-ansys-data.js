@@ -38,170 +38,85 @@ async function downloadAnsysData() {
     });
     
     try {
-        // STEP 1: Go to login page
+        // LOGIN
         console.log('Navigating to ANSYS licensing portal...');
         await page.goto('https://licensing.ansys.com', { waitUntil: 'networkidle0', timeout: 60000 });
         await new Promise(r => setTimeout(r, 3000));
-        await page.screenshot({ path: 'debug-01-initial.png' });
         
-        // STEP 2: Enter email
-        console.log('Looking for email field...');
-        await page.waitForSelector('input', { timeout: 30000 });
-        
-        // Find the visible input field
-        const emailEntered = await page.evaluate((email) => {
+        // Enter email
+        console.log('Entering email...');
+        await page.evaluate((email) => {
             const inputs = document.querySelectorAll('input');
             for (const input of inputs) {
-                const type = input.type.toLowerCase();
                 const rect = input.getBoundingClientRect();
-                // Find visible, non-hidden input
-                if (rect.width > 0 && rect.height > 0 && type !== 'hidden' && type !== 'submit') {
+                if (rect.width > 0 && rect.height > 0 && input.type !== 'hidden' && input.type !== 'submit') {
                     input.focus();
                     input.value = email;
                     input.dispatchEvent(new Event('input', { bubbles: true }));
                     input.dispatchEvent(new Event('change', { bubbles: true }));
-                    return { success: true, type: input.type, name: input.name };
+                    break;
                 }
             }
-            return { success: false };
         }, USERNAME);
         
-        console.log('Email entry result:', emailEntered);
-        await page.screenshot({ path: 'debug-02-email-entered.png' });
-        
-        // STEP 3: Click Continue
-        console.log('Clicking Continue...');
+        // Click Continue
         await page.evaluate(() => {
-            const buttons = document.querySelectorAll('button');
-            for (const btn of buttons) {
-                const text = btn.textContent?.toLowerCase() || '';
-                if (text.includes('continue') || text.includes('next') || text.includes('sign') || btn.type === 'submit') {
-                    btn.click();
-                    return true;
-                }
-            }
-            // Try submit button
-            const submit = document.querySelector('button[type="submit"], input[type="submit"]');
-            if (submit) {
-                submit.click();
-                return true;
-            }
-            return false;
+            const btn = document.querySelector('button[type="submit"]');
+            if (btn) btn.click();
         });
         
-        // Wait for password page
-        console.log('Waiting for password page...');
         await new Promise(r => setTimeout(r, 5000));
-        await page.screenshot({ path: 'debug-03-after-email-submit.png' });
         
-        // STEP 4: Wait for password field
-        console.log('Looking for password field...');
-        
-        // Wait up to 30 seconds for password field to appear
-        let passwordFieldFound = false;
+        // Wait for and enter password
+        console.log('Entering password...');
         for (let i = 0; i < 15; i++) {
-            const hasPasswordField = await page.evaluate(() => {
-                const pwdInput = document.querySelector('input[type="password"]');
-                return pwdInput !== null;
-            });
-            
-            if (hasPasswordField) {
-                passwordFieldFound = true;
-                console.log('Password field found after', (i + 1) * 2, 'seconds');
-                break;
-            }
-            
-            console.log(`Checking for password field... attempt ${i + 1}/15`);
+            const hasPassword = await page.evaluate(() => !!document.querySelector('input[type="password"]'));
+            if (hasPassword) break;
             await new Promise(r => setTimeout(r, 2000));
         }
         
-        await page.screenshot({ path: 'debug-04-password-page.png' });
-        
-        if (!passwordFieldFound) {
-            // Log what's on the page
-            const pageContent = await page.evaluate(() => document.body.innerText.substring(0, 1000));
-            console.log('Page content:', pageContent);
-            throw new Error('Password field not found after 30 seconds');
-        }
-        
-        // STEP 5: Enter password
-        console.log('Entering password...');
-        const passwordEntered = await page.evaluate((pwd) => {
+        await page.evaluate((pwd) => {
             const pwdInput = document.querySelector('input[type="password"]');
             if (pwdInput) {
                 pwdInput.focus();
                 pwdInput.value = pwd;
                 pwdInput.dispatchEvent(new Event('input', { bubbles: true }));
                 pwdInput.dispatchEvent(new Event('change', { bubbles: true }));
-                return true;
             }
-            return false;
         }, PASSWORD);
         
-        console.log('Password entered:', passwordEntered);
-        await page.screenshot({ path: 'debug-05-password-entered.png' });
-        
-        // STEP 6: Click Continue/Login
-        console.log('Clicking login button...');
+        // Click login
         await page.evaluate(() => {
-            const buttons = document.querySelectorAll('button');
-            for (const btn of buttons) {
-                const text = btn.textContent?.toLowerCase() || '';
-                if (text.includes('continue') || text.includes('sign in') || text.includes('log in') || btn.type === 'submit') {
-                    btn.click();
-                    return true;
-                }
-            }
-            const submit = document.querySelector('button[type="submit"]');
-            if (submit) submit.click();
-            return false;
+            const btn = document.querySelector('button[type="submit"]');
+            if (btn) btn.click();
         });
         
-        // Wait for navigation
-        console.log('Waiting for login to complete...');
         await new Promise(r => setTimeout(r, 10000));
-        await page.screenshot({ path: 'debug-06-after-login.png' });
+        console.log('Login successful!');
         
-        const currentUrl = page.url();
-        console.log('Current URL after login:', currentUrl);
-        
-        if (currentUrl.includes('licensing.ansys.com') && !currentUrl.includes('login')) {
-            console.log('Login successful!');
-        } else {
-            console.log('Login may have failed, continuing anyway...');
-        }
-        
-        // STEP 7: Navigate to transactions
+        // Navigate to transactions
         console.log('Navigating to Usage Transactions...');
         await page.goto('https://licensing.ansys.com/transactions', { waitUntil: 'networkidle0', timeout: 120000 });
         
         // Wait for content
-        console.log('Waiting for transactions page...');
         for (let i = 0; i < 30; i++) {
             const hasContent = await page.evaluate(() => {
-                const text = document.body.innerText || '';
-                return text.includes('Start Time') || text.includes('Usage Transaction') || text.includes('From');
+                return document.body.innerText.includes('Start Time') || document.body.innerText.includes('From');
             });
-            
-            if (hasContent) {
-                console.log('Transactions page loaded!');
-                break;
-            }
-            
-            console.log(`Waiting for content... ${i + 1}/30`);
+            if (hasContent) break;
             await new Promise(r => setTimeout(r, 2000));
         }
+        console.log('Transactions page loaded!');
         
-        await page.screenshot({ path: 'debug-07-transactions.png', fullPage: true });
+        // SCRAPE YTD DATA
+        console.log('=== Scraping YTD data ===');
+        await scrapeData(page, 'YTD', 'historical', downloadPath);
         
-        // Download data
-        console.log('=== Downloading YTD data ===');
-        await selectDateRangeAndDownload(page, 'YTD', 'historical', downloadPath);
+        // SCRAPE 5 DAYS DATA
+        console.log('=== Scraping 5 Days data ===');
+        await scrapeData(page, '5 Days', 'recent', downloadPath);
         
-        console.log('=== Downloading 5 Days data ===');
-        await selectDateRangeAndDownload(page, '5 Days', 'recent', downloadPath);
-        
-        console.log('All downloads complete!');
+        console.log('All data scraped successfully!');
         
     } catch (error) {
         console.error('Error:', error.message);
@@ -212,52 +127,103 @@ async function downloadAnsysData() {
     }
 }
 
-async function selectDateRangeAndDownload(page, dateOption, filePrefix, downloadPath) {
+async function scrapeData(page, dateOption, filePrefix, downloadPath) {
     // Click date picker
-    const datePickerClicked = await page.evaluate(() => {
+    await page.evaluate(() => {
         const buttons = document.querySelectorAll('button');
         for (const btn of buttons) {
             if (btn.textContent && btn.textContent.includes('From') && btn.textContent.includes('To')) {
                 btn.click();
-                return true;
+                return;
             }
         }
-        return false;
     });
-    console.log('Date picker clicked:', datePickerClicked);
     await new Promise(r => setTimeout(r, 2000));
     
-    // Select option
-    const optionClicked = await page.evaluate((option) => {
+    // Select date option
+    await page.evaluate((option) => {
         const elements = document.querySelectorAll('*');
         for (const el of elements) {
             if (el.textContent?.trim() === option && el.children.length === 0) {
                 el.click();
-                return true;
+                return;
             }
         }
-        return false;
     }, dateOption);
-    console.log(`${dateOption} clicked:`, optionClicked);
-    await new Promise(r => setTimeout(r, 4000));
+    console.log(`Selected ${dateOption}`);
+    await new Promise(r => setTimeout(r, 5000));
     
-    // Click download
-    const downloadClicked = await page.evaluate(() => {
-        const elements = document.querySelectorAll('button, [role="button"], svg');
-        for (const el of elements) {
-            const html = el.outerHTML.toLowerCase();
-            if (html.includes('download') || html.includes('export')) {
-                const btn = el.closest('button') || el;
-                btn.click();
-                return true;
-            }
-        }
-        return false;
+    // Get total pages
+    const pageInfo = await page.evaluate(() => {
+        const text = document.body.innerText;
+        const match = text.match(/Page \d+ of (\d+)/);
+        return match ? parseInt(match[1]) : 1;
     });
-    console.log('Download clicked:', downloadClicked);
-    await new Promise(r => setTimeout(r, 10000));
+    console.log(`Total pages: ${pageInfo}`);
     
-    console.log('Files in data folder:', fs.readdirSync(downloadPath));
+    // Scrape all pages
+    let allData = [];
+    let headers = [];
+    
+    for (let pageNum = 1; pageNum <= pageInfo; pageNum++) {
+        console.log(`Scraping page ${pageNum}/${pageInfo}...`);
+        
+        // Get table data from current page
+        const pageData = await page.evaluate(() => {
+            const rows = [];
+            const headerCells = document.querySelectorAll('th, [role="columnheader"]');
+            const headers = Array.from(headerCells).map(h => h.textContent?.trim() || '');
+            
+            const dataRows = document.querySelectorAll('tbody tr, [role="row"]');
+            dataRows.forEach(row => {
+                const cells = row.querySelectorAll('td, [role="cell"]');
+                if (cells.length > 0) {
+                    const rowData = Array.from(cells).map(c => c.textContent?.trim() || '');
+                    rows.push(rowData);
+                }
+            });
+            
+            return { headers, rows };
+        });
+        
+        if (pageNum === 1) {
+            headers = pageData.headers;
+        }
+        allData = allData.concat(pageData.rows);
+        
+        // Go to next page if not last
+        if (pageNum < pageInfo) {
+            await page.evaluate(() => {
+                const nextBtn = document.querySelector('[aria-label="next page"], [aria-label="Next page"], button:has-text(">")');
+                if (nextBtn) {
+                    nextBtn.click();
+                } else {
+                    // Try finding by text content
+                    const buttons = document.querySelectorAll('button');
+                    for (const btn of buttons) {
+                        if (btn.textContent === '>' || btn.textContent === '›' || btn.getAttribute('aria-label')?.toLowerCase().includes('next')) {
+                            btn.click();
+                            break;
+                        }
+                    }
+                }
+            });
+            await new Promise(r => setTimeout(r, 3000));
+        }
+    }
+    
+    console.log(`Scraped ${allData.length} rows`);
+    
+    // Convert to CSV
+    const csvContent = [
+        headers.join(','),
+        ...allData.map(row => row.map(cell => `"${cell.replace(/"/g, '""')}"`).join(','))
+    ].join('\n');
+    
+    // Save file
+    const filePath = path.join(downloadPath, `${filePrefix}.csv`);
+    fs.writeFileSync(filePath, csvContent);
+    console.log(`Saved ${filePrefix}.csv (${allData.length} rows)`);
 }
 
 downloadAnsysData()
