@@ -126,6 +126,69 @@ async function waitForTableLoad(page) {
     console.log('Page loaded!');
 }
 
+async function findNextPageButton(page) {
+    // Get all buttons on page
+    const buttons = await page.$$('button');
+    
+    for (const button of buttons) {
+        const box = await button.boundingBox();
+        if (!box) continue;
+        
+        // Pagination buttons are small (around 30-40px) and near bottom of page
+        if (box.width > 20 && box.width < 50 && box.y > 600) {
+            const isDisabled = await button.evaluate(el => el.disabled);
+            const ariaLabel = await button.evaluate(el => el.getAttribute('aria-label') || '');
+            
+            // Check if this is the "next" button
+            if (ariaLabel.toLowerCase().includes('next') && !isDisabled) {
+                return button;
+            }
+        }
+    }
+    
+    // Fallback: find buttons near "Page X of Y" text and pick by position
+    const pageTextBox = await page.evaluate(() => {
+        const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+        while (walker.nextNode()) {
+            if (walker.currentNode.textContent?.match(/Page\s+\d+\s+of\s+\d+/)) {
+                const range = document.createRange();
+                range.selectNode(walker.currentNode);
+                const rect = range.getBoundingClientRect();
+                return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
+            }
+        }
+        return null;
+    });
+    
+    if (pageTextBox) {
+        console.log(`  Page text found at y=${pageTextBox.y}`);
+        
+        // Find buttons at similar y position, to the right of "Page X of Y"
+        const candidates = [];
+        for (const button of buttons) {
+            const box = await button.boundingBox();
+            if (!box) continue;
+            
+            // Same vertical area (within 30px) and to the right
+            if (Math.abs(box.y - pageTextBox.y) < 30 && box.x > pageTextBox.x + pageTextBox.width) {
+                const isDisabled = await button.evaluate(el => el.disabled);
+                if (!isDisabled) {
+                    candidates.push({ button, x: box.x });
+                }
+            }
+        }
+        
+        // Sort by x position and return first one (the > button)
+        candidates.sort((a, b) => a.x - b.x);
+        if (candidates.length > 0) {
+            console.log(`  Found ${candidates.length} candidate buttons to the right`);
+            return candidates[0].button; // First button to the right is ">"
+        }
+    }
+    
+    return null;
+}
+
 async function scrapeData(page, dateOption, filePrefix, downloadPath) {
     // Click date picker
     await page.evaluate(() => {
@@ -172,47 +235,6 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
     
     console.log(`Total pages: ${totalPages}, Total rows expected: ${totalRows}`);
     
-    // Find the next button by looking at pagination area
-    // The buttons are: |< < > >| - we want the 3rd one (index 2)
-    const paginationInfo = await page.evaluate(() => {
-        // Find element containing "Page X of Y"
-        const allElements = Array.from(document.querySelectorAll('*'));
-        let paginationContainer = null;
-        
-        for (const el of allElements) {
-            const text = el.textContent || '';
-            if (text.match(/Page\s+\d+\s+of\s+\d+/) && el.children.length < 10) {
-                paginationContainer = el.closest('div');
-                break;
-            }
-        }
-        
-        if (!paginationContainer) {
-            return { found: false, buttons: [] };
-        }
-        
-        // Get all buttons in this container and nearby
-        const parentDiv = paginationContainer.parentElement || paginationContainer;
-        const buttons = parentDiv.querySelectorAll('button');
-        
-        const buttonData = Array.from(buttons).map((btn, i) => {
-            const rect = btn.getBoundingClientRect();
-            return {
-                index: i,
-                x: rect.x,
-                y: rect.y,
-                width: rect.width,
-                height: rect.height,
-                disabled: btn.disabled,
-                html: btn.innerHTML.substring(0, 100)
-            };
-        });
-        
-        return { found: true, buttonCount: buttons.length, buttons: buttonData };
-    });
-    
-    console.log(`Pagination: ${paginationInfo.buttonCount} buttons found`);
-    
     // Scrape all pages
     let allData = [];
     
@@ -249,61 +271,14 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
         
         // Go to next page
         if (pageNum < totalPages) {
-            // Click the "next" button - it's the 3rd button in pagination (index 2)
-            // Buttons are: |< (first), < (prev), > (next), >| (last)
-            const clicked = await page.evaluate(() => {
-                // Find the pagination container
-                const allElements = Array.from(document.querySelectorAll('*'));
-                let paginationContainer = null;
-                
-                for (const el of allElements) {
-                    const text = el.textContent || '';
-                    if (text.match(/Page\s+\d+\s+of\s+\d+/) && el.children.length < 10) {
-                        paginationContainer = el.closest('div')?.parentElement;
-                        break;
-                    }
-                }
-                
-                if (!paginationContainer) {
-                    return 'no pagination container';
-                }
-                
-                // Get all buttons
-                const buttons = Array.from(paginationContainer.querySelectorAll('button'));
-                
-                // Filter to only small icon-like buttons (pagination buttons are usually small)
-                const paginationButtons = buttons.filter(btn => {
-                    const rect = btn.getBoundingClientRect();
-                    return rect.width < 60 && rect.width > 20;
-                });
-                
-                // Sort by x position (left to right)
-                paginationButtons.sort((a, b) => {
-                    return a.getBoundingClientRect().x - b.getBoundingClientRect().x;
-                });
-                
-                // The "next" button should be the 3rd one (index 2) in: |< < > >|
-                // Or the 2nd one (index 1) if there are only 2 visible: < >
-                if (paginationButtons.length >= 4) {
-                    const nextBtn = paginationButtons[2]; // 3rd button
-                    if (!nextBtn.disabled) {
-                        nextBtn.click();
-                        return `clicked button index 2 of ${paginationButtons.length}`;
-                    }
-                    return 'button 2 is disabled';
-                } else if (paginationButtons.length >= 2) {
-                    const nextBtn = paginationButtons[1]; // 2nd button
-                    if (!nextBtn.disabled) {
-                        nextBtn.click();
-                        return `clicked button index 1 of ${paginationButtons.length}`;
-                    }
-                    return 'button 1 is disabled';
-                }
-                
-                return `only ${paginationButtons.length} pagination buttons found`;
-            });
+            const nextButton = await findNextPageButton(page);
             
-            console.log(`  Next: ${clicked}`);
+            if (nextButton) {
+                await nextButton.click();
+                console.log(`  Clicked next button`);
+            } else {
+                console.log(`  WARNING: Could not find next button`);
+            }
             
             // Wait for page to change
             await new Promise(r => setTimeout(r, 2500));
