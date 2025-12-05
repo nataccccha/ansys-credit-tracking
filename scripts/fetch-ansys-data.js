@@ -10,7 +10,6 @@ if (!USERNAME || !PASSWORD) {
     process.exit(1);
 }
 
-// Only these 8 columns will be saved
 const HEADERS = ['Start Time', 'End Time', 'Product', 'Count', 'Hours', 'Cost', 'Currency', 'Username'];
 
 async function downloadAnsysData() {
@@ -99,7 +98,7 @@ async function downloadAnsysData() {
         await waitForTableLoad(page);
         await scrapeData(page, '1 Year', 'historical', downloadPath);
         
-        // SCRAPE 5 DAYS DATA - fresh page load
+        // SCRAPE 5 DAYS DATA
         console.log('=== Scraping 5 Days data ===');
         await page.goto('https://licensing.ansys.com/transactions', { waitUntil: 'networkidle0', timeout: 120000 });
         await waitForTableLoad(page);
@@ -175,26 +174,34 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
     
     // Scrape all pages
     let allData = [];
+    let lastFirstRow = '';
     
     for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
         console.log(`Scraping page ${pageNum}/${totalPages}...`);
         
         await new Promise(r => setTimeout(r, 1500));
         
-        // Get table data - only first 8 columns
+        // Verify we're on the right page
+        const currentPageNum = await page.evaluate(() => {
+            const text = document.body.innerText;
+            const match = text.match(/Page\s+(\d+)\s+of/i);
+            return match ? parseInt(match[1]) : 0;
+        });
+        console.log(`  Currently on page: ${currentPageNum}`);
+        
+        // Get table data
         const pageData = await page.evaluate((numCols) => {
             const rows = [];
             const rowElements = document.querySelectorAll('[role="row"]');
             
             rowElements.forEach((row, index) => {
-                if (index === 0) return; // Skip header
+                if (index === 0) return;
                 
                 let cells = row.querySelectorAll('[role="cell"]');
                 if (cells.length === 0) cells = row.querySelectorAll('[role="gridcell"]');
                 if (cells.length === 0) cells = row.querySelectorAll('td');
                 
                 if (cells.length > 0) {
-                    // Only take first 8 columns
                     const rowData = Array.from(cells)
                         .slice(0, numCols)
                         .map(c => (c.textContent?.trim() || '').replace(/\n/g, ' ').replace(/\s+/g, ' '));
@@ -205,47 +212,63 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
             return rows;
         }, HEADERS.length);
         
-        console.log(`  Page ${pageNum}: ${pageData.length} rows`);
+        // Check for duplicates
+        const firstRow = pageData.length > 0 ? pageData[0].join('|') : '';
+        if (firstRow === lastFirstRow && pageNum > 1) {
+            console.log(`  WARNING: Duplicate data detected, page didn't change!`);
+            // Try clicking next again
+            await clickNextPage(page);
+            await new Promise(r => setTimeout(r, 3000));
+            continue;
+        }
+        lastFirstRow = firstRow;
+        
+        console.log(`  Got ${pageData.length} rows`);
         allData = allData.concat(pageData);
         
         // Go to next page
         if (pageNum < totalPages) {
-            await page.evaluate(() => {
-                const selectors = [
-                    '[aria-label="Go to next page"]',
-                    '[aria-label="next page"]',
-                    '[aria-label="Next page"]'
-                ];
-                
-                for (const selector of selectors) {
-                    const btn = document.querySelector(selector);
-                    if (btn && !btn.disabled) {
-                        btn.click();
-                        return;
-                    }
-                }
-                
-                const buttons = document.querySelectorAll('button');
-                for (const btn of buttons) {
-                    const text = btn.textContent?.trim();
-                    if ((text === '>' || text === '›') && !btn.disabled) {
-                        btn.click();
-                        return;
-                    }
-                }
-            });
+            await clickNextPage(page);
             
-            await new Promise(r => setTimeout(r, 2000));
+            // Wait for page number to change
+            for (let i = 0; i < 10; i++) {
+                await new Promise(r => setTimeout(r, 500));
+                const newPageNum = await page.evaluate(() => {
+                    const text = document.body.innerText;
+                    const match = text.match(/Page\s+(\d+)\s+of/i);
+                    return match ? parseInt(match[1]) : 0;
+                });
+                if (newPageNum === pageNum + 1) {
+                    break;
+                }
+                if (i === 9) {
+                    console.log(`  Page number didn't change, retrying click...`);
+                    await clickNextPage(page);
+                }
+            }
+            
+            await new Promise(r => setTimeout(r, 1000));
         }
     }
     
     console.log(`Scraped ${allData.length} rows total (expected ${totalRows})`);
     
-    // Convert to CSV - only 8 columns
+    // Remove any duplicate rows
+    const uniqueData = [];
+    const seen = new Set();
+    for (const row of allData) {
+        const key = row.join('|');
+        if (!seen.has(key)) {
+            seen.add(key);
+            uniqueData.push(row);
+        }
+    }
+    console.log(`After deduplication: ${uniqueData.length} unique rows`);
+    
+    // Convert to CSV
     const csvContent = [
         HEADERS.join(','),
-        ...allData.map(row => {
-            // Ensure exactly 8 columns
+        ...uniqueData.map(row => {
             while (row.length < HEADERS.length) row.push('');
             return row.slice(0, HEADERS.length)
                 .map(cell => `"${(cell || '').replace(/"/g, '""')}"`)
@@ -256,7 +279,84 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
     // Save file
     const filePath = path.join(downloadPath, `${filePrefix}.csv`);
     fs.writeFileSync(filePath, csvContent);
-    console.log(`Saved ${filePrefix}.csv (${allData.length} rows, ${HEADERS.length} columns)`);
+    console.log(`Saved ${filePrefix}.csv (${uniqueData.length} rows, ${HEADERS.length} columns)`);
+}
+
+async function clickNextPage(page) {
+    // Try multiple methods to click next page
+    const result = await page.evaluate(() => {
+        // Method 1: Look for > or › button directly
+        const allButtons = document.querySelectorAll('button');
+        for (const btn of allButtons) {
+            const text = btn.textContent?.trim();
+            // Look for the > symbol which is typically the next button
+            if (text === '›' || text === '>' || text === '→') {
+                if (!btn.disabled) {
+                    btn.click();
+                    return 'clicked > button';
+                }
+            }
+        }
+        
+        // Method 2: aria-label
+        const ariaSelectors = [
+            '[aria-label="Go to next page"]',
+            '[aria-label="Next page"]',
+            '[aria-label="next page"]'
+        ];
+        for (const sel of ariaSelectors) {
+            const btn = document.querySelector(sel);
+            if (btn && !btn.disabled) {
+                btn.click();
+                return 'clicked aria-label button';
+            }
+        }
+        
+        // Method 3: Find pagination container and click the right-most enabled button
+        const paginationContainer = document.querySelector('[class*="pagination"], [class*="Pagination"], nav[aria-label*="pagination"]');
+        if (paginationContainer) {
+            const buttons = paginationContainer.querySelectorAll('button:not([disabled])');
+            if (buttons.length > 0) {
+                // The "next" button is usually the last or second-to-last button
+                const lastBtn = buttons[buttons.length - 1];
+                const text = lastBtn.textContent?.trim();
+                if (text === '›' || text === '>' || text === '>>' || text === '→' || text === '»' || text.includes('Last') || text.includes('Next')) {
+                    lastBtn.click();
+                    return 'clicked last pagination button';
+                }
+                // Try second to last
+                if (buttons.length > 1) {
+                    const secondLast = buttons[buttons.length - 2];
+                    secondLast.click();
+                    return 'clicked second-to-last button';
+                }
+            }
+        }
+        
+        // Method 4: Look for SVG icons that look like arrows
+        const svgButtons = document.querySelectorAll('button');
+        for (const btn of svgButtons) {
+            const svg = btn.querySelector('svg');
+            if (svg && !btn.disabled) {
+                const path = svg.querySelector('path');
+                const d = path?.getAttribute('d') || '';
+                // Right arrow paths typically have positive x movement
+                if (d.includes('l') || d.includes('L')) {
+                    // This might be an arrow, check position - if it's on the right side of pagination
+                    const rect = btn.getBoundingClientRect();
+                    if (rect.left > window.innerWidth / 2) {
+                        btn.click();
+                        return 'clicked SVG arrow button';
+                    }
+                }
+            }
+        }
+        
+        return 'no button found';
+    });
+    
+    console.log(`  Next page click: ${result}`);
+    return result !== 'no button found';
 }
 
 downloadAnsysData()
