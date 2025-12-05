@@ -10,6 +10,9 @@ if (!USERNAME || !PASSWORD) {
     process.exit(1);
 }
 
+// Only these 8 columns will be saved
+const HEADERS = ['Start Time', 'End Time', 'Product', 'Count', 'Hours', 'Cost', 'Currency', 'Username'];
+
 async function downloadAnsysData() {
     const downloadPath = path.resolve('./data');
     
@@ -43,7 +46,6 @@ async function downloadAnsysData() {
         await page.goto('https://licensing.ansys.com', { waitUntil: 'networkidle0', timeout: 60000 });
         await new Promise(r => setTimeout(r, 3000));
         
-        // Enter email
         console.log('Entering email...');
         await page.evaluate((email) => {
             const inputs = document.querySelectorAll('input');
@@ -59,7 +61,6 @@ async function downloadAnsysData() {
             }
         }, USERNAME);
         
-        // Click Continue
         await page.evaluate(() => {
             const btn = document.querySelector('button[type="submit"]');
             if (btn) btn.click();
@@ -67,7 +68,6 @@ async function downloadAnsysData() {
         
         await new Promise(r => setTimeout(r, 5000));
         
-        // Wait for and enter password
         console.log('Entering password...');
         for (let i = 0; i < 15; i++) {
             const hasPassword = await page.evaluate(() => !!document.querySelector('input[type="password"]'));
@@ -85,7 +85,6 @@ async function downloadAnsysData() {
             }
         }, PASSWORD);
         
-        // Click login
         await page.evaluate(() => {
             const btn = document.querySelector('button[type="submit"]');
             if (btn) btn.click();
@@ -94,29 +93,16 @@ async function downloadAnsysData() {
         await new Promise(r => setTimeout(r, 10000));
         console.log('Login successful!');
         
-        // Navigate to transactions
-        console.log('Navigating to Usage Transactions...');
-        await page.goto('https://licensing.ansys.com/transactions', { waitUntil: 'networkidle0', timeout: 120000 });
-        
-        // Wait for content
-        for (let i = 0; i < 30; i++) {
-            const hasContent = await page.evaluate(() => {
-                return document.body.innerText.includes('Start Time') || document.body.innerText.includes('From');
-            });
-            if (hasContent) break;
-            await new Promise(r => setTimeout(r, 2000));
-        }
-        console.log('Transactions page loaded!');
-        
-        // Take screenshot to debug table structure
-        await page.screenshot({ path: 'debug-table-structure.png', fullPage: true });
-        
-        // SCRAPE 1 YEAR DATA (rolling 12 months)
+        // SCRAPE 1 YEAR DATA
         console.log('=== Scraping 1 Year data ===');
+        await page.goto('https://licensing.ansys.com/transactions', { waitUntil: 'networkidle0', timeout: 120000 });
+        await waitForTableLoad(page);
         await scrapeData(page, '1 Year', 'historical', downloadPath);
         
-        // SCRAPE 5 DAYS DATA
+        // SCRAPE 5 DAYS DATA - fresh page load
         console.log('=== Scraping 5 Days data ===');
+        await page.goto('https://licensing.ansys.com/transactions', { waitUntil: 'networkidle0', timeout: 120000 });
+        await waitForTableLoad(page);
         await scrapeData(page, '5 Days', 'recent', downloadPath);
         
         console.log('All data scraped successfully!');
@@ -128,6 +114,17 @@ async function downloadAnsysData() {
     } finally {
         await browser.close();
     }
+}
+
+async function waitForTableLoad(page) {
+    for (let i = 0; i < 30; i++) {
+        const hasContent = await page.evaluate(() => {
+            return document.body.innerText.includes('Start Time') || document.body.innerText.includes('From');
+        });
+        if (hasContent) break;
+        await new Promise(r => setTimeout(r, 2000));
+    }
+    console.log('Page loaded!');
 }
 
 async function scrapeData(page, dateOption, filePrefix, downloadPath) {
@@ -154,199 +151,112 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
         }
     }, dateOption);
     console.log(`Selected ${dateOption}`);
-    await new Promise(r => setTimeout(r, 5000));
     
-    // Take screenshot after selecting date
-    await page.screenshot({ path: `debug-after-${filePrefix}-select.png`, fullPage: true });
+    // Wait for table to reload
+    await new Promise(r => setTimeout(r, 3000));
+    for (let i = 0; i < 10; i++) {
+        const loading = await page.evaluate(() => document.body.innerText.includes('Loading'));
+        if (!loading) break;
+        await new Promise(r => setTimeout(r, 1000));
+    }
+    await new Promise(r => setTimeout(r, 2000));
     
-    // Get total pages
-    const pageInfo = await page.evaluate(() => {
+    // Get page info
+    const { totalPages, totalRows } = await page.evaluate(() => {
         const text = document.body.innerText;
-        const match = text.match(/Page \d+ of (\d+)/);
-        return match ? parseInt(match[1]) : 1;
+        const rowMatch = text.match(/\d+\s+to\s+\d+\s+of\s+([\d,]+)/i);
+        const totalRows = rowMatch ? parseInt(rowMatch[1].replace(/,/g, '')) : 0;
+        const pageMatch = text.match(/Page\s+\d+\s+of\s+(\d+)/i);
+        const totalPages = pageMatch ? parseInt(pageMatch[1]) : 1;
+        return { totalPages, totalRows };
     });
-    console.log(`Total pages: ${pageInfo}`);
     
-    // Debug: log HTML structure
-    const tableDebug = await page.evaluate(() => {
-        const info = {
-            tables: document.querySelectorAll('table').length,
-            tbodies: document.querySelectorAll('tbody').length,
-            trs: document.querySelectorAll('tr').length,
-            tds: document.querySelectorAll('td').length,
-            ths: document.querySelectorAll('th').length,
-            roleRows: document.querySelectorAll('[role="row"]').length,
-            roleCells: document.querySelectorAll('[role="cell"]').length,
-            roleColumnHeaders: document.querySelectorAll('[role="columnheader"]').length,
-            divWithData: document.querySelectorAll('div[data-field]').length,
-            muiTableCells: document.querySelectorAll('.MuiTableCell-root').length
-        };
-        
-        // Try to get sample of what's in a row
-        const firstRow = document.querySelector('tbody tr');
-        if (firstRow) {
-            info.sampleRowHTML = firstRow.innerHTML.substring(0, 500);
-        }
-        
-        // Check for MUI DataGrid
-        const dataGrid = document.querySelector('.MuiDataGrid-root');
-        if (dataGrid) {
-            info.hasMuiDataGrid = true;
-            const gridRows = dataGrid.querySelectorAll('.MuiDataGrid-row');
-            info.muiGridRows = gridRows.length;
-        }
-        
-        return info;
-    });
-    console.log('Table structure debug:', JSON.stringify(tableDebug, null, 2));
+    console.log(`Total pages: ${totalPages}, Total rows expected: ${totalRows}`);
     
     // Scrape all pages
     let allData = [];
-    let headers = [];
     
-    for (let pageNum = 1; pageNum <= pageInfo; pageNum++) {
-        console.log(`Scraping page ${pageNum}/${pageInfo}...`);
+    for (let pageNum = 1; pageNum <= totalPages; pageNum++) {
+        console.log(`Scraping page ${pageNum}/${totalPages}...`);
         
-        // Wait for table to be populated
-        await new Promise(r => setTimeout(r, 2000));
+        await new Promise(r => setTimeout(r, 1500));
         
-        // Get table data - try multiple approaches
-        const pageData = await page.evaluate(() => {
-            let headers = [];
-            let rows = [];
+        // Get table data - only first 8 columns
+        const pageData = await page.evaluate((numCols) => {
+            const rows = [];
+            const rowElements = document.querySelectorAll('[role="row"]');
             
-            // APPROACH 1: Standard HTML table
-            const table = document.querySelector('table');
-            if (table) {
-                const headerCells = table.querySelectorAll('thead th, thead td');
-                headers = Array.from(headerCells).map(h => h.textContent?.trim() || '');
+            rowElements.forEach((row, index) => {
+                if (index === 0) return; // Skip header
                 
-                const bodyRows = table.querySelectorAll('tbody tr');
-                bodyRows.forEach(row => {
-                    const cells = row.querySelectorAll('td');
-                    if (cells.length > 0) {
-                        const rowData = Array.from(cells).map(c => c.textContent?.trim() || '');
-                        rows.push(rowData);
-                    }
-                });
-            }
-            
-            // APPROACH 2: MUI DataGrid
-            if (rows.length === 0) {
-                const dataGrid = document.querySelector('.MuiDataGrid-root');
-                if (dataGrid) {
-                    // Get headers
-                    const headerCells = dataGrid.querySelectorAll('.MuiDataGrid-columnHeader');
-                    headers = Array.from(headerCells).map(h => h.textContent?.trim() || '');
-                    
-                    // Get data rows
-                    const gridRows = dataGrid.querySelectorAll('.MuiDataGrid-row');
-                    gridRows.forEach(row => {
-                        const cells = row.querySelectorAll('.MuiDataGrid-cell');
-                        if (cells.length > 0) {
-                            const rowData = Array.from(cells).map(c => c.textContent?.trim() || '');
-                            rows.push(rowData);
-                        }
-                    });
+                let cells = row.querySelectorAll('[role="cell"]');
+                if (cells.length === 0) cells = row.querySelectorAll('[role="gridcell"]');
+                if (cells.length === 0) cells = row.querySelectorAll('td');
+                
+                if (cells.length > 0) {
+                    // Only take first 8 columns
+                    const rowData = Array.from(cells)
+                        .slice(0, numCols)
+                        .map(c => (c.textContent?.trim() || '').replace(/\n/g, ' ').replace(/\s+/g, ' '));
+                    rows.push(rowData);
                 }
-            }
+            });
             
-            // APPROACH 3: Role-based selectors
-            if (rows.length === 0) {
-                const roleHeaders = document.querySelectorAll('[role="columnheader"]');
-                headers = Array.from(roleHeaders).map(h => h.textContent?.trim() || '');
-                
-                const roleRows = document.querySelectorAll('[role="row"]');
-                roleRows.forEach((row, index) => {
-                    if (index === 0) return; // Skip header row
-                    const cells = row.querySelectorAll('[role="cell"], [role="gridcell"]');
-                    if (cells.length > 0) {
-                        const rowData = Array.from(cells).map(c => c.textContent?.trim() || '');
-                        rows.push(rowData);
-                    }
-                });
-            }
-            
-            // APPROACH 4: Generic div-based table (common in React apps)
-            if (rows.length === 0) {
-                // Look for repeated div structures
-                const allDivs = document.querySelectorAll('div');
-                const rowLike = [];
-                
-                allDivs.forEach(div => {
-                    const text = div.textContent?.trim() || '';
-                    // Look for divs containing date-like patterns (the Start Time column)
-                    if (text.match(/\d{4}-\d{2}-\d{2}/) && div.children.length < 3) {
-                        rowLike.push(div.closest('div[class]')?.parentElement);
-                    }
-                });
-            }
-            
-            return { headers, rows, headerCount: headers.length, rowCount: rows.length };
-        });
+            return rows;
+        }, HEADERS.length);
         
-        console.log(`Page ${pageNum}: Found ${pageData.headerCount} headers, ${pageData.rowCount} rows`);
+        console.log(`  Page ${pageNum}: ${pageData.length} rows`);
+        allData = allData.concat(pageData);
         
-        if (pageNum === 1 && pageData.headers.length > 0) {
-            headers = pageData.headers;
-            console.log('Headers:', headers);
-        }
-        
-        allData = allData.concat(pageData.rows);
-        
-        // Go to next page if not last
-        if (pageNum < pageInfo) {
+        // Go to next page
+        if (pageNum < totalPages) {
             await page.evaluate(() => {
                 const selectors = [
-                    '[aria-label="next page"]',
-                    '[aria-label="Next page"]',
                     '[aria-label="Go to next page"]',
-                    'button[aria-label*="next"]',
-                    'button[aria-label*="Next"]'
+                    '[aria-label="next page"]',
+                    '[aria-label="Next page"]'
                 ];
                 
                 for (const selector of selectors) {
                     const btn = document.querySelector(selector);
-                    if (btn) {
+                    if (btn && !btn.disabled) {
                         btn.click();
-                        return true;
+                        return;
                     }
                 }
                 
                 const buttons = document.querySelectorAll('button');
                 for (const btn of buttons) {
                     const text = btn.textContent?.trim();
-                    const aria = btn.getAttribute('aria-label')?.toLowerCase() || '';
-                    if (text === '>' || text === '›' || text === '→' || aria.includes('next')) {
+                    if ((text === '>' || text === '›') && !btn.disabled) {
                         btn.click();
-                        return true;
+                        return;
                     }
                 }
-                
-                return false;
             });
-            await new Promise(r => setTimeout(r, 3000));
+            
+            await new Promise(r => setTimeout(r, 2000));
         }
     }
     
-    console.log(`Scraped ${allData.length} rows total`);
+    console.log(`Scraped ${allData.length} rows total (expected ${totalRows})`);
     
-    // If we still have no data, use default headers
-    if (headers.length === 0) {
-        headers = ['Start Time', 'End Time', 'Product', 'Count', 'Hours', 'Cost', 'Currency', 'Username'];
-        console.log('Using default headers:', headers);
-    }
-    
-    // Convert to CSV
+    // Convert to CSV - only 8 columns
     const csvContent = [
-        headers.join(','),
-        ...allData.map(row => row.map(cell => `"${(cell || '').replace(/"/g, '""')}"`).join(','))
+        HEADERS.join(','),
+        ...allData.map(row => {
+            // Ensure exactly 8 columns
+            while (row.length < HEADERS.length) row.push('');
+            return row.slice(0, HEADERS.length)
+                .map(cell => `"${(cell || '').replace(/"/g, '""')}"`)
+                .join(',');
+        })
     ].join('\n');
     
     // Save file
     const filePath = path.join(downloadPath, `${filePrefix}.csv`);
     fs.writeFileSync(filePath, csvContent);
-    console.log(`Saved ${filePrefix}.csv (${allData.length} rows)`);
+    console.log(`Saved ${filePrefix}.csv (${allData.length} rows, ${HEADERS.length} columns)`);
 }
 
 downloadAnsysData()
