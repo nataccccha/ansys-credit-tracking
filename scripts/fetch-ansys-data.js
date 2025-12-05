@@ -47,63 +47,166 @@ async function downloadAnsysData() {
         await page.goto('https://licensing.ansys.com', { waitUntil: 'networkidle0', timeout: 60000 });
         await new Promise(function(r) { setTimeout(r, 3000); });
         
+        // Enter email using Puppeteer's type method
         console.log('Entering email...');
-        await page.evaluate(function(email) {
-            var inputs = document.querySelectorAll('input');
-            for (var i = 0; i < inputs.length; i++) {
-                var input = inputs[i];
-                var rect = input.getBoundingClientRect();
-                if (rect.width > 0 && rect.height > 0 && input.type !== 'hidden' && input.type !== 'submit') {
+        
+        // Wait for email input to appear
+        await page.waitForSelector('input[type="email"], input[type="text"], input[name="email"], input[placeholder*="mail"]', { timeout: 30000 });
+        
+        // Try multiple selectors for email input
+        var emailEntered = await page.evaluate(function(email) {
+            // Try various selectors
+            var selectors = [
+                'input[type="email"]',
+                'input[name="email"]',
+                'input[placeholder*="mail"]',
+                'input[placeholder*="Mail"]',
+                'input[autocomplete="email"]',
+                'input[autocomplete="username"]'
+            ];
+            
+            for (var i = 0; i < selectors.length; i++) {
+                var input = document.querySelector(selectors[i]);
+                if (input) {
                     input.focus();
                     input.value = email;
                     input.dispatchEvent(new Event('input', { bubbles: true }));
                     input.dispatchEvent(new Event('change', { bubbles: true }));
-                    break;
+                    return 'found with selector: ' + selectors[i];
                 }
             }
+            
+            // Fallback: find any visible text input
+            var inputs = document.querySelectorAll('input');
+            for (var i = 0; i < inputs.length; i++) {
+                var input = inputs[i];
+                var rect = input.getBoundingClientRect();
+                var type = input.type || 'text';
+                if (rect.width > 100 && rect.height > 20 && (type === 'text' || type === 'email')) {
+                    input.focus();
+                    input.value = email;
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
+                    input.dispatchEvent(new Event('change', { bubbles: true }));
+                    return 'found visible input at index ' + i;
+                }
+            }
+            
+            return 'no email input found';
         }, USERNAME);
         
-        await page.evaluate(function() {
-            var btn = document.querySelector('button[type="submit"]');
-            if (btn) btn.click();
+        console.log('Email entry: ' + emailEntered);
+        
+        // Take screenshot to verify
+        await page.screenshot({ path: 'debug-01-after-email.png' });
+        
+        // Click Continue button
+        await new Promise(function(r) { setTimeout(r, 1000); });
+        
+        var continueClicked = await page.evaluate(function() {
+            // Look for Continue button
+            var buttons = document.querySelectorAll('button');
+            for (var i = 0; i < buttons.length; i++) {
+                var btn = buttons[i];
+                var text = (btn.textContent || '').trim().toLowerCase();
+                if (text === 'continue' || text === 'next' || text === 'submit') {
+                    btn.click();
+                    return 'clicked button: ' + text;
+                }
+            }
+            
+            // Try submit button
+            var submitBtn = document.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.click();
+                return 'clicked submit button';
+            }
+            
+            return 'no continue button found';
         });
+        
+        console.log('Continue button: ' + continueClicked);
         
         await new Promise(function(r) { setTimeout(r, 5000); });
         
-        console.log('Entering password...');
+        // Take screenshot after clicking continue
+        await page.screenshot({ path: 'debug-02-after-continue.png' });
+        
+        console.log('Waiting for password field...');
         for (var i = 0; i < 15; i++) {
             var hasPassword = await page.evaluate(function() { return !!document.querySelector('input[type="password"]'); });
-            if (hasPassword) break;
+            if (hasPassword) {
+                console.log('Password field found!');
+                break;
+            }
+            console.log('Waiting for password... attempt ' + (i + 1));
             await new Promise(function(r) { setTimeout(r, 2000); });
         }
         
-        await page.evaluate(function(pwd) {
+        console.log('Entering password...');
+        var passwordEntered = await page.evaluate(function(pwd) {
             var pwdInput = document.querySelector('input[type="password"]');
             if (pwdInput) {
                 pwdInput.focus();
                 pwdInput.value = pwd;
                 pwdInput.dispatchEvent(new Event('input', { bubbles: true }));
                 pwdInput.dispatchEvent(new Event('change', { bubbles: true }));
+                return 'password entered';
             }
+            return 'no password field found';
         }, PASSWORD);
         
-        await page.evaluate(function() {
-            var btn = document.querySelector('button[type="submit"]');
-            if (btn) btn.click();
+        console.log('Password entry: ' + passwordEntered);
+        
+        // Click sign in / submit
+        await new Promise(function(r) { setTimeout(r, 1000); });
+        
+        var signInClicked = await page.evaluate(function() {
+            var buttons = document.querySelectorAll('button');
+            for (var i = 0; i < buttons.length; i++) {
+                var btn = buttons[i];
+                var text = (btn.textContent || '').trim().toLowerCase();
+                if (text.includes('sign in') || text.includes('login') || text.includes('log in') || text === 'continue' || text === 'submit') {
+                    btn.click();
+                    return 'clicked: ' + text;
+                }
+            }
+            
+            var submitBtn = document.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.click();
+                return 'clicked submit';
+            }
+            
+            return 'no sign in button found';
         });
         
+        console.log('Sign in button: ' + signInClicked);
+        
         await new Promise(function(r) { setTimeout(r, 10000); });
+        
+        // Take screenshot after login
+        await page.screenshot({ path: 'debug-03-after-login.png' });
+        
+        console.log('Current URL: ' + page.url());
         console.log('Login successful!');
         
-        // RECENT DATA FIRST (5 Days - smaller, faster)
+        // RECENT DATA FIRST
         console.log('=== Scraping 5 Days data ===');
         await page.goto('https://licensing.ansys.com/transactions', { waitUntil: 'networkidle0', timeout: 120000 });
+        
+        // Wait for page to load
+        console.log('Waiting for transactions page...');
+        await new Promise(function(r) { setTimeout(r, 5000); });
+        
+        await page.screenshot({ path: 'debug-04-transactions.png' });
+        
         await waitForTableLoad(page);
         recentRows = await scrapeData(page, '5 Days', 'recent', downloadPath);
         
-        // HISTORICAL DATA SECOND (1 Year - larger, takes longer)
+        // HISTORICAL DATA
         console.log('=== Scraping 1 Year data ===');
         await page.goto('https://licensing.ansys.com/transactions', { waitUntil: 'networkidle0', timeout: 120000 });
+        await new Promise(function(r) { setTimeout(r, 5000); });
         await waitForTableLoad(page);
         historicalRows = await scrapeData(page, '1 Year', 'historical', downloadPath);
         
@@ -131,41 +234,25 @@ async function waitForTableLoad(page) {
     console.log('Waiting for table to load...');
     for (var i = 0; i < 30; i++) {
         var hasContent = await page.evaluate(function() {
-            return document.body.innerText.includes('Start Time');
+            return document.body.innerText.includes('Start Time') || 
+                   document.querySelectorAll('[role="row"]').length > 1;
         });
         if (hasContent) {
-            console.log('Table headers found!');
+            console.log('Table content found!');
             break;
         }
         await new Promise(function(r) { setTimeout(r, 2000); });
     }
-    
-    // Wait for actual row data
-    for (var i = 0; i < 15; i++) {
-        var rowCount = await page.evaluate(function() {
-            return document.querySelectorAll('[role="row"]').length;
-        });
-        console.log('Row elements found: ' + rowCount);
-        if (rowCount > 1) break;
-        await new Promise(function(r) { setTimeout(r, 2000); });
-    }
-    
     console.log('Page loaded!');
 }
 
 async function scrapeData(page, dateOption, filePrefix, downloadPath) {
-    // Take screenshot before clicking date picker
-    await page.screenshot({ path: 'debug-before-datepicker-' + filePrefix + '.png' });
-    
-    // Check current page state
+    // Check page state
     var pageState = await page.evaluate(function() {
-        var text = document.body.innerText;
         return {
-            hasFrom: text.includes('From'),
-            hasTo: text.includes('To'),
-            hasStartTime: text.includes('Start Time'),
-            rowCount: document.querySelectorAll('[role="row"]').length,
-            pageInfo: text.match(/\d+\s+to\s+\d+\s+of\s+[\d,]+/i) ? text.match(/\d+\s+to\s+\d+\s+of\s+[\d,]+/i)[0] : 'not found'
+            hasFrom: document.body.innerText.includes('From'),
+            hasStartTime: document.body.innerText.includes('Start Time'),
+            rowCount: document.querySelectorAll('[role="row"]').length
         };
     });
     console.log('Page state: ' + JSON.stringify(pageState));
@@ -175,18 +262,16 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
         var buttons = document.querySelectorAll('button');
         for (var i = 0; i < buttons.length; i++) {
             var btn = buttons[i];
-            if (btn.textContent && btn.textContent.includes('From') && btn.textContent.includes('To')) {
+            var text = btn.textContent || '';
+            if (text.includes('From') && text.includes('To')) {
                 btn.click();
-                return 'clicked button with From/To';
+                return 'clicked';
             }
         }
-        return 'no date picker button found';
+        return 'not found';
     });
     console.log('Date picker: ' + datePickerClicked);
     await new Promise(function(r) { setTimeout(r, 2000); });
-    
-    // Take screenshot after clicking date picker
-    await page.screenshot({ path: 'debug-after-datepicker-' + filePrefix + '.png' });
     
     // Select date option
     var optionClicked = await page.evaluate(function(option) {
@@ -198,25 +283,11 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
                 return 'clicked ' + option;
             }
         }
-        return 'option not found: ' + option;
+        return 'not found: ' + option;
     }, dateOption);
     console.log('Date option: ' + optionClicked);
     
-    // Wait for table to reload
-    console.log('Waiting for table to reload...');
-    await new Promise(function(r) { setTimeout(r, 3000); });
-    
-    // Wait for loading to finish
-    for (var i = 0; i < 15; i++) {
-        var loading = await page.evaluate(function() { return document.body.innerText.includes('Loading'); });
-        if (!loading) break;
-        console.log('Still loading...');
-        await new Promise(function(r) { setTimeout(r, 1000); });
-    }
-    await new Promise(function(r) { setTimeout(r, 3000); });
-    
-    // Take screenshot after loading
-    await page.screenshot({ path: 'debug-after-load-' + filePrefix + '.png' });
+    await new Promise(function(r) { setTimeout(r, 5000); });
     
     // Get page info
     var pageInfo = await page.evaluate(function() {
@@ -225,17 +296,8 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
         var totalRows = rowMatch ? parseInt(rowMatch[3].replace(/,/g, '')) : 0;
         var pageMatch = text.match(/Page\s+(\d+)\s+of\s+(\d+)/i);
         var totalPages = pageMatch ? parseInt(pageMatch[2]) : 1;
-        var currentPage = pageMatch ? parseInt(pageMatch[1]) : 1;
-        return { 
-            totalPages: totalPages, 
-            totalRows: totalRows,
-            currentPage: currentPage,
-            rowMatchText: rowMatch ? rowMatch[0] : 'not found',
-            pageMatchText: pageMatch ? pageMatch[0] : 'not found'
-        };
+        return { totalPages: totalPages, totalRows: totalRows };
     });
-    
-    console.log('Page info: ' + JSON.stringify(pageInfo));
     
     var totalPages = pageInfo.totalPages;
     var totalRows = pageInfo.totalRows;
@@ -243,14 +305,12 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
     console.log('Total pages: ' + totalPages + ', Total rows expected: ' + totalRows);
     
     var allData = [];
-    var lastFirstCell = '';
     
     for (var pageNum = 1; pageNum <= totalPages; pageNum++) {
         if (pageNum % 20 === 1 || pageNum === totalPages) {
             console.log('Scraping page ' + pageNum + '/' + totalPages + '...');
         }
         
-        // Get table data
         var pageData = await page.evaluate(function(numCols) {
             var rows = [];
             var rowElements = document.querySelectorAll('[role="row"]');
@@ -261,7 +321,6 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
                 
                 var cells = row.querySelectorAll('[role="cell"]');
                 if (cells.length === 0) cells = row.querySelectorAll('[role="gridcell"]');
-                if (cells.length === 0) cells = row.querySelectorAll('td');
                 
                 if (cells.length > 0) {
                     var rowData = [];
@@ -276,82 +335,21 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
             return rows;
         }, HEADERS.length);
         
-        if (pageNum === 1) {
-            console.log('First page data rows: ' + pageData.length);
-            if (pageData.length > 0) {
-                console.log('First row: ' + JSON.stringify(pageData[0]));
-            }
-        }
-        
-        // Check if data actually changed
-        var currentFirstCell = pageData.length > 0 ? pageData[0][0] : '';
-        if (pageNum > 1 && currentFirstCell === lastFirstCell) {
-            console.log('  WARNING: Data did not change, waiting longer...');
-            await new Promise(function(r) { setTimeout(r, 2000); });
-            
-            // Try getting data again
-            pageData = await page.evaluate(function(numCols) {
-                var rows = [];
-                var rowElements = document.querySelectorAll('[role="row"]');
-                
-                for (var i = 0; i < rowElements.length; i++) {
-                    if (i === 0) continue;
-                    var row = rowElements[i];
-                    
-                    var cells = row.querySelectorAll('[role="cell"]');
-                    if (cells.length === 0) cells = row.querySelectorAll('[role="gridcell"]');
-                    if (cells.length === 0) cells = row.querySelectorAll('td');
-                    
-                    if (cells.length > 0) {
-                        var rowData = [];
-                        for (var j = 0; j < Math.min(cells.length, numCols); j++) {
-                            var text = (cells[j].textContent || '').trim().replace(/\n/g, ' ').replace(/\s+/g, ' ');
-                            rowData.push(text);
-                        }
-                        rows.push(rowData);
-                    }
-                }
-                
-                return rows;
-            }, HEADERS.length);
-            currentFirstCell = pageData.length > 0 ? pageData[0][0] : '';
-        }
-        lastFirstCell = currentFirstCell;
-        
         allData = allData.concat(pageData);
         
-        // Go to next page
         if (pageNum < totalPages) {
-            // Click the AG-Grid "Next Page" button
             await page.evaluate(function() {
                 var nextBtn = document.querySelector('[aria-label="Next Page"]');
                 if (nextBtn && !nextBtn.classList.contains('ag-disabled')) {
                     nextBtn.click();
                 }
             });
-            
-            // Wait for page number to change
-            var expectedPage = pageNum + 1;
-            for (var waitAttempt = 0; waitAttempt < 10; waitAttempt++) {
-                await new Promise(function(r) { setTimeout(r, 500); });
-                var currentPageNum = await page.evaluate(function() {
-                    var text = document.body.innerText;
-                    var match = text.match(/Page\s+(\d+)\s+of/i);
-                    return match ? parseInt(match[1]) : 0;
-                });
-                if (currentPageNum === expectedPage) {
-                    break;
-                }
-            }
-            
-            // Additional wait for data to load
-            await new Promise(function(r) { setTimeout(r, 1000); });
+            await new Promise(function(r) { setTimeout(r, 2000); });
         }
     }
     
     console.log('Scraped ' + allData.length + ' rows total (expected ' + totalRows + ')');
     
-    // Deduplicate
     var uniqueData = [];
     var seen = {};
     for (var i = 0; i < allData.length; i++) {
@@ -363,7 +361,6 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
     }
     console.log('After dedup: ' + uniqueData.length + ' unique rows');
     
-    // Convert to CSV
     var csvLines = [HEADERS.join(',')];
     for (var i = 0; i < uniqueData.length; i++) {
         var row = uniqueData[i];
