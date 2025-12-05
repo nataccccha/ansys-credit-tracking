@@ -108,9 +108,9 @@ async function downloadAnsysData() {
         }
         console.log('Transactions page loaded!');
         
-        // SCRAPE YTD DATA
-        console.log('=== Scraping YTD data ===');
-        await scrapeData(page, 'YTD', 'historical', downloadPath);
+        // SCRAPE 1 YEAR DATA (rolling 12 months)
+        console.log('=== Scraping 1 Year data ===');
+        await scrapeData(page, '1 Year', 'historical', downloadPath);
         
         // SCRAPE 5 DAYS DATA
         console.log('=== Scraping 5 Days data ===');
@@ -194,30 +194,46 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
         // Go to next page if not last
         if (pageNum < pageInfo) {
             await page.evaluate(() => {
-                const nextBtn = document.querySelector('[aria-label="next page"], [aria-label="Next page"], button:has-text(">")');
-                if (nextBtn) {
-                    nextBtn.click();
-                } else {
-                    // Try finding by text content
-                    const buttons = document.querySelectorAll('button');
-                    for (const btn of buttons) {
-                        if (btn.textContent === '>' || btn.textContent === '›' || btn.getAttribute('aria-label')?.toLowerCase().includes('next')) {
-                            btn.click();
-                            break;
-                        }
+                // Try various next page button selectors
+                const selectors = [
+                    '[aria-label="next page"]',
+                    '[aria-label="Next page"]',
+                    '[aria-label="Go to next page"]',
+                    'button[aria-label*="next"]',
+                    'button[aria-label*="Next"]'
+                ];
+                
+                for (const selector of selectors) {
+                    const btn = document.querySelector(selector);
+                    if (btn) {
+                        btn.click();
+                        return true;
                     }
                 }
+                
+                // Try finding by text/icon
+                const buttons = document.querySelectorAll('button');
+                for (const btn of buttons) {
+                    const text = btn.textContent?.trim();
+                    const aria = btn.getAttribute('aria-label')?.toLowerCase() || '';
+                    if (text === '>' || text === '›' || text === '→' || aria.includes('next')) {
+                        btn.click();
+                        return true;
+                    }
+                }
+                
+                return false;
             });
             await new Promise(r => setTimeout(r, 3000));
         }
     }
     
-    console.log(`Scraped ${allData.length} rows`);
+    console.log(`Scraped ${allData.length} rows total`);
     
     // Convert to CSV
     const csvContent = [
         headers.join(','),
-        ...allData.map(row => row.map(cell => `"${cell.replace(/"/g, '""')}"`).join(','))
+        ...allData.map(row => row.map(cell => `"${(cell || '').replace(/"/g, '""')}"`).join(','))
     ].join('\n');
     
     // Save file
