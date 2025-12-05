@@ -2561,7 +2561,8 @@ Thanks,`;
                 }
             });
 
-            const historicalMonthlyValues = Object.values(historicalByMonth);
+            // Calculate average only from months with actual data
+            const historicalMonthlyValues = Object.values(historicalByMonth).filter(v => v > 0);
             const historicalAvgMonthly = historicalMonthlyValues.length > 0 
                 ? historicalMonthlyValues.reduce((a, b) => a + b, 0) / historicalMonthlyValues.length 
                 : 0;
@@ -2687,24 +2688,30 @@ Thanks,`;
             // Sort months
             const sortedMonths = Array.from(allMonths).sort();
             
-            // Generate month names
-            const monthNames = sortedMonths.map(month => {
+            // Only keep last 12 months
+            const last12Months = sortedMonths.slice(-12);
+            
+            // Generate month names with year (e.g., "Jan '25", "Dec '25", "Jan '26")
+            const monthNames = last12Months.map(month => {
                 const parts = month.split('-');
                 if (parts.length >= 2) {
                     const year = parseInt(parts[0]);
                     const monthNum = parseInt(parts[1]);
                     if (!isNaN(year) && !isNaN(monthNum) && monthNum >= 1 && monthNum <= 12) {
                         const date = new Date(year, monthNum - 1);
-                        return date.toLocaleDateString('en-US', { month: 'long' });
+                        const monthName = date.toLocaleDateString('en-US', { month: 'short' });
+                        const yearShort = "'" + String(year).slice(-2);
+                        return `${monthName} ${yearShort}`;
                     }
                 }
-                return month; // Return raw value if parsing fails
+                return month;
             });
 
-            // Generate header
+            // Generate header with Avg column
             const headerRow = document.getElementById('pivotTableHeader');
             headerRow.innerHTML = '<th>Username</th>' + 
                 monthNames.map(name => `<th>${name}</th>`).join('') +
+                '<th style="background: rgba(0, 122, 255, 0.15); font-weight: 700;">Avg</th>' +
                 '<th style="background: var(--bg-primary); font-weight: 700;">Total</th>';
 
             // Generate body
@@ -2713,14 +2720,15 @@ Thanks,`;
             const monthTotals = {};
             
             // Initialize month totals
-            sortedMonths.forEach(month => {
+            last12Months.forEach(month => {
                 monthTotals[month] = 0;
             });
 
             // Sort users by total
             const userTotals = {};
             Object.keys(monthlyData).forEach(user => {
-                userTotals[user] = Object.values(monthlyData[user]).reduce((a, b) => a + b, 0);
+                // Only count last 12 months for sorting
+                userTotals[user] = last12Months.reduce((sum, month) => sum + (monthlyData[user][month] || 0), 0);
             });
 
             const sortedUsers = Object.keys(userTotals).sort((a, b) => userTotals[b] - userTotals[a]);
@@ -2729,14 +2737,19 @@ Thanks,`;
             sortedUsers.forEach(user => {
                 let rowHTML = `<td>${user}</td>`;
                 let userTotal = 0;
+                let monthsWithData = 0;
                 
-                sortedMonths.forEach(month => {
+                last12Months.forEach(month => {
                     const value = monthlyData[user][month] || 0;
                     userTotal += value;
+                    if (value > 0) monthsWithData++;
                     monthTotals[month] += value;
                     rowHTML += `<td>${value > 0 ? value.toFixed(1) : '0'}</td>`;
                 });
                 
+                // Calculate average (only count months with data to avoid skewing)
+                const userAvg = monthsWithData > 0 ? userTotal / monthsWithData : 0;
+                rowHTML += `<td style="font-weight: 600; background: rgba(0, 122, 255, 0.08); color: var(--accent-info);">${userAvg.toFixed(1)}</td>`;
                 rowHTML += `<td style="font-weight: 600; background: var(--bg-secondary);">${userTotal.toFixed(1)}</td>`;
                 rows.push(`<tr>${rowHTML}</tr>`);
             });
@@ -2744,11 +2757,16 @@ Thanks,`;
             // Add total row
             let totalRowHTML = '<td style="font-weight: 700;">Total</td>';
             let grandTotal = 0;
-            sortedMonths.forEach(month => {
+            let monthsCount = 0;
+            last12Months.forEach(month => {
                 const total = monthTotals[month];
                 grandTotal += total;
+                if (total > 0) monthsCount++;
                 totalRowHTML += `<td style="font-weight: 600;">${total.toFixed(1)}</td>`;
             });
+            // Add total row with average
+            const grandAvg = monthsCount > 0 ? grandTotal / monthsCount : 0;
+            totalRowHTML += `<td style="font-weight: 700; background: rgba(0, 122, 255, 0.15); color: var(--accent-info);">${grandAvg.toFixed(1)}</td>`;
             totalRowHTML += `<td style="font-weight: 700; background: var(--bg-primary);">${grandTotal.toFixed(1)}</td>`;
             rows.push(`<tr class="total-row">${totalRowHTML}</tr>`);
 
