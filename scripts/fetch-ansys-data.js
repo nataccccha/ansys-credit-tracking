@@ -19,27 +19,35 @@ async function downloadAnsysData() {
     
     console.log('Starting browser...');
     const browser = await puppeteer.launch({
-        headless: 'new',
+        headless: false,  // Try with visible browser via xvfb
         args: [
             '--no-sandbox', 
             '--disable-setuid-sandbox',
             '--disable-dev-shm-usage',
-            '--disable-gpu',
+            '--disable-blink-features=AutomationControlled',
             '--window-size=1920,1080'
         ]
     });
     
     const page = await browser.newPage();
+    
+    // Make browser look more real
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
     await page.setViewport({ width: 1920, height: 1080 });
     
-    // Set a longer default timeout
+    // Remove webdriver flag
+    await page.evaluateOnNewDocument(() => {
+        Object.defineProperty(navigator, 'webdriver', { get: () => false });
+    });
+    
     page.setDefaultTimeout(60000);
     
     try {
         // LOGIN
         console.log('Navigating to ANSYS licensing portal...');
-        await page.goto('https://licensing.ansys.com', { waitUntil: 'networkidle2', timeout: 60000 });
+        await page.goto('https://licensing.ansys.com', { waitUntil: 'networkidle0', timeout: 60000 });
         await new Promise(r => setTimeout(r, 5000));
+        await page.screenshot({ path: 'debug-0-login-page.png' });
         
         const emailInput = await page.$('input[type="email"]') || 
                           await page.$('input[id="email"]') ||
@@ -47,7 +55,7 @@ async function downloadAnsysData() {
         
         if (emailInput) {
             await emailInput.click();
-            await emailInput.type(USERNAME);
+            await page.keyboard.type(USERNAME, { delay: 50 }); // Type slowly like human
             console.log('Email entered');
         }
         
@@ -56,96 +64,45 @@ async function downloadAnsysData() {
         
         console.log('Entering password...');
         await page.waitForSelector('input[type="password"]', { timeout: 15000 });
-        await page.type('input[type="password"]', PASSWORD);
+        await page.keyboard.type(PASSWORD, { delay: 50 });
         await page.click('button[type="submit"]');
-        await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 60000 });
+        
+        await page.waitForNavigation({ waitUntil: 'networkidle0', timeout: 60000 });
         console.log('Login successful!');
+        await page.screenshot({ path: 'debug-1-after-login.png' });
         
-        // GO TO TRANSACTIONS - use click navigation instead of direct URL
-        console.log('Navigating to Usage Transactions...');
-        
-        // Try clicking on the sidebar menu instead of direct navigation
-        await page.goto('https://licensing.ansys.com', { waitUntil: 'networkidle2', timeout: 60000 });
-        await new Promise(r => setTimeout(r, 5000));
-        
-        // Look for "Elastic Reporting" or "Usage Transactions" link
-        const navClicked = await page.evaluate(() => {
-            const links = document.querySelectorAll('a, button, div, span');
-            for (const link of links) {
-                const text = link.textContent?.toLowerCase() || '';
-                if (text.includes('usage transactions') || text.includes('elastic reporting')) {
-                    link.click();
-                    return text;
-                }
-            }
-            return null;
-        });
-        console.log('Clicked nav:', navClicked);
-        
+        // Wait a bit then go to transactions
         await new Promise(r => setTimeout(r, 3000));
         
-        // Now try clicking "Usage Transactions" specifically
-        await page.evaluate(() => {
-            const links = document.querySelectorAll('a, button, div, span');
-            for (const link of links) {
-                const text = link.textContent?.trim();
-                if (text === 'Usage Transactions') {
-                    link.click();
-                    return;
-                }
-            }
+        console.log('Navigating to Usage Transactions...');
+        await page.goto('https://licensing.ansys.com/transactions', { 
+            waitUntil: 'networkidle0', 
+            timeout: 120000 
         });
         
-        // Wait for the page to load - look for specific elements
-        console.log('Waiting for transactions page to load...');
-        
-        // Wait up to 60 seconds for the table or date picker to appear
-        let loaded = false;
-        for (let i = 0; i < 30; i++) {
-            await new Promise(r => setTimeout(r, 2000));
-            
-            const hasContent = await page.evaluate(() => {
-                // Check if loading spinner is gone and content is visible
-                const loading = document.body.textContent?.includes('Loading...');
-                const hasTable = document.querySelector('table') !== null;
-                const hasDatePicker = document.body.textContent?.includes('From:') || 
-                                     document.body.textContent?.includes('From ');
-                return !loading || hasTable || hasDatePicker;
-            });
-            
-            console.log(`Check ${i + 1}/30: Content loaded = ${hasContent}`);
-            
-            if (hasContent) {
-                loaded = true;
-                break;
-            }
+        // Wait for content to appear
+        console.log('Waiting for page content...');
+        try {
+            await page.waitForFunction(
+                () => !document.body.textContent.includes('Loading...') || 
+                      document.querySelector('table') !== null,
+                { timeout: 120000 }
+            );
+            console.log('Page loaded!');
+        } catch (e) {
+            console.log('Timeout waiting for page, continuing anyway...');
         }
         
-        await page.screenshot({ path: 'debug-1-after-waiting.png', fullPage: true });
+        await page.screenshot({ path: 'debug-2-transactions.png', fullPage: true });
         
-        if (!loaded) {
-            console.log('Page did not fully load, trying direct URL...');
-            await page.goto('https://licensing.ansys.com/transactions', { 
-                waitUntil: 'domcontentloaded', 
-                timeout: 60000 
-            });
-            
-            // Wait more
-            for (let i = 0; i < 15; i++) {
-                await new Promise(r => setTimeout(r, 2000));
-                const stillLoading = await page.evaluate(() => {
-                    return document.body.textContent?.includes('Loading...');
-                });
-                console.log(`Direct URL check ${i + 1}/15: Still loading = ${stillLoading}`);
-                if (!stillLoading) break;
-            }
-        }
+        // Log what we see
+        const url = page.url();
+        const title = await page.title();
+        console.log('Current URL:', url);
+        console.log('Page title:', title);
         
-        await page.screenshot({ path: 'debug-2-final-state.png', fullPage: true });
-        
-        // Log page content for debugging
-        const pageText = await page.evaluate(() => document.body.innerText?.substring(0, 1000));
-        console.log('Page content preview:', pageText);
+        const bodyText = await page.evaluate(() => document.body.innerText.substring(0, 500));
+        console.log('Page text:', bodyText);
         
         // DOWNLOAD YTD DATA
         console.log('=== Downloading YTD data ===');
@@ -158,8 +115,12 @@ async function downloadAnsysData() {
         console.log('All downloads complete!');
         
     } catch (error) {
-        console.error('Error during automation:', error);
+        console.error('Error:', error.message);
         await page.screenshot({ path: 'error-screenshot.png', fullPage: true });
+        
+        // Log page state
+        const url = page.url();
+        console.log('Error URL:', url);
         throw error;
     } finally {
         await browser.close();
@@ -167,7 +128,6 @@ async function downloadAnsysData() {
 }
 
 async function selectDateRangeAndDownload(page, dateOption, filePrefix, downloadPath) {
-    // Click the date range button
     console.log('Opening date picker...');
     
     const clicked = await page.evaluate(() => {
@@ -184,14 +144,12 @@ async function selectDateRangeAndDownload(page, dateOption, filePrefix, download
     console.log('Date picker clicked:', clicked);
     await new Promise(r => setTimeout(r, 2000));
     
-    // Click on the date option
-    console.log(`Looking for "${dateOption}" option...`);
+    console.log(`Selecting "${dateOption}"...`);
     
     const optionClicked = await page.evaluate((option) => {
-        const elements = document.querySelectorAll('div, li, span, p, a, button');
+        const elements = document.querySelectorAll('*');
         for (const el of elements) {
-            const text = el.textContent?.trim();
-            if (text === option) {
+            if (el.textContent?.trim() === option && el.children.length === 0) {
                 el.click();
                 return true;
             }
@@ -202,17 +160,14 @@ async function selectDateRangeAndDownload(page, dateOption, filePrefix, download
     console.log('Option clicked:', optionClicked);
     await new Promise(r => setTimeout(r, 4000));
     
-    // Click download button
-    console.log('Looking for download button...');
+    console.log('Clicking download...');
     
     const downloadClicked = await page.evaluate(() => {
-        const buttons = document.querySelectorAll('button, [role="button"]');
-        for (const btn of buttons) {
-            const html = btn.outerHTML.toLowerCase();
-            const aria = btn.getAttribute('aria-label')?.toLowerCase() || '';
-            const title = btn.getAttribute('title')?.toLowerCase() || '';
-            if (html.includes('download') || aria.includes('download') || title.includes('download')) {
-                btn.click();
+        const elements = document.querySelectorAll('button, [role="button"], svg');
+        for (const el of elements) {
+            const html = el.outerHTML.toLowerCase();
+            if (html.includes('download') || html.includes('export')) {
+                el.closest('button')?.click() || el.click();
                 return true;
             }
         }
@@ -222,9 +177,7 @@ async function selectDateRangeAndDownload(page, dateOption, filePrefix, download
     console.log('Download clicked:', downloadClicked);
     await new Promise(r => setTimeout(r, 10000));
     
-    // Check files
-    const files = fs.readdirSync(downloadPath);
-    console.log('Files:', files);
+    console.log('Files:', fs.readdirSync(downloadPath));
 }
 
 downloadAnsysData()
