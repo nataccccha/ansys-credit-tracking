@@ -126,69 +126,6 @@ async function waitForTableLoad(page) {
     console.log('Page loaded!');
 }
 
-async function findNextPageButton(page) {
-    // Get all buttons on page
-    const buttons = await page.$$('button');
-    
-    for (const button of buttons) {
-        const box = await button.boundingBox();
-        if (!box) continue;
-        
-        // Pagination buttons are small (around 30-40px) and near bottom of page
-        if (box.width > 20 && box.width < 50 && box.y > 600) {
-            const isDisabled = await button.evaluate(el => el.disabled);
-            const ariaLabel = await button.evaluate(el => el.getAttribute('aria-label') || '');
-            
-            // Check if this is the "next" button
-            if (ariaLabel.toLowerCase().includes('next') && !isDisabled) {
-                return button;
-            }
-        }
-    }
-    
-    // Fallback: find buttons near "Page X of Y" text and pick by position
-    const pageTextBox = await page.evaluate(() => {
-        const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
-        while (walker.nextNode()) {
-            if (walker.currentNode.textContent?.match(/Page\s+\d+\s+of\s+\d+/)) {
-                const range = document.createRange();
-                range.selectNode(walker.currentNode);
-                const rect = range.getBoundingClientRect();
-                return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
-            }
-        }
-        return null;
-    });
-    
-    if (pageTextBox) {
-        console.log(`  Page text found at y=${pageTextBox.y}`);
-        
-        // Find buttons at similar y position, to the right of "Page X of Y"
-        const candidates = [];
-        for (const button of buttons) {
-            const box = await button.boundingBox();
-            if (!box) continue;
-            
-            // Same vertical area (within 30px) and to the right
-            if (Math.abs(box.y - pageTextBox.y) < 30 && box.x > pageTextBox.x + pageTextBox.width) {
-                const isDisabled = await button.evaluate(el => el.disabled);
-                if (!isDisabled) {
-                    candidates.push({ button, x: box.x });
-                }
-            }
-        }
-        
-        // Sort by x position and return first one (the > button)
-        candidates.sort((a, b) => a.x - b.x);
-        if (candidates.length > 0) {
-            console.log(`  Found ${candidates.length} candidate buttons to the right`);
-            return candidates[0].button; // First button to the right is ">"
-        }
-    }
-    
-    return null;
-}
-
 async function scrapeData(page, dateOption, filePrefix, downloadPath) {
     // Click date picker
     await page.evaluate(() => {
@@ -235,6 +172,31 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
     
     console.log(`Total pages: ${totalPages}, Total rows expected: ${totalRows}`);
     
+    // DEBUG: Log ALL buttons on page
+    if (filePrefix === 'recent') { // Only debug once
+        const allButtonsInfo = await page.evaluate(() => {
+            const buttons = document.querySelectorAll('button');
+            return Array.from(buttons).map((btn, i) => {
+                const rect = btn.getBoundingClientRect();
+                return {
+                    i,
+                    x: Math.round(rect.x),
+                    y: Math.round(rect.y),
+                    w: Math.round(rect.width),
+                    h: Math.round(rect.height),
+                    disabled: btn.disabled,
+                    aria: btn.getAttribute('aria-label'),
+                    text: btn.innerText?.substring(0, 20).replace(/\n/g, ' '),
+                    hasSvg: btn.querySelector('svg') !== null
+                };
+            }).filter(b => b.y > 500); // Only buttons in lower half of page
+        });
+        console.log('Buttons in lower half of page:');
+        allButtonsInfo.forEach(b => {
+            console.log(`  [${b.i}] x:${b.x} y:${b.y} ${b.w}x${b.h} aria:"${b.aria}" text:"${b.text}" svg:${b.hasSvg} disabled:${b.disabled}`);
+        });
+    }
+    
     // Scrape all pages
     let allData = [];
     
@@ -271,12 +233,66 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
         
         // Go to next page
         if (pageNum < totalPages) {
-            const nextButton = await findNextPageButton(page);
+            // Try clicking by aria-label using Puppeteer's native click
+            let clicked = false;
             
-            if (nextButton) {
-                await nextButton.click();
-                console.log(`  Clicked next button`);
-            } else {
+            // Method 1: Try aria-label selectors
+            const ariaSelectors = [
+                'button[aria-label="Go to next page"]',
+                'button[aria-label="Next page"]', 
+                'button[aria-label="next page"]',
+                'button[aria-label*="next"]',
+                'button[aria-label*="Next"]'
+            ];
+            
+            for (const selector of ariaSelectors) {
+                try {
+                    const btn = await page.$(selector);
+                    if (btn) {
+                        const isDisabled = await btn.evaluate(el => el.disabled);
+                        if (!isDisabled) {
+                            await btn.click();
+                            clicked = true;
+                            console.log(`  Clicked: ${selector}`);
+                            break;
+                        }
+                    }
+                } catch (e) {}
+            }
+            
+            // Method 2: Click by index - find button with specific position
+            if (!clicked) {
+                const nextBtnIndex = await page.evaluate(() => {
+                    const buttons = document.querySelectorAll('button');
+                    for (let i = 0; i < buttons.length; i++) {
+                        const btn = buttons[i];
+                        const aria = btn.getAttribute('aria-label') || '';
+                        if (aria.toLowerCase().includes('next') && !btn.disabled) {
+                            return i;
+                        }
+                    }
+                    return -1;
+                });
+                
+                if (nextBtnIndex >= 0) {
+                    const buttons = await page.$$('button');
+                    await buttons[nextBtnIndex].click();
+                    clicked = true;
+                    console.log(`  Clicked button index ${nextBtnIndex}`);
+                }
+            }
+            
+            // Method 3: Use keyboard - Tab to pagination and press right arrow
+            if (!clicked) {
+                // Click somewhere on page first to focus
+                await page.keyboard.press('Tab');
+                await page.keyboard.press('Tab');
+                await page.keyboard.press('Tab');
+                // Try pressing Enter on what might be the next button
+                console.log(`  Trying keyboard navigation...`);
+            }
+            
+            if (!clicked) {
                 console.log(`  WARNING: Could not find next button`);
             }
             
