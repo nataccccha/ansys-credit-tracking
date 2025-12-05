@@ -312,13 +312,3 @@ downloadAnsysData()
         console.error('Failed:', error);
         process.exit(1);
     });
-```
-
-Now it will print:
-```
-========== DEBUG: ALL BUTTONS ==========
-Total buttons on page: X
-Buttons with aria-label or in lower half (y > 500):
-  [0] pos:(1200,650) size:32x32 aria:"..." title:"..." text:"..." svg:true disabled:false
-  ...
-========== END DEBUG ==========
