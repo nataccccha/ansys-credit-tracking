@@ -233,6 +233,12 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
     
     await new Promise(function(r) { setTimeout(r, 3000); });
     
+    // Scroll to bottom to ensure pagination is visible
+    await page.evaluate(function() {
+        window.scrollTo(0, document.body.scrollHeight);
+    });
+    await new Promise(function(r) { setTimeout(r, 1000); });
+    
     // Get page info
     var pageInfo = await page.evaluate(function() {
         var text = document.body.innerText;
@@ -248,21 +254,33 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
     
     console.log('Total pages: ' + totalPages + ', Total rows expected: ' + totalRows);
     
+    // Get Next button coordinates
+    var btnCoords = await page.evaluate(function() {
+        var btn = document.querySelector('[aria-label="Next Page"]');
+        if (btn) {
+            var rect = btn.getBoundingClientRect();
+            return {
+                x: rect.x + rect.width / 2,
+                y: rect.y + rect.height / 2,
+                width: rect.width,
+                height: rect.height
+            };
+        }
+        return null;
+    });
+    
+    if (btnCoords) {
+        console.log('Next button at: (' + Math.round(btnCoords.x) + ', ' + Math.round(btnCoords.y) + ')');
+    } else {
+        console.log('Next button not found!');
+    }
+    
     var allData = [];
-    var lastFirstCell = '';
-    var stuckCount = 0;
     
     for (var pageNum = 1; pageNum <= totalPages; pageNum++) {
         if (pageNum % 20 === 1 || pageNum === totalPages) {
             console.log('Scraping page ' + pageNum + '/' + totalPages + '...');
         }
-        
-        // Get current page number from UI
-        var currentPageNum = await page.evaluate(function() {
-            var text = document.body.innerText;
-            var match = text.match(/Page\s+(\d+)\s+of/i);
-            return match ? parseInt(match[1]) : 0;
-        });
         
         var pageData = await page.evaluate(function(numCols) {
             var rows = [];
@@ -288,49 +306,63 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
             return rows;
         }, HEADERS.length);
         
-        // Check if we're stuck on same data
-        var currentFirstCell = pageData.length > 0 ? pageData[0][0] : '';
-        if (currentFirstCell === lastFirstCell && pageNum > 1) {
-            stuckCount++;
-            if (stuckCount >= 3) {
-                console.log('Stuck on same page, stopping early');
-                break;
-            }
-        } else {
-            stuckCount = 0;
-        }
-        lastFirstCell = currentFirstCell;
-        
         allData = allData.concat(pageData);
         
         if (pageNum < totalPages) {
-            // Use Puppeteer's native click
-            var nextBtn = await page.$('[aria-label="Next Page"]:not(.ag-disabled)');
-            if (nextBtn) {
-                await nextBtn.click();
+            // Get fresh coordinates each time (in case page shifted)
+            var coords = await page.evaluate(function() {
+                var btn = document.querySelector('[aria-label="Next Page"]');
+                if (btn) {
+                    var rect = btn.getBoundingClientRect();
+                    return {
+                        x: rect.x + rect.width / 2,
+                        y: rect.y + rect.height / 2
+                    };
+                }
+                return null;
+            });
+            
+            if (coords) {
+                // Use Puppeteer's mouse to click at exact coordinates
+                await page.mouse.click(coords.x, coords.y);
                 
-                // Wait for page number to change
-                var expectedPage = pageNum + 1;
-                for (var w = 0; w < 15; w++) {
-                    await new Promise(function(r) { setTimeout(r, 500); });
-                    var newPageNum = await page.evaluate(function() {
-                        var text = document.body.innerText;
-                        var match = text.match(/Page\s+(\d+)\s+of/i);
-                        return match ? parseInt(match[1]) : 0;
-                    });
-                    if (newPageNum === expectedPage) {
-                        break;
-                    }
-                    if (w === 14) {
-                        console.log('Page did not change from ' + currentPageNum + ' to ' + expectedPage);
-                    }
+                if (pageNum <= 3) {
+                    console.log('  Clicked at (' + Math.round(coords.x) + ', ' + Math.round(coords.y) + ')');
+                }
+            }
+            
+            // Wait for page number to change
+            var expectedPage = pageNum + 1;
+            var attempts = 0;
+            var maxAttempts = 10;
+            
+            while (attempts < maxAttempts) {
+                await new Promise(function(r) { setTimeout(r, 500); });
+                
+                var currentPage = await page.evaluate(function() {
+                    var text = document.body.innerText;
+                    var match = text.match(/Page\s+(\d+)\s+of/i);
+                    return match ? parseInt(match[1]) : 0;
+                });
+                
+                if (currentPage === expectedPage) {
+                    break;
                 }
                 
-                // Wait for data to load
-                await new Promise(function(r) { setTimeout(r, 1000); });
-            } else {
-                console.log('Next button not found or disabled');
+                attempts++;
+                
+                // If not changed after 3 attempts, try clicking again
+                if (attempts === 3 && coords) {
+                    console.log('  Retrying click...');
+                    await page.mouse.click(coords.x, coords.y);
+                }
             }
+            
+            if (attempts === maxAttempts && pageNum <= 5) {
+                console.log('  WARNING: Page did not change to ' + expectedPage);
+            }
+            
+            await new Promise(function(r) { setTimeout(r, 1000); });
         }
     }
     
