@@ -182,49 +182,27 @@ async function waitForTableLoad(page) {
     console.log('Page loaded!');
 }
 
-async function clickNextPageButton(page) {
-    // Scroll button into view and click using multiple methods
-    var result = await page.evaluate(function() {
-        var btn = document.querySelector('[aria-label="Next Page"]');
-        if (!btn) return { success: false, reason: 'not found' };
-        if (btn.classList.contains('ag-disabled')) return { success: false, reason: 'disabled' };
-        
-        // Scroll into view
-        btn.scrollIntoView({ behavior: 'instant', block: 'center' });
-        
-        return { success: true, scrolled: true };
-    });
-    
-    if (!result.success) {
-        return result;
-    }
-    
-    // Small wait after scroll
-    await new Promise(function(r) { setTimeout(r, 200); });
-    
-    // Now click using Puppeteer
-    try {
-        await page.click('[aria-label="Next Page"]');
-        return { success: true, method: 'page.click' };
-    } catch (e) {
-        // Try with force option
-        try {
-            var btn = await page.$('[aria-label="Next Page"]');
-            if (btn) {
-                await btn.click({ force: true });
-                return { success: true, method: 'btn.click force' };
+async function waitForDataLoaded(page) {
+    // Wait for "Loading" to disappear from the table
+    for (var i = 0; i < 30; i++) {
+        var isLoading = await page.evaluate(function() {
+            var cells = document.querySelectorAll('[role="cell"], [role="gridcell"]');
+            for (var j = 0; j < cells.length; j++) {
+                if (cells[j].textContent.trim() === 'Loading') {
+                    return true;
+                }
             }
-        } catch (e2) {
-            // Final fallback: evaluate click
-            await page.evaluate(function() {
-                var btn = document.querySelector('[aria-label="Next Page"]');
-                if (btn) btn.click();
-            });
-            return { success: true, method: 'evaluate click' };
+            return false;
+        });
+        
+        if (!isLoading) {
+            return true;
         }
+        
+        await new Promise(function(r) { setTimeout(r, 500); });
     }
     
-    return { success: false, reason: 'all methods failed' };
+    return false;
 }
 
 async function scrapeData(page, dateOption, filePrefix, downloadPath) {
@@ -278,12 +256,6 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
     
     await new Promise(function(r) { setTimeout(r, 3000); });
     
-    // Scroll to bottom to ensure pagination is visible
-    await page.evaluate(function() {
-        window.scrollTo(0, document.body.scrollHeight);
-    });
-    await new Promise(function(r) { setTimeout(r, 1000); });
-    
     // Get page info
     var pageInfo = await page.evaluate(function() {
         var text = document.body.innerText;
@@ -300,14 +272,14 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
     console.log('Total pages: ' + totalPages + ', Total rows expected: ' + totalRows);
     
     var allData = [];
-    var lastFirstCell = '';
-    var stuckCount = 0;
-    var maxStuck = 5;
     
     for (var pageNum = 1; pageNum <= totalPages; pageNum++) {
         if (pageNum % 20 === 1 || pageNum === totalPages) {
             console.log('Scraping page ' + pageNum + '/' + totalPages + '...');
         }
+        
+        // Wait for data to be loaded (no "Loading" cells)
+        await waitForDataLoaded(page);
         
         var pageData = await page.evaluate(function(numCols) {
             var rows = [];
@@ -326,49 +298,28 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
                         var text = (cells[j].textContent || '').trim().replace(/\n/g, ' ').replace(/\s+/g, ' ');
                         rowData.push(text);
                     }
-                    rows.push(rowData);
+                    // Skip rows that still have "Loading"
+                    if (rowData[0] !== 'Loading') {
+                        rows.push(rowData);
+                    }
                 }
             }
             
             return rows;
         }, HEADERS.length);
         
-        // Check if we're stuck on same data
-        var currentFirstCell = pageData.length > 0 ? pageData[0][0] : '';
-        if (currentFirstCell === lastFirstCell && pageNum > 1) {
-            stuckCount++;
-            
-            if (stuckCount >= maxStuck) {
-                console.log('Stuck on same page after ' + maxStuck + ' retries, stopping early');
-                break;
-            }
-            
-            console.log('Stuck count: ' + stuckCount + ', retrying...');
-            
-            // Try clicking with scroll
-            var clickResult = await clickNextPageButton(page);
-            console.log('Retry click: ' + JSON.stringify(clickResult));
-            
-            await new Promise(function(r) { setTimeout(r, 2000); });
-            continue;
-        } else {
-            stuckCount = 0;
-        }
-        lastFirstCell = currentFirstCell;
-        
         allData = allData.concat(pageData);
         
         if (pageNum < totalPages) {
-            var clickResult = await clickNextPageButton(page);
-            
-            if (pageNum <= 3) {
-                console.log('Click result: ' + JSON.stringify(clickResult));
+            // Click next page
+            try {
+                await page.click('[aria-label="Next Page"]');
+            } catch (e) {
+                console.log('Click failed: ' + e.message);
             }
             
             // Wait for page number to change
             var expectedPage = pageNum + 1;
-            var pageChanged = false;
-            
             for (var w = 0; w < 20; w++) {
                 await new Promise(function(r) { setTimeout(r, 300); });
                 var newPageNum = await page.evaluate(function() {
@@ -377,16 +328,12 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
                     return match ? parseInt(match[1]) : 0;
                 });
                 if (newPageNum === expectedPage) {
-                    pageChanged = true;
                     break;
                 }
             }
             
-            if (!pageChanged && pageNum <= 5) {
-                console.log('Page did not change to ' + expectedPage);
-            }
-            
-            await new Promise(function(r) { setTimeout(r, 1000); });
+            // IMPORTANT: Wait for data to load after page change
+            await waitForDataLoaded(page);
         }
     }
     
