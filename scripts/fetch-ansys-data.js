@@ -224,6 +224,32 @@ async function waitForDataLoaded(page, minRows) {
     return await getLoadedRowCount(page);
 }
 
+async function clickNextPage(page) {
+    // Scroll button into view first
+    await page.evaluate(function() {
+        var btn = document.querySelector('[aria-label="Next Page"]');
+        if (btn) {
+            btn.scrollIntoView({ behavior: 'instant', block: 'center' });
+        }
+    });
+    
+    await new Promise(function(r) { setTimeout(r, 500); });
+    
+    // Try multiple click methods
+    try {
+        // Method 1: Puppeteer click
+        await page.click('[aria-label="Next Page"]');
+        return true;
+    } catch (e) {
+        // Method 2: JavaScript click
+        await page.evaluate(function() {
+            var btn = document.querySelector('[aria-label="Next Page"]');
+            if (btn) btn.click();
+        });
+        return true;
+    }
+}
+
 async function scrapeData(page, dateOption, filePrefix, downloadPath) {
     // Click date picker
     console.log('Clicking date picker...');
@@ -292,19 +318,16 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
     
     var allData = [];
     var consecutiveFailures = 0;
-    var maxConsecutiveFailures = 3;
+    var maxConsecutiveFailures = 5;
     
     for (var pageNum = 1; pageNum <= totalPages; pageNum++) {
         var isLastPage = (pageNum === totalPages);
         var expectedRowsOnPage = isLastPage ? (totalRows - (pageNum - 1) * ROWS_PER_PAGE) : ROWS_PER_PAGE;
         
-        // Get current row range
         var currentStart = await getRowRangeStart(page);
         
-        // Check if page is in error state (row range is 0 or way off)
-        var expectedStart = (pageNum - 1) * ROWS_PER_PAGE + 1;
         if (currentStart === 0 && pageNum > 1) {
-            console.log('Page appears to be in error state (row range = 0), stopping');
+            console.log('Page error state detected, stopping');
             break;
         }
         
@@ -348,46 +371,43 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
         allData = allData.concat(pageData);
         
         if (pageNum < totalPages) {
+            // Small delay before clicking
+            await new Promise(function(r) { setTimeout(r, 500); });
+            
             // Click next page
-            try {
-                await page.click('[aria-label="Next Page"]');
-            } catch (e) {
-                console.log('  Click failed: ' + e.message);
-            }
+            await clickNextPage(page);
             
             // Wait for row range to change
             var changed = false;
-            for (var w = 0; w < 30; w++) {
+            for (var w = 0; w < 40; w++) {
                 await new Promise(function(r) { setTimeout(r, 500); });
                 var newStart = await getRowRangeStart(page);
                 if (newStart !== currentStart && newStart > 0) {
                     changed = true;
-                    if (pageNum <= 5) {
-                        console.log('  Page changed: row ' + currentStart + ' -> ' + newStart);
-                    }
                     break;
                 }
             }
             
             if (!changed) {
                 consecutiveFailures++;
-                console.log('  Page did not change (failure ' + consecutiveFailures + '/' + maxConsecutiveFailures + ')');
+                if (pageNum % 10 === 0 || consecutiveFailures > 1) {
+                    console.log('  Page change failed (attempt ' + consecutiveFailures + '/' + maxConsecutiveFailures + ')');
+                }
                 
                 if (consecutiveFailures >= maxConsecutiveFailures) {
-                    console.log('Too many consecutive failures, stopping');
+                    console.log('Too many failures, stopping');
                     break;
                 }
                 
-                // Try one more click
-                try {
-                    await page.click('[aria-label="Next Page"]');
-                    await new Promise(function(r) { setTimeout(r, 3000); });
-                } catch (e) {}
+                // Retry: wait longer and click again
+                await new Promise(function(r) { setTimeout(r, 2000); });
+                await clickNextPage(page);
+                await new Promise(function(r) { setTimeout(r, 3000); });
             } else {
                 consecutiveFailures = 0;
             }
             
-            // Wait for data to load after page change
+            // Wait for new data to load
             await waitForDataLoaded(page, ROWS_PER_PAGE);
         }
     }
