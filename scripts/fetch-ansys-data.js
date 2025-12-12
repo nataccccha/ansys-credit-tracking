@@ -183,6 +183,25 @@ async function waitForTableLoad(page) {
     console.log('Page loaded!');
 }
 
+async function getRowRangeStart(page) {
+    return await page.evaluate(function() {
+        var text = document.body.innerText;
+        var match = text.match(/(\d+)\s+to\s+\d+\s+of\s+[\d,]+/i);
+        return match ? parseInt(match[1]) : 0;
+    });
+}
+
+async function waitForRowRange(page, expectedStart, maxWait) {
+    for (var i = 0; i < maxWait; i++) {
+        var currentStart = await getRowRangeStart(page);
+        if (currentStart === expectedStart) {
+            return true;
+        }
+        await new Promise(function(r) { setTimeout(r, 500); });
+    }
+    return false;
+}
+
 async function getLoadedRowCount(page) {
     return await page.evaluate(function() {
         var count = 0;
@@ -195,7 +214,6 @@ async function getLoadedRowCount(page) {
             
             if (cells.length > 0) {
                 var firstCellText = (cells[0].textContent || '').trim();
-                // Count row only if it's not "Loading"
                 if (firstCellText !== 'Loading' && firstCellText !== '') {
                     count++;
                 }
@@ -206,29 +224,14 @@ async function getLoadedRowCount(page) {
     });
 }
 
-async function waitForFullPage(page, expectedRows, isLastPage) {
-    // Wait until we have the expected number of loaded rows
-    var maxWait = 60; // 30 seconds max
-    
-    for (var i = 0; i < maxWait; i++) {
+async function waitForDataLoaded(page, minRows) {
+    for (var i = 0; i < 60; i++) {
         var loadedRows = await getLoadedRowCount(page);
-        
-        if (isLastPage) {
-            // Last page: just need some rows loaded (not "Loading")
-            if (loadedRows > 0 && loadedRows === expectedRows) {
-                return loadedRows;
-            }
-        } else {
-            // Not last page: need full 20 rows
-            if (loadedRows >= ROWS_PER_PAGE) {
-                return loadedRows;
-            }
+        if (loadedRows >= minRows) {
+            return loadedRows;
         }
-        
         await new Promise(function(r) { setTimeout(r, 500); });
     }
-    
-    // Return whatever we have
     return await getLoadedRowCount(page);
 }
 
@@ -302,14 +305,21 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
     
     for (var pageNum = 1; pageNum <= totalPages; pageNum++) {
         var isLastPage = (pageNum === totalPages);
-        var expectedRowsOnPage = isLastPage ? (totalRows % ROWS_PER_PAGE || ROWS_PER_PAGE) : ROWS_PER_PAGE;
+        var expectedStartRow = (pageNum - 1) * ROWS_PER_PAGE + 1;
+        var expectedRowsOnPage = isLastPage ? (totalRows - (pageNum - 1) * ROWS_PER_PAGE) : ROWS_PER_PAGE;
         
         if (pageNum % 20 === 1 || pageNum === totalPages) {
-            console.log('Scraping page ' + pageNum + '/' + totalPages + ' (expecting ' + expectedRowsOnPage + ' rows)...');
+            console.log('Scraping page ' + pageNum + '/' + totalPages + ' (rows ' + expectedStartRow + '-' + (expectedStartRow + expectedRowsOnPage - 1) + ')...');
         }
         
-        // Wait for full page of data to load
-        var loadedRows = await waitForFullPage(page, expectedRowsOnPage, isLastPage);
+        // Wait for correct row range to appear
+        var rangeCorrect = await waitForRowRange(page, expectedStartRow, 60);
+        if (!rangeCorrect && pageNum <= 5) {
+            console.log('  WARNING: Row range did not update to ' + expectedStartRow);
+        }
+        
+        // Wait for data to load (no "Loading" cells)
+        var loadedRows = await waitForDataLoaded(page, expectedRowsOnPage);
         
         if (pageNum <= 5 || pageNum === totalPages) {
             console.log('  Loaded ' + loadedRows + ' rows');
@@ -352,19 +362,9 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
                 console.log('Click failed: ' + e.message);
             }
             
-            // Wait for page number to change
-            var expectedPage = pageNum + 1;
-            for (var w = 0; w < 20; w++) {
-                await new Promise(function(r) { setTimeout(r, 300); });
-                var newPageNum = await page.evaluate(function() {
-                    var text = document.body.innerText;
-                    var match = text.match(/Page\s+(\d+)\s+of/i);
-                    return match ? parseInt(match[1]) : 0;
-                });
-                if (newPageNum === expectedPage) {
-                    break;
-                }
-            }
+            // Wait for row range to change (this confirms page actually changed)
+            var nextExpectedStart = pageNum * ROWS_PER_PAGE + 1;
+            await waitForRowRange(page, nextExpectedStart, 60);
         }
     }
     
