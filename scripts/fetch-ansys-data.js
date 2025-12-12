@@ -182,6 +182,74 @@ async function waitForTableLoad(page) {
     console.log('Page loaded!');
 }
 
+async function clickNextPage(page) {
+    // Try multiple methods to click the Next Page button
+    
+    // Method 1: Find button info first
+    var btnInfo = await page.evaluate(function() {
+        var btn = document.querySelector('[aria-label="Next Page"]');
+        if (!btn) return { found: false, method: 'not found' };
+        
+        var rect = btn.getBoundingClientRect();
+        var isDisabled = btn.classList.contains('ag-disabled');
+        
+        return {
+            found: true,
+            disabled: isDisabled,
+            x: rect.x + rect.width / 2,
+            y: rect.y + rect.height / 2,
+            width: rect.width,
+            height: rect.height
+        };
+    });
+    
+    if (!btnInfo.found) {
+        return { success: false, reason: 'button not found' };
+    }
+    
+    if (btnInfo.disabled) {
+        return { success: false, reason: 'button disabled' };
+    }
+    
+    // Method 2: Try JavaScript click with full event simulation
+    var jsClicked = await page.evaluate(function() {
+        var btn = document.querySelector('[aria-label="Next Page"]');
+        if (!btn || btn.classList.contains('ag-disabled')) return false;
+        
+        // Simulate full click sequence
+        var rect = btn.getBoundingClientRect();
+        var centerX = rect.x + rect.width / 2;
+        var centerY = rect.y + rect.height / 2;
+        
+        var events = ['mouseenter', 'mouseover', 'mousedown', 'mouseup', 'click'];
+        for (var i = 0; i < events.length; i++) {
+            var evt = new MouseEvent(events[i], {
+                view: window,
+                bubbles: true,
+                cancelable: true,
+                clientX: centerX,
+                clientY: centerY,
+                button: 0
+            });
+            btn.dispatchEvent(evt);
+        }
+        
+        return true;
+    });
+    
+    if (jsClicked) {
+        return { success: true, method: 'js events', coords: btnInfo };
+    }
+    
+    // Method 3: Try Puppeteer mouse click at coordinates
+    try {
+        await page.mouse.click(btnInfo.x, btnInfo.y);
+        return { success: true, method: 'mouse click', coords: btnInfo };
+    } catch (e) {
+        return { success: false, reason: 'mouse click failed: ' + e.message };
+    }
+}
+
 async function scrapeData(page, dateOption, filePrefix, downloadPath) {
     // Click date picker
     console.log('Clicking date picker...');
@@ -248,9 +316,19 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
     
     console.log('Total pages: ' + totalPages + ', Total rows expected: ' + totalRows);
     
+    // Debug: Check next button before starting
+    var initialBtnCheck = await page.evaluate(function() {
+        var btn = document.querySelector('[aria-label="Next Page"]');
+        if (!btn) return 'NOT FOUND';
+        var rect = btn.getBoundingClientRect();
+        return 'Found at (' + Math.round(rect.x) + ',' + Math.round(rect.y) + ') size ' + rect.width + 'x' + rect.height + ' disabled=' + btn.classList.contains('ag-disabled');
+    });
+    console.log('Next button check: ' + initialBtnCheck);
+    
     var allData = [];
     var lastFirstCell = '';
     var stuckCount = 0;
+    var maxStuck = 5;
     
     for (var pageNum = 1; pageNum <= totalPages; pageNum++) {
         if (pageNum % 20 === 1 || pageNum === totalPages) {
@@ -292,24 +370,20 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
         var currentFirstCell = pageData.length > 0 ? pageData[0][0] : '';
         if (currentFirstCell === lastFirstCell && pageNum > 1) {
             stuckCount++;
-            console.log('Stuck count: ' + stuckCount + ' (same data as previous page)');
             
-            if (stuckCount >= 10) {
-                console.log('Stuck on same page after 10 retries, stopping early');
+            if (stuckCount >= maxStuck) {
+                console.log('Stuck on same page after ' + maxStuck + ' retries, stopping early');
                 break;
             }
             
-            // Try clicking again with longer wait
-            console.log('Retrying click with longer wait...');
+            // Don't add duplicate data, just retry
+            console.log('Stuck count: ' + stuckCount + ', retrying...');
             await new Promise(function(r) { setTimeout(r, 2000); });
             
-            var nextBtn = await page.$('[aria-label="Next Page"]:not(.ag-disabled)');
-            if (nextBtn) {
-                await nextBtn.click();
-                await new Promise(function(r) { setTimeout(r, 3000); });
-            }
+            var retryResult = await clickNextPage(page);
+            console.log('Retry click result: ' + JSON.stringify(retryResult));
             
-            // Don't add duplicate data, continue to next iteration
+            await new Promise(function(r) { setTimeout(r, 2000); });
             continue;
         } else {
             stuckCount = 0;
@@ -319,54 +393,35 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
         allData = allData.concat(pageData);
         
         if (pageNum < totalPages) {
-            // Use Puppeteer's native click
-            var nextBtn = await page.$('[aria-label="Next Page"]:not(.ag-disabled)');
-            if (nextBtn) {
-                await nextBtn.click();
-                
-                // Wait for page number to change - increased wait time
-                var expectedPage = pageNum + 1;
-                var pageChanged = false;
-                
-                for (var w = 0; w < 20; w++) {
-                    await new Promise(function(r) { setTimeout(r, 500); });
-                    var newPageNum = await page.evaluate(function() {
-                        var text = document.body.innerText;
-                        var match = text.match(/Page\s+(\d+)\s+of/i);
-                        return match ? parseInt(match[1]) : 0;
-                    });
-                    if (newPageNum === expectedPage) {
-                        pageChanged = true;
-                        break;
-                    }
-                }
-                
-                if (!pageChanged) {
-                    console.log('Page did not change from ' + currentPageNum + ' to ' + expectedPage + ', retrying...');
-                    
-                    // Retry click
-                    await nextBtn.click();
-                    await new Promise(function(r) { setTimeout(r, 2000); });
-                    
-                    // Check again
-                    for (var w2 = 0; w2 < 10; w2++) {
-                        await new Promise(function(r) { setTimeout(r, 500); });
-                        var newPageNum2 = await page.evaluate(function() {
-                            var text = document.body.innerText;
-                            var match = text.match(/Page\s+(\d+)\s+of/i);
-                            return match ? parseInt(match[1]) : 0;
-                        });
-                        if (newPageNum2 === expectedPage) {
-                            break;
-                        }
-                    }
-                }
-                
-                // Wait for data to load
-                await new Promise(function(r) { setTimeout(r, 1500); });
-            } else {
-                console.log('Next button not found or disabled');
+            var clickResult = await clickNextPage(page);
+            
+            if (pageNum <= 5) {
+                console.log('Click result: ' + JSON.stringify(clickResult));
             }
+            
+            // Wait for page number to change
+            var expectedPage = pageNum + 1;
+            var pageChanged = false;
+            
+            for (var w = 0; w < 20; w++) {
+                await new Promise(function(r) { setTimeout(r, 300); });
+                var newPageNum = await page.evaluate(function() {
+                    var text = document.body.innerText;
+                    var match = text.match(/Page\s+(\d+)\s+of/i);
+                    return match ? parseInt(match[1]) : 0;
+                });
+                if (newPageNum === expectedPage) {
+                    pageChanged = true;
+                    break;
+                }
+            }
+            
+            if (!pageChanged && pageNum <= 5) {
+                console.log('Page did not change from ' + currentPageNum + ' to ' + expectedPage);
+            }
+            
+            // Wait for data to load
+            await new Promise(function(r) { setTimeout(r, 1000); });
         }
     }
     
