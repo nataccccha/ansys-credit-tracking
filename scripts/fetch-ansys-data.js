@@ -182,74 +182,6 @@ async function waitForTableLoad(page) {
     console.log('Page loaded!');
 }
 
-async function clickNextPage(page) {
-    // Try multiple methods to click the Next Page button
-    
-    // Method 1: Find button info first
-    var btnInfo = await page.evaluate(function() {
-        var btn = document.querySelector('[aria-label="Next Page"]');
-        if (!btn) return { found: false, method: 'not found' };
-        
-        var rect = btn.getBoundingClientRect();
-        var isDisabled = btn.classList.contains('ag-disabled');
-        
-        return {
-            found: true,
-            disabled: isDisabled,
-            x: rect.x + rect.width / 2,
-            y: rect.y + rect.height / 2,
-            width: rect.width,
-            height: rect.height
-        };
-    });
-    
-    if (!btnInfo.found) {
-        return { success: false, reason: 'button not found' };
-    }
-    
-    if (btnInfo.disabled) {
-        return { success: false, reason: 'button disabled' };
-    }
-    
-    // Method 2: Try JavaScript click with full event simulation
-    var jsClicked = await page.evaluate(function() {
-        var btn = document.querySelector('[aria-label="Next Page"]');
-        if (!btn || btn.classList.contains('ag-disabled')) return false;
-        
-        // Simulate full click sequence
-        var rect = btn.getBoundingClientRect();
-        var centerX = rect.x + rect.width / 2;
-        var centerY = rect.y + rect.height / 2;
-        
-        var events = ['mouseenter', 'mouseover', 'mousedown', 'mouseup', 'click'];
-        for (var i = 0; i < events.length; i++) {
-            var evt = new MouseEvent(events[i], {
-                view: window,
-                bubbles: true,
-                cancelable: true,
-                clientX: centerX,
-                clientY: centerY,
-                button: 0
-            });
-            btn.dispatchEvent(evt);
-        }
-        
-        return true;
-    });
-    
-    if (jsClicked) {
-        return { success: true, method: 'js events', coords: btnInfo };
-    }
-    
-    // Method 3: Try Puppeteer mouse click at coordinates
-    try {
-        await page.mouse.click(btnInfo.x, btnInfo.y);
-        return { success: true, method: 'mouse click', coords: btnInfo };
-    } catch (e) {
-        return { success: false, reason: 'mouse click failed: ' + e.message };
-    }
-}
-
 async function scrapeData(page, dateOption, filePrefix, downloadPath) {
     // Click date picker
     console.log('Clicking date picker...');
@@ -316,15 +248,6 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
     
     console.log('Total pages: ' + totalPages + ', Total rows expected: ' + totalRows);
     
-    // Debug: Check next button before starting
-    var initialBtnCheck = await page.evaluate(function() {
-        var btn = document.querySelector('[aria-label="Next Page"]');
-        if (!btn) return 'NOT FOUND';
-        var rect = btn.getBoundingClientRect();
-        return 'Found at (' + Math.round(rect.x) + ',' + Math.round(rect.y) + ') size ' + rect.width + 'x' + rect.height + ' disabled=' + btn.classList.contains('ag-disabled');
-    });
-    console.log('Next button check: ' + initialBtnCheck);
-    
     var allData = [];
     var lastFirstCell = '';
     var stuckCount = 0;
@@ -376,12 +299,16 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
                 break;
             }
             
-            // Don't add duplicate data, just retry
-            console.log('Stuck count: ' + stuckCount + ', retrying...');
-            await new Promise(function(r) { setTimeout(r, 2000); });
+            console.log('Stuck count: ' + stuckCount + ', retrying with page.click...');
+            await new Promise(function(r) { setTimeout(r, 1000); });
             
-            var retryResult = await clickNextPage(page);
-            console.log('Retry click result: ' + JSON.stringify(retryResult));
+            // Try Puppeteer's native page.click
+            try {
+                await page.click('[aria-label="Next Page"]');
+                console.log('page.click succeeded');
+            } catch (e) {
+                console.log('page.click failed: ' + e.message);
+            }
             
             await new Promise(function(r) { setTimeout(r, 2000); });
             continue;
@@ -393,10 +320,29 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
         allData = allData.concat(pageData);
         
         if (pageNum < totalPages) {
-            var clickResult = await clickNextPage(page);
-            
-            if (pageNum <= 5) {
-                console.log('Click result: ' + JSON.stringify(clickResult));
+            // Use Puppeteer's native page.click
+            try {
+                await page.click('[aria-label="Next Page"]');
+                if (pageNum <= 3) {
+                    console.log('page.click succeeded');
+                }
+            } catch (e) {
+                console.log('page.click failed: ' + e.message);
+                
+                // Fallback: try mouse click at coordinates
+                var coords = await page.evaluate(function() {
+                    var btn = document.querySelector('[aria-label="Next Page"]');
+                    if (btn) {
+                        var rect = btn.getBoundingClientRect();
+                        return { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
+                    }
+                    return null;
+                });
+                
+                if (coords) {
+                    await page.mouse.click(coords.x, coords.y);
+                    console.log('Fallback mouse.click at ' + Math.round(coords.x) + ',' + Math.round(coords.y));
+                }
             }
             
             // Wait for page number to change
