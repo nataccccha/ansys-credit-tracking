@@ -224,6 +224,17 @@ async function waitForDataLoaded(page, minRows) {
     return await getLoadedRowCount(page);
 }
 
+async function waitForValidRowRange(page, maxWait) {
+    for (var i = 0; i < maxWait; i++) {
+        var start = await getRowRangeStart(page);
+        if (start > 0) {
+            return start;
+        }
+        await new Promise(function(r) { setTimeout(r, 500); });
+    }
+    return 0;
+}
+
 async function clickNextPage(page) {
     // Scroll button into view first
     await page.evaluate(function() {
@@ -233,15 +244,12 @@ async function clickNextPage(page) {
         }
     });
     
-    await new Promise(function(r) { setTimeout(r, 500); });
+    await new Promise(function(r) { setTimeout(r, 300); });
     
-    // Try multiple click methods
     try {
-        // Method 1: Puppeteer click
         await page.click('[aria-label="Next Page"]');
         return true;
     } catch (e) {
-        // Method 2: JavaScript click
         await page.evaluate(function() {
             var btn = document.querySelector('[aria-label="Next Page"]');
             if (btn) btn.click();
@@ -319,16 +327,35 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
     var allData = [];
     var consecutiveFailures = 0;
     var maxConsecutiveFailures = 5;
+    var errorRecoveryAttempts = 0;
+    var maxErrorRecoveryAttempts = 3;
     
     for (var pageNum = 1; pageNum <= totalPages; pageNum++) {
         var isLastPage = (pageNum === totalPages);
         var expectedRowsOnPage = isLastPage ? (totalRows - (pageNum - 1) * ROWS_PER_PAGE) : ROWS_PER_PAGE;
         
-        var currentStart = await getRowRangeStart(page);
+        // Wait for valid row range (handles temporary 0 states)
+        var currentStart = await waitForValidRowRange(page, 20);
         
         if (currentStart === 0 && pageNum > 1) {
-            console.log('Page error state detected, stopping');
-            break;
+            errorRecoveryAttempts++;
+            console.log('Row range is 0, attempting recovery (' + errorRecoveryAttempts + '/' + maxErrorRecoveryAttempts + ')...');
+            
+            if (errorRecoveryAttempts > maxErrorRecoveryAttempts) {
+                console.log('Max recovery attempts reached, stopping');
+                break;
+            }
+            
+            // Wait longer and retry
+            await new Promise(function(r) { setTimeout(r, 5000); });
+            currentStart = await waitForValidRowRange(page, 40);
+            
+            if (currentStart === 0) {
+                console.log('Recovery failed, stopping');
+                break;
+            }
+            
+            console.log('Recovery successful, continuing from row ' + currentStart);
         }
         
         if (pageNum % 20 === 1 || pageNum === totalPages) {
@@ -371,10 +398,9 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
         allData = allData.concat(pageData);
         
         if (pageNum < totalPages) {
-            // Small delay before clicking
-            await new Promise(function(r) { setTimeout(r, 500); });
+            // Small delay before clicking (be gentle on the server)
+            await new Promise(function(r) { setTimeout(r, 300); });
             
-            // Click next page
             await clickNextPage(page);
             
             // Wait for row range to change
@@ -384,30 +410,29 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
                 var newStart = await getRowRangeStart(page);
                 if (newStart !== currentStart && newStart > 0) {
                     changed = true;
+                    consecutiveFailures = 0;
                     break;
                 }
             }
             
             if (!changed) {
                 consecutiveFailures++;
-                if (pageNum % 10 === 0 || consecutiveFailures > 1) {
+                if (consecutiveFailures >= 2) {
                     console.log('  Page change failed (attempt ' + consecutiveFailures + '/' + maxConsecutiveFailures + ')');
                 }
                 
                 if (consecutiveFailures >= maxConsecutiveFailures) {
-                    console.log('Too many failures, stopping');
+                    console.log('Too many consecutive failures, stopping');
                     break;
                 }
                 
-                // Retry: wait longer and click again
+                // Retry with longer wait
                 await new Promise(function(r) { setTimeout(r, 2000); });
                 await clickNextPage(page);
                 await new Promise(function(r) { setTimeout(r, 3000); });
-            } else {
-                consecutiveFailures = 0;
             }
             
-            // Wait for new data to load
+            // Wait for data to load
             await waitForDataLoaded(page, ROWS_PER_PAGE);
         }
     }
