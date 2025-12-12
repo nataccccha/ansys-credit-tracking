@@ -224,19 +224,7 @@ async function waitForDataLoaded(page, minRows) {
     return await getLoadedRowCount(page);
 }
 
-async function waitForValidRowRange(page, maxWait) {
-    for (var i = 0; i < maxWait; i++) {
-        var start = await getRowRangeStart(page);
-        if (start > 0) {
-            return start;
-        }
-        await new Promise(function(r) { setTimeout(r, 500); });
-    }
-    return 0;
-}
-
 async function clickNextPage(page) {
-    // Scroll button into view first
     await page.evaluate(function() {
         var btn = document.querySelector('[aria-label="Next Page"]');
         if (btn) {
@@ -256,6 +244,39 @@ async function clickNextPage(page) {
         });
         return true;
     }
+}
+
+async function goToPage(page, targetPage) {
+    // Use the page input to jump directly to a page
+    var jumped = await page.evaluate(function(target) {
+        // Find the page input field in AG-Grid pagination
+        var inputs = document.querySelectorAll('input');
+        for (var i = 0; i < inputs.length; i++) {
+            var input = inputs[i];
+            // AG-Grid page input is usually small and near pagination
+            if (input.type === 'text' || input.type === 'number') {
+                var rect = input.getBoundingClientRect();
+                if (rect.width > 20 && rect.width < 100 && rect.height > 15 && rect.height < 40) {
+                    // Check if it's near pagination text
+                    var parent = input.parentElement;
+                    for (var j = 0; j < 5 && parent; j++) {
+                        if (parent.innerText && parent.innerText.includes('Page')) {
+                            input.focus();
+                            input.value = target;
+                            input.dispatchEvent(new Event('input', { bubbles: true }));
+                            input.dispatchEvent(new Event('change', { bubbles: true }));
+                            input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', keyCode: 13, bubbles: true }));
+                            return true;
+                        }
+                        parent = parent.parentElement;
+                    }
+                }
+            }
+        }
+        return false;
+    }, targetPage);
+    
+    return jumped;
 }
 
 async function scrapeData(page, dateOption, filePrefix, downloadPath) {
@@ -327,35 +348,85 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
     var allData = [];
     var consecutiveFailures = 0;
     var maxConsecutiveFailures = 5;
-    var errorRecoveryAttempts = 0;
-    var maxErrorRecoveryAttempts = 3;
     
     for (var pageNum = 1; pageNum <= totalPages; pageNum++) {
         var isLastPage = (pageNum === totalPages);
         var expectedRowsOnPage = isLastPage ? (totalRows - (pageNum - 1) * ROWS_PER_PAGE) : ROWS_PER_PAGE;
         
-        // Wait for valid row range (handles temporary 0 states)
-        var currentStart = await waitForValidRowRange(page, 20);
-        
-        if (currentStart === 0 && pageNum > 1) {
-            errorRecoveryAttempts++;
-            console.log('Row range is 0, attempting recovery (' + errorRecoveryAttempts + '/' + maxErrorRecoveryAttempts + ')...');
-            
-            if (errorRecoveryAttempts > maxErrorRecoveryAttempts) {
-                console.log('Max recovery attempts reached, stopping');
-                break;
-            }
-            
-            // Wait longer and retry
+        // Periodic pause every 30 pages to prevent overload
+        if (pageNum > 1 && pageNum % 30 === 1) {
+            console.log('  Pausing for 5 seconds (page ' + pageNum + ')...');
             await new Promise(function(r) { setTimeout(r, 5000); });
-            currentStart = await waitForValidRowRange(page, 40);
+        }
+        
+        var currentStart = await getRowRangeStart(page);
+        
+        // Check for error state
+        if (currentStart === 0 && pageNum > 1) {
+            console.log('Page in error state, waiting 10 seconds...');
+            await new Promise(function(r) { setTimeout(r, 10000); });
             
+            currentStart = await getRowRangeStart(page);
             if (currentStart === 0) {
-                console.log('Recovery failed, stopping');
-                break;
+                console.log('Still in error state, refreshing page...');
+                await page.reload({ waitUntil: 'networkidle0' });
+                await new Promise(function(r) { setTimeout(r, 5000); });
+                
+                // Re-select date range
+                await page.evaluate(function() {
+                    var buttons = document.querySelectorAll('button');
+                    for (var i = 0; i < buttons.length; i++) {
+                        var text = buttons[i].textContent || '';
+                        if (text.includes('From') && text.includes('To')) {
+                            buttons[i].click();
+                            return;
+                        }
+                    }
+                });
+                await new Promise(function(r) { setTimeout(r, 2000); });
+                
+                await page.evaluate(function(option) {
+                    var elements = document.querySelectorAll('li, div, span, button');
+                    for (var i = 0; i < elements.length; i++) {
+                        var el = elements[i];
+                        var text = (el.textContent || '').trim();
+                        if (text === option) {
+                            el.click();
+                            return;
+                        }
+                    }
+                }, dateOption);
+                
+                await new Promise(function(r) { setTimeout(r, 5000); });
+                await waitForDataLoaded(page, ROWS_PER_PAGE);
+                
+                // Try to navigate to where we were
+                var targetPage = pageNum;
+                console.log('Attempting to jump to page ' + targetPage + '...');
+                
+                // Click through pages (slow but reliable)
+                for (var p = 1; p < targetPage && p < targetPage; p++) {
+                    await clickNextPage(page);
+                    await new Promise(function(r) { setTimeout(r, 1000); });
+                    
+                    // Check if successful every 10 pages
+                    if (p % 10 === 0) {
+                        var checkStart = await getRowRangeStart(page);
+                        if (checkStart === 0) {
+                            console.log('Recovery failed at page ' + p + ', stopping');
+                            break;
+                        }
+                    }
+                }
+                
+                currentStart = await getRowRangeStart(page);
+                if (currentStart === 0) {
+                    console.log('Could not recover, stopping');
+                    break;
+                }
+                
+                console.log('Recovered, now at row ' + currentStart);
             }
-            
-            console.log('Recovery successful, continuing from row ' + currentStart);
         }
         
         if (pageNum % 20 === 1 || pageNum === totalPages) {
@@ -398,7 +469,6 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
         allData = allData.concat(pageData);
         
         if (pageNum < totalPages) {
-            // Small delay before clicking (be gentle on the server)
             await new Promise(function(r) { setTimeout(r, 300); });
             
             await clickNextPage(page);
@@ -426,13 +496,11 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
                     break;
                 }
                 
-                // Retry with longer wait
                 await new Promise(function(r) { setTimeout(r, 2000); });
                 await clickNextPage(page);
                 await new Promise(function(r) { setTimeout(r, 3000); });
             }
             
-            // Wait for data to load
             await waitForDataLoaded(page, ROWS_PER_PAGE);
         }
     }
