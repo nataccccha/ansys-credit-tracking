@@ -191,15 +191,33 @@ async function getRowRangeStart(page) {
     });
 }
 
-async function waitForRowRange(page, expectedStart, maxWait) {
-    for (var i = 0; i < maxWait; i++) {
-        var currentStart = await getRowRangeStart(page);
-        if (currentStart === expectedStart) {
-            return true;
+async function clickNextAndWaitForChange(page, currentStart) {
+    var maxRetries = 5;
+    
+    for (var retry = 0; retry < maxRetries; retry++) {
+        // Click next page
+        try {
+            await page.click('[aria-label="Next Page"]');
+        } catch (e) {
+            console.log('  Click failed: ' + e.message);
         }
-        await new Promise(function(r) { setTimeout(r, 500); });
+        
+        // Wait for row range to change from current value
+        for (var i = 0; i < 40; i++) {
+            await new Promise(function(r) { setTimeout(r, 500); });
+            var newStart = await getRowRangeStart(page);
+            if (newStart !== currentStart && newStart > 0) {
+                return newStart;
+            }
+        }
+        
+        if (retry < maxRetries - 1) {
+            console.log('  Row range stuck at ' + currentStart + ', retrying click...');
+        }
     }
-    return false;
+    
+    // Return whatever we have
+    return await getRowRangeStart(page);
 }
 
 async function getLoadedRowCount(page) {
@@ -305,21 +323,17 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
     
     for (var pageNum = 1; pageNum <= totalPages; pageNum++) {
         var isLastPage = (pageNum === totalPages);
-        var expectedStartRow = (pageNum - 1) * ROWS_PER_PAGE + 1;
         var expectedRowsOnPage = isLastPage ? (totalRows - (pageNum - 1) * ROWS_PER_PAGE) : ROWS_PER_PAGE;
         
-        if (pageNum % 20 === 1 || pageNum === totalPages) {
-            console.log('Scraping page ' + pageNum + '/' + totalPages + ' (rows ' + expectedStartRow + '-' + (expectedStartRow + expectedRowsOnPage - 1) + ')...');
-        }
+        // Get current row range
+        var currentStart = await getRowRangeStart(page);
         
-        // Wait for correct row range to appear
-        var rangeCorrect = await waitForRowRange(page, expectedStartRow, 60);
-        if (!rangeCorrect && pageNum <= 5) {
-            console.log('  WARNING: Row range did not update to ' + expectedStartRow);
+        if (pageNum % 20 === 1 || pageNum === totalPages) {
+            console.log('Scraping page ' + pageNum + '/' + totalPages + ' (starting at row ' + currentStart + ')...');
         }
         
         // Wait for data to load (no "Loading" cells)
-        var loadedRows = await waitForDataLoaded(page, expectedRowsOnPage);
+        var loadedRows = await waitForDataLoaded(page, Math.min(expectedRowsOnPage, ROWS_PER_PAGE));
         
         if (pageNum <= 5 || pageNum === totalPages) {
             console.log('  Loaded ' + loadedRows + ' rows');
@@ -355,16 +369,12 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
         allData = allData.concat(pageData);
         
         if (pageNum < totalPages) {
-            // Click next page
-            try {
-                await page.click('[aria-label="Next Page"]');
-            } catch (e) {
-                console.log('Click failed: ' + e.message);
-            }
+            // Click next and wait for row range to change
+            var newStart = await clickNextAndWaitForChange(page, currentStart);
             
-            // Wait for row range to change (this confirms page actually changed)
-            var nextExpectedStart = pageNum * ROWS_PER_PAGE + 1;
-            await waitForRowRange(page, nextExpectedStart, 60);
+            if (pageNum <= 5) {
+                console.log('  Page changed: row ' + currentStart + ' -> ' + newStart);
+            }
         }
     }
     
