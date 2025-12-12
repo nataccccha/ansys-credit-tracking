@@ -11,6 +11,7 @@ if (!USERNAME || !PASSWORD) {
 }
 
 const HEADERS = ['Start Time', 'End Time', 'Product', 'Count', 'Hours', 'Cost', 'Currency', 'Username'];
+const ROWS_PER_PAGE = 20;
 
 async function downloadAnsysData() {
     var downloadPath = path.resolve('./data');
@@ -182,27 +183,53 @@ async function waitForTableLoad(page) {
     console.log('Page loaded!');
 }
 
-async function waitForDataLoaded(page) {
-    // Wait for "Loading" to disappear from the table
-    for (var i = 0; i < 30; i++) {
-        var isLoading = await page.evaluate(function() {
-            var cells = document.querySelectorAll('[role="cell"], [role="gridcell"]');
-            for (var j = 0; j < cells.length; j++) {
-                if (cells[j].textContent.trim() === 'Loading') {
-                    return true;
+async function getLoadedRowCount(page) {
+    return await page.evaluate(function() {
+        var count = 0;
+        var rowElements = document.querySelectorAll('[role="row"]');
+        
+        for (var i = 1; i < rowElements.length; i++) {
+            var row = rowElements[i];
+            var cells = row.querySelectorAll('[role="cell"]');
+            if (cells.length === 0) cells = row.querySelectorAll('[role="gridcell"]');
+            
+            if (cells.length > 0) {
+                var firstCellText = (cells[0].textContent || '').trim();
+                // Count row only if it's not "Loading"
+                if (firstCellText !== 'Loading' && firstCellText !== '') {
+                    count++;
                 }
             }
-            return false;
-        });
+        }
         
-        if (!isLoading) {
-            return true;
+        return count;
+    });
+}
+
+async function waitForFullPage(page, expectedRows, isLastPage) {
+    // Wait until we have the expected number of loaded rows
+    var maxWait = 60; // 30 seconds max
+    
+    for (var i = 0; i < maxWait; i++) {
+        var loadedRows = await getLoadedRowCount(page);
+        
+        if (isLastPage) {
+            // Last page: just need some rows loaded (not "Loading")
+            if (loadedRows > 0 && loadedRows === expectedRows) {
+                return loadedRows;
+            }
+        } else {
+            // Not last page: need full 20 rows
+            if (loadedRows >= ROWS_PER_PAGE) {
+                return loadedRows;
+            }
         }
         
         await new Promise(function(r) { setTimeout(r, 500); });
     }
     
-    return false;
+    // Return whatever we have
+    return await getLoadedRowCount(page);
 }
 
 async function scrapeData(page, dateOption, filePrefix, downloadPath) {
@@ -274,12 +301,19 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
     var allData = [];
     
     for (var pageNum = 1; pageNum <= totalPages; pageNum++) {
+        var isLastPage = (pageNum === totalPages);
+        var expectedRowsOnPage = isLastPage ? (totalRows % ROWS_PER_PAGE || ROWS_PER_PAGE) : ROWS_PER_PAGE;
+        
         if (pageNum % 20 === 1 || pageNum === totalPages) {
-            console.log('Scraping page ' + pageNum + '/' + totalPages + '...');
+            console.log('Scraping page ' + pageNum + '/' + totalPages + ' (expecting ' + expectedRowsOnPage + ' rows)...');
         }
         
-        // Wait for data to be loaded (no "Loading" cells)
-        await waitForDataLoaded(page);
+        // Wait for full page of data to load
+        var loadedRows = await waitForFullPage(page, expectedRowsOnPage, isLastPage);
+        
+        if (pageNum <= 5 || pageNum === totalPages) {
+            console.log('  Loaded ' + loadedRows + ' rows');
+        }
         
         var pageData = await page.evaluate(function(numCols) {
             var rows = [];
@@ -299,7 +333,7 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
                         rowData.push(text);
                     }
                     // Skip rows that still have "Loading"
-                    if (rowData[0] !== 'Loading') {
+                    if (rowData[0] !== 'Loading' && rowData[0] !== '') {
                         rows.push(rowData);
                     }
                 }
@@ -331,9 +365,6 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
                     break;
                 }
             }
-            
-            // IMPORTANT: Wait for data to load after page change
-            await waitForDataLoaded(page);
         }
     }
     
