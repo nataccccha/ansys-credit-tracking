@@ -182,6 +182,51 @@ async function waitForTableLoad(page) {
     console.log('Page loaded!');
 }
 
+async function clickNextPageButton(page) {
+    // Scroll button into view and click using multiple methods
+    var result = await page.evaluate(function() {
+        var btn = document.querySelector('[aria-label="Next Page"]');
+        if (!btn) return { success: false, reason: 'not found' };
+        if (btn.classList.contains('ag-disabled')) return { success: false, reason: 'disabled' };
+        
+        // Scroll into view
+        btn.scrollIntoView({ behavior: 'instant', block: 'center' });
+        
+        return { success: true, scrolled: true };
+    });
+    
+    if (!result.success) {
+        return result;
+    }
+    
+    // Small wait after scroll
+    await new Promise(function(r) { setTimeout(r, 200); });
+    
+    // Now click using Puppeteer
+    try {
+        await page.click('[aria-label="Next Page"]');
+        return { success: true, method: 'page.click' };
+    } catch (e) {
+        // Try with force option
+        try {
+            var btn = await page.$('[aria-label="Next Page"]');
+            if (btn) {
+                await btn.click({ force: true });
+                return { success: true, method: 'btn.click force' };
+            }
+        } catch (e2) {
+            // Final fallback: evaluate click
+            await page.evaluate(function() {
+                var btn = document.querySelector('[aria-label="Next Page"]');
+                if (btn) btn.click();
+            });
+            return { success: true, method: 'evaluate click' };
+        }
+    }
+    
+    return { success: false, reason: 'all methods failed' };
+}
+
 async function scrapeData(page, dateOption, filePrefix, downloadPath) {
     // Click date picker
     console.log('Clicking date picker...');
@@ -233,6 +278,12 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
     
     await new Promise(function(r) { setTimeout(r, 3000); });
     
+    // Scroll to bottom to ensure pagination is visible
+    await page.evaluate(function() {
+        window.scrollTo(0, document.body.scrollHeight);
+    });
+    await new Promise(function(r) { setTimeout(r, 1000); });
+    
     // Get page info
     var pageInfo = await page.evaluate(function() {
         var text = document.body.innerText;
@@ -257,13 +308,6 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
         if (pageNum % 20 === 1 || pageNum === totalPages) {
             console.log('Scraping page ' + pageNum + '/' + totalPages + '...');
         }
-        
-        // Get current page number from UI
-        var currentPageNum = await page.evaluate(function() {
-            var text = document.body.innerText;
-            var match = text.match(/Page\s+(\d+)\s+of/i);
-            return match ? parseInt(match[1]) : 0;
-        });
         
         var pageData = await page.evaluate(function(numCols) {
             var rows = [];
@@ -299,16 +343,11 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
                 break;
             }
             
-            console.log('Stuck count: ' + stuckCount + ', retrying with page.click...');
-            await new Promise(function(r) { setTimeout(r, 1000); });
+            console.log('Stuck count: ' + stuckCount + ', retrying...');
             
-            // Try Puppeteer's native page.click
-            try {
-                await page.click('[aria-label="Next Page"]');
-                console.log('page.click succeeded');
-            } catch (e) {
-                console.log('page.click failed: ' + e.message);
-            }
+            // Try clicking with scroll
+            var clickResult = await clickNextPageButton(page);
+            console.log('Retry click: ' + JSON.stringify(clickResult));
             
             await new Promise(function(r) { setTimeout(r, 2000); });
             continue;
@@ -320,29 +359,10 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
         allData = allData.concat(pageData);
         
         if (pageNum < totalPages) {
-            // Use Puppeteer's native page.click
-            try {
-                await page.click('[aria-label="Next Page"]');
-                if (pageNum <= 3) {
-                    console.log('page.click succeeded');
-                }
-            } catch (e) {
-                console.log('page.click failed: ' + e.message);
-                
-                // Fallback: try mouse click at coordinates
-                var coords = await page.evaluate(function() {
-                    var btn = document.querySelector('[aria-label="Next Page"]');
-                    if (btn) {
-                        var rect = btn.getBoundingClientRect();
-                        return { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
-                    }
-                    return null;
-                });
-                
-                if (coords) {
-                    await page.mouse.click(coords.x, coords.y);
-                    console.log('Fallback mouse.click at ' + Math.round(coords.x) + ',' + Math.round(coords.y));
-                }
+            var clickResult = await clickNextPageButton(page);
+            
+            if (pageNum <= 3) {
+                console.log('Click result: ' + JSON.stringify(clickResult));
             }
             
             // Wait for page number to change
@@ -363,10 +383,9 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
             }
             
             if (!pageChanged && pageNum <= 5) {
-                console.log('Page did not change from ' + currentPageNum + ' to ' + expectedPage);
+                console.log('Page did not change to ' + expectedPage);
             }
             
-            // Wait for data to load
             await new Promise(function(r) { setTimeout(r, 1000); });
         }
     }
