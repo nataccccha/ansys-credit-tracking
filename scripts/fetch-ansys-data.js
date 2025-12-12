@@ -232,7 +232,7 @@ async function clickNextPage(page) {
         }
     });
     
-    await new Promise(function(r) { setTimeout(r, 300); });
+    await new Promise(function(r) { setTimeout(r, 500); });
     
     try {
         await page.click('[aria-label="Next Page"]');
@@ -244,39 +244,6 @@ async function clickNextPage(page) {
         });
         return true;
     }
-}
-
-async function goToPage(page, targetPage) {
-    // Use the page input to jump directly to a page
-    var jumped = await page.evaluate(function(target) {
-        // Find the page input field in AG-Grid pagination
-        var inputs = document.querySelectorAll('input');
-        for (var i = 0; i < inputs.length; i++) {
-            var input = inputs[i];
-            // AG-Grid page input is usually small and near pagination
-            if (input.type === 'text' || input.type === 'number') {
-                var rect = input.getBoundingClientRect();
-                if (rect.width > 20 && rect.width < 100 && rect.height > 15 && rect.height < 40) {
-                    // Check if it's near pagination text
-                    var parent = input.parentElement;
-                    for (var j = 0; j < 5 && parent; j++) {
-                        if (parent.innerText && parent.innerText.includes('Page')) {
-                            input.focus();
-                            input.value = target;
-                            input.dispatchEvent(new Event('input', { bubbles: true }));
-                            input.dispatchEvent(new Event('change', { bubbles: true }));
-                            input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', keyCode: 13, bubbles: true }));
-                            return true;
-                        }
-                        parent = parent.parentElement;
-                    }
-                }
-            }
-        }
-        return false;
-    }, targetPage);
-    
-    return jumped;
 }
 
 async function scrapeData(page, dateOption, filePrefix, downloadPath) {
@@ -347,85 +314,31 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
     
     var allData = [];
     var consecutiveFailures = 0;
-    var maxConsecutiveFailures = 5;
+    var maxConsecutiveFailures = 10;
     
     for (var pageNum = 1; pageNum <= totalPages; pageNum++) {
         var isLastPage = (pageNum === totalPages);
         var expectedRowsOnPage = isLastPage ? (totalRows - (pageNum - 1) * ROWS_PER_PAGE) : ROWS_PER_PAGE;
         
-        // Periodic pause every 30 pages to prevent overload
-        if (pageNum > 1 && pageNum % 30 === 1) {
-            console.log('  Pausing for 5 seconds (page ' + pageNum + ')...');
-            await new Promise(function(r) { setTimeout(r, 5000); });
-        }
-        
         var currentStart = await getRowRangeStart(page);
         
-        // Check for error state
+        // More aggressive error recovery
         if (currentStart === 0 && pageNum > 1) {
-            console.log('Page in error state, waiting 10 seconds...');
-            await new Promise(function(r) { setTimeout(r, 10000); });
+            console.log('Row range is 0 at page ' + pageNum + ', waiting...');
             
-            currentStart = await getRowRangeStart(page);
-            if (currentStart === 0) {
-                console.log('Still in error state, refreshing page...');
-                await page.reload({ waitUntil: 'networkidle0' });
-                await new Promise(function(r) { setTimeout(r, 5000); });
-                
-                // Re-select date range
-                await page.evaluate(function() {
-                    var buttons = document.querySelectorAll('button');
-                    for (var i = 0; i < buttons.length; i++) {
-                        var text = buttons[i].textContent || '';
-                        if (text.includes('From') && text.includes('To')) {
-                            buttons[i].click();
-                            return;
-                        }
-                    }
-                });
-                await new Promise(function(r) { setTimeout(r, 2000); });
-                
-                await page.evaluate(function(option) {
-                    var elements = document.querySelectorAll('li, div, span, button');
-                    for (var i = 0; i < elements.length; i++) {
-                        var el = elements[i];
-                        var text = (el.textContent || '').trim();
-                        if (text === option) {
-                            el.click();
-                            return;
-                        }
-                    }
-                }, dateOption);
-                
-                await new Promise(function(r) { setTimeout(r, 5000); });
-                await waitForDataLoaded(page, ROWS_PER_PAGE);
-                
-                // Try to navigate to where we were
-                var targetPage = pageNum;
-                console.log('Attempting to jump to page ' + targetPage + '...');
-                
-                // Click through pages (slow but reliable)
-                for (var p = 1; p < targetPage && p < targetPage; p++) {
-                    await clickNextPage(page);
-                    await new Promise(function(r) { setTimeout(r, 1000); });
-                    
-                    // Check if successful every 10 pages
-                    if (p % 10 === 0) {
-                        var checkStart = await getRowRangeStart(page);
-                        if (checkStart === 0) {
-                            console.log('Recovery failed at page ' + p + ', stopping');
-                            break;
-                        }
-                    }
-                }
-                
+            // Wait up to 30 seconds for recovery
+            for (var recovery = 0; recovery < 30; recovery++) {
+                await new Promise(function(r) { setTimeout(r, 1000); });
                 currentStart = await getRowRangeStart(page);
-                if (currentStart === 0) {
-                    console.log('Could not recover, stopping');
+                if (currentStart > 0) {
+                    console.log('Recovered! Now at row ' + currentStart);
                     break;
                 }
-                
-                console.log('Recovered, now at row ' + currentStart);
+            }
+            
+            if (currentStart === 0) {
+                console.log('Could not recover after 30 seconds, stopping');
+                break;
             }
         }
         
@@ -469,13 +382,14 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
         allData = allData.concat(pageData);
         
         if (pageNum < totalPages) {
-            await new Promise(function(r) { setTimeout(r, 300); });
+            // SLOW DOWN - wait 1 second between pages
+            await new Promise(function(r) { setTimeout(r, 1000); });
             
             await clickNextPage(page);
             
-            // Wait for row range to change
+            // Wait for row range to change - longer timeout
             var changed = false;
-            for (var w = 0; w < 40; w++) {
+            for (var w = 0; w < 60; w++) {
                 await new Promise(function(r) { setTimeout(r, 500); });
                 var newStart = await getRowRangeStart(page);
                 if (newStart !== currentStart && newStart > 0) {
@@ -487,21 +401,27 @@ async function scrapeData(page, dateOption, filePrefix, downloadPath) {
             
             if (!changed) {
                 consecutiveFailures++;
-                if (consecutiveFailures >= 2) {
-                    console.log('  Page change failed (attempt ' + consecutiveFailures + '/' + maxConsecutiveFailures + ')');
-                }
+                console.log('  Page change failed (attempt ' + consecutiveFailures + '/' + maxConsecutiveFailures + ')');
                 
                 if (consecutiveFailures >= maxConsecutiveFailures) {
                     console.log('Too many consecutive failures, stopping');
                     break;
                 }
                 
-                await new Promise(function(r) { setTimeout(r, 2000); });
-                await clickNextPage(page);
+                // Wait longer before retry
                 await new Promise(function(r) { setTimeout(r, 3000); });
+                await clickNextPage(page);
+                await new Promise(function(r) { setTimeout(r, 5000); });
             }
             
+            // Wait for data to fully load
             await waitForDataLoaded(page, ROWS_PER_PAGE);
+            
+            // Extra pause every 20 pages
+            if (pageNum % 20 === 0) {
+                console.log('  Pausing for 3 seconds...');
+                await new Promise(function(r) { setTimeout(r, 3000); });
+            }
         }
     }
     
