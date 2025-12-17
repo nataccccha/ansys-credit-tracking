@@ -1667,6 +1667,7 @@
                             <div class="stat-label">Recent Weekly Usage</div>
                             <div class="stat-value" id="recentWeekly" style="color: var(--accent-info);">0</div>
                             <div class="stat-subtext">AEC</div>
+                            <div class="stat-subtext" id="recentDaysOfData" style="font-size: 0.7rem; margin-top: 4px;"></div>
                             <div id="weeklyTrend"></div>
                         </div>
                         <div class="stat-card">
@@ -1802,7 +1803,7 @@
         // ============================================
         // CONFIGURATION - Update these values
         // ============================================
-        const INITIAL_BALANCE = 603.9;  // Update this with current AEC balance
+        const INITIAL_BALANCE = 834.2;  // Update this with current AEC balance
         const BALANCE_UPDATE_DATE = "December 17, 2025";  // Fallback date (auto-detected from recent CSV data)
         const ACTIVE_USERS_THIS_WEEK = 0;  // Fallback value (auto-detected from unique usernames in recent CSV)
 
@@ -2588,6 +2589,27 @@ Thanks,`;
             document.getElementById('historicalAvg').textContent = historicalAvgMonthly.toFixed(1);
             if (hasRecentData) {
                 document.getElementById('recentWeekly').textContent = recentTotal.toFixed(1);
+                
+                // Calculate days of data in recent CSV
+                const recentDates = new Set();
+                recentData.forEach(row => {
+                    const dateStr = row['Start Time'] || row['End Time'];
+                    if (dateStr) {
+                        // Extract just the date part (YYYY-MM-DD)
+                        const datePart = dateStr.split(' ')[0];
+                        recentDates.add(datePart);
+                    }
+                });
+                const daysOfData = recentDates.size;
+                
+                // Display days of data with appropriate color
+                const daysElement = document.getElementById('recentDaysOfData');
+                if (daysOfData < 7) {
+                    const color = daysOfData <= 2 ? 'var(--accent-danger)' : 'var(--accent-warning)';
+                    daysElement.innerHTML = `<span style="color: ${color};">(${daysOfData} of 7 days)</span>`;
+                } else {
+                    daysElement.innerHTML = `<span style="color: var(--accent-success);">(${daysOfData} days)</span>`;
+                }
             } else {
                 document.getElementById('recentWeekly').textContent = '0';
                 document.getElementById('recentWeekly').parentElement.querySelector('.stat-subtext').innerHTML = '<span style="color: var(--accent-warning);">No recent data</span>';
