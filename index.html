@@ -562,7 +562,7 @@ h1 { font-size: 1rem; }
     </div>
   </div>
   <script>
-    const INITIAL_BALANCE = 603.9;
+    const INITIAL_BALANCE = 834.2;
     const BALANCE_UPDATE_DATE = "December 17, 2025";
     const ACTIVE_USERS_THIS_WEEK = 0;
     const HISTORICAL_CSV_URL = "https://raw.githubusercontent.com/nataccccha/ansys-credit-tracking/refs/heads/main/data/historical.csv";
@@ -802,7 +802,7 @@ h1 { font-size: 1rem; }
       if (activeUsersCount > 0) {
         activeUsersNote = `<div style="margin-top: 8px; padding: 10px 12px; background: var(--bg-primary); border: 1px solid var(--accent-info); border-radius: 6px; font-size: 0.875rem;">
           <strong style="color: var(--accent-info);">📊 Note:</strong> There are currently <strong>${activeUsersCount}</strong> other user${activeUsersCount > 1 ? 's' : ''} running simulations this week.
-          If you're planning computationally heavy work, please check with Natacha to avoid credit conflicts.
+          If you're planning computationally heavy work, please check with the administrator to avoid credit conflicts.
         </div>`;
       }
       if (isCritical) {
@@ -866,28 +866,32 @@ h1 { font-size: 1rem; }
         const hours = row.querySelector('.hours-input').value;
         const weeksVal = row.querySelector('.weeks-input').value;
         if (software && hours > 0) {
-          softwareList += `• ${software}: ${hours} hrs/week × ${weeksVal} week(s)\n`;
+          softwareList += `- ${software}: ${Number(hours).toLocaleString()} hrs/week × ${weeksVal} weeks\n`;
         }
       });
       const subject = alertType === 'critical'
         ? 'URGENT: ANSYS AEC Credit Request - Balance Exceeded'
         : 'ANSYS AEC Credit Alert - Low Balance Warning';
       const body = `Hi Natacha,
+
 I am planning to run ANSYS simulations and wanted to notify you about our credit situation.
-PLANNED USAGE
-${softwareList}
-Total Duration: ${weeks} week(s)
-Weekly Burn Rate: ${weeklyRate} AEC/week
-Total AEC Required: ${plannedUsage} AEC
-CURRENT STATUS
-Current Balance: ${currentBalance} AEC
-Remaining After Usage: ${remaining} AEC
-${alertType === 'critical' ? `Shortfall: ${(plannedUsage - currentBalance).toFixed(1)} AEC` : ''}
+
+**PLANNED USAGE**
+${softwareList}- Total Duration: ${weeks} weeks
+- Weekly Burn Rate: ${Number(weeklyRate).toLocaleString()} AEC/week
+- Total AEC Required: ${Number(plannedUsage).toLocaleString()} AEC
+
+**CURRENT STATUS**
+- Current Balance: ${Number(currentBalance).toLocaleString()} AEC
+- Remaining After Usage: ${Number(remaining).toLocaleString()} AEC
+${alertType === 'critical' ? `- Shortfall: ${Number(plannedUsage - currentBalance).toLocaleString()} AEC\n` : ''}
 ${alertType === 'critical'
-  ? 'ACTION NEEDED: We need additional credits to proceed with this simulation. Please advise on next steps.'
-  : 'HEADS UP: Our balance will be running low after this usage. We may need to order more credits soon.'}
+  ? '**ACTION NEEDED:** We need additional credits to proceed with this simulation. Please advise on next steps.'
+  : '**HEADS UP:** Our balance will be running low after this usage. We may need to order more credits soon.'}
+
 Please let me know if you have any questions.
-Thanks,`;
+
+Thanks!`;
       const outlookUrl = `https://outlook.office365.us/owa/arete.com/?path=/mail/action/compose&to=${encodeURIComponent('nramioulle@arete.com')}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
       window.open(outlookUrl, '_blank');
     }
@@ -1564,10 +1568,15 @@ Thanks,`;
       const weeksRemaining = recentWeekly > 0 ? (currentBalanceNum / recentWeekly).toFixed(1) : 0;
       const subject = 'ANSYS AEC Purchase Request';
       const body = `Hi Ben and Dario,
+
 We've been using ${recentWeekly.toFixed(1)} AECs per week which means we've got around ${weeksRemaining} weeks left with our current balance of ${currentBalanceNum.toFixed(1)} AEC.
-Can you help in putting in another order of 5000 AECs so we don't have any periods of interruption?
-Thanks so much!
+
+Can you help in putting in another order of 5,000 AECs so we don't have any periods of interruption?
+
 Let me know if you need anything from me.
+
+Thanks!
+
 Best,
 Natacha`;
       const toEmails = 'BBennett@arete.com;dcontreras@arete.com';
