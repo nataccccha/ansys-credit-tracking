@@ -1352,7 +1352,7 @@ Thanks!`;
       const headerRow = document.getElementById('pivotTableHeader');
       headerRow.innerHTML = '<th>Username</th>' +
         monthNames.map(name => `<th>${name}</th>`).join('') +
-        '<th style="background: rgba(0, 122, 255, 0.15); font-weight: 700;">Avg</th>' +
+        '<th style="background: rgba(0, 91, 127, 0.15); font-weight: 700; color: var(--accent-teal);">Avg</th>' +
         '<th style="background: var(--bg-primary); font-weight: 700;">Total</th>';
       const tbody = document.getElementById('pivotTableBody');
       const rows = [];
@@ -1377,7 +1377,7 @@ Thanks!`;
           rowHTML += `<td>${value > 0 ? value.toFixed(1) : '0'}</td>`;
         });
         const userAvg = monthsWithData > 0 ? userTotal / monthsWithData : 0;
-        rowHTML += `<td style="font-weight: 600; background: rgba(0, 122, 255, 0.08); color: var(--accent-info);">${userAvg.toFixed(1)}</td>`;
+        rowHTML += `<td style="font-weight: 600; background: rgba(0, 91, 127, 0.08); color: var(--accent-teal);">${userAvg.toFixed(1)}</td>`;
         rowHTML += `<td style="font-weight: 600; background: var(--bg-secondary);">${userTotal.toFixed(1)}</td>`;
         rows.push(`<tr>${rowHTML}</tr>`);
       });
@@ -1391,7 +1391,7 @@ Thanks!`;
         totalRowHTML += `<td style="font-weight: 600;">${total.toFixed(1)}</td>`;
       });
       const grandAvg = monthsCount > 0 ? grandTotal / monthsCount : 0;
-      totalRowHTML += `<td style="font-weight: 700; background: rgba(0, 122, 255, 0.15); color: var(--accent-info);">${grandAvg.toFixed(1)}</td>`;
+      totalRowHTML += `<td style="font-weight: 700; background: rgba(0, 91, 127, 0.15); color: var(--accent-teal);">${grandAvg.toFixed(1)}</td>`;
       totalRowHTML += `<td style="font-weight: 700; background: var(--bg-primary);">${grandTotal.toFixed(1)}</td>`;
       rows.push(`<tr class="total-row">${totalRowHTML}</tr>`);
       tbody.innerHTML = rows.join('');
