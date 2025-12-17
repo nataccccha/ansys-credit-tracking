@@ -529,7 +529,7 @@ h1 { font-size: 1rem; }
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 12px;">
             <div>
               <h2 style="margin-bottom: 4px; font-size: 1rem; font-weight: 600; color: var(--accent-teal);">
-                📊 Monthly Usage Report
+                📊 Previous Month Usage Report
               </h2>
               <p style="color: var(--text-secondary); font-size: 0.875rem;">
                 Software usage breakdown by user for <strong id="monthlyReportMonth"></strong>
@@ -1673,7 +1673,7 @@ Natacha`;
         return;
       }
       
-      // Find the most recent complete month in the data
+      // Find all months in the data
       const monthsInData = {};
       historicalData.forEach(row => {
         const rowDate = parseDate(row['Start Time']);
@@ -1690,8 +1690,18 @@ Natacha`;
         return;
       }
       
-      // Use the most recent month with data
-      const targetMonthStr = sortedMonths[0];
+      // Get current month key to exclude it (we want last FULL month)
+      const today = new Date();
+      const currentMonthKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+      
+      // Find the most recent month that is NOT the current month
+      let targetMonthStr = sortedMonths.find(m => m !== currentMonthKey);
+      
+      // If all data is from current month, fall back to it
+      if (!targetMonthStr) {
+        targetMonthStr = sortedMonths[0];
+      }
+      
       const [targetYearStr, targetMonthNumStr] = targetMonthStr.split('-');
       const targetYear = parseInt(targetYearStr);
       const targetMonth = parseInt(targetMonthNumStr) - 1; // JS months are 0-indexed
