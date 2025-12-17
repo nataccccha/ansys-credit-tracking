@@ -196,6 +196,7 @@ tr:hover td { background: var(--bg-secondary); }
 .notify-btn:hover { background: white; transform: scale(1.02); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); }
 .notify-btn.warning { color: var(--accent-warning); }
 .notify-btn.critical { color: var(--accent-danger); }
+.notify-btn.safe { color: var(--accent-success); }
 .alert-icon { font-size: 1rem; flex-shrink: 0; }
 @media (max-width: 1024px) { .upload-grid,
       .comparison-grid { grid-template-columns: 1fr; }
@@ -348,13 +349,12 @@ h1 { font-size: 1rem; }
             </optgroup>
           </select>
           <input type="number" class="hours-input" placeholder="Hours" min="0" step="0.5">
-          <input type="number" class="weeks-input" placeholder="Weeks" min="1" value="1" step="1">
-          <button class="remove-software-btn" onclick="removeSoftwareRow(this)" style="visibility: hidden;">✕</button>
+          <input type="number" class="weeks-input" placeholder="Weeks" min="1" step="1">
+          <button class="remove-software-btn" onclick="clearCalculator()" style="background: var(--accent-danger); visibility: visible;">Clear</button>
         </div>
       </div>
-      <div style="display: flex; gap: 8px;">
-        <button class="add-software-btn" onclick="addSoftwareRow()" style="flex: 1;">+ Add Another Software</button>
-        <button class="add-software-btn" onclick="clearCalculator()" style="background: var(--accent-danger); flex: 0 0 auto;">Clear</button>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end;">
+        <button class="add-software-btn" onclick="addSoftwareRow()">+ Add Another Software</button>
       </div>
       <div class="calculator-result">
         <div class="result-row">
@@ -371,12 +371,12 @@ h1 { font-size: 1rem; }
         </div>
         <div id="alertMessage"></div>
       </div>
-      <div style="display: flex; gap: 8px; margin-top: 10px;">
-        <button class="purchase-btn" onclick="calculateUsage()" style="flex: 1; padding: 8px; font-size: 0.875rem;">
-          Calculate
-        </button>
-        <button class="purchase-btn" onclick="exportQuoteToPDF()" style="padding: 8px 16px; font-size: 0.875rem; background: linear-gradient(135deg, var(--accent-teal), var(--accent-info)); white-space: nowrap;">
+      <div style="display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; justify-content: space-between;">
+        <button class="add-software-btn" onclick="exportQuoteToPDF()" style="background: var(--accent-teal);">
           📄 Export as Quote
+        </button>
+        <button class="add-software-btn" onclick="calculateUsage()">
+          Calculate
         </button>
       </div>
           </div>
@@ -760,7 +760,7 @@ h1 { font-size: 1rem; }
           </optgroup>
         </select>
         <input type="number" class="hours-input" placeholder="Hours" min="0" step="0.5">
-        <input type="number" class="weeks-input" placeholder="Weeks" min="1" value="1" step="1">
+        <input type="number" class="weeks-input" placeholder="Weeks" min="1" step="1">
         <button class="remove-software-btn" onclick="removeSoftwareRow(this)">✕</button>
       `;
       container.appendChild(newRow);
@@ -829,8 +829,8 @@ h1 { font-size: 1rem; }
             </optgroup>
           </select>
           <input type="number" class="hours-input" placeholder="Hours" min="0" step="0.5">
-          <input type="number" class="weeks-input" placeholder="Weeks" min="1" value="1" step="1">
-          <button class="remove-software-btn" onclick="removeSoftwareRow(this)" style="visibility: hidden;">✕</button>
+          <input type="number" class="weeks-input" placeholder="Weeks" min="1" step="1">
+          <button class="remove-software-btn" onclick="clearCalculator()" style="background: var(--accent-danger); visibility: visible;">Clear</button>
         </div>
       `;
       document.getElementById('totalCredits').textContent = '0.0 AEC';
@@ -925,6 +925,9 @@ h1 { font-size: 1rem; }
               Planned: ${totalCredits.toFixed(1)} AEC | Balance: ${currentBalance.toFixed(1)} AEC | Remaining: ${remaining.toFixed(1)} AEC (${(remaining / weeklyBurnRate).toFixed(1)} weeks at current rate).
               No action needed.
             </div>
+            <button class="notify-btn safe" onclick="openNatachaEmail('info', ${totalCredits.toFixed(1)}, ${currentBalance.toFixed(1)}, ${remaining.toFixed(1)}, ${weeklyBurnRate.toFixed(1)}, ${totalWeeks})">
+              📧 Notify
+            </button>
           </div>
           ${activeUsersNote}
         `;
@@ -941,9 +944,17 @@ h1 { font-size: 1rem; }
           softwareList += `- ${software}: ${Number(hours).toLocaleString()} hrs/week × ${weeksVal} weeks\n`;
         }
       });
-      const subject = alertType === 'critical'
-        ? 'URGENT: ANSYS AEC Credit Request - Balance Exceeded'
-        : 'ANSYS AEC Credit Alert - Low Balance Warning';
+      let subject, actionText;
+      if (alertType === 'critical') {
+        subject = 'URGENT: ANSYS AEC Credit Request - Balance Exceeded';
+        actionText = '**ACTION NEEDED:** We need additional credits to proceed with this simulation. Please advise on next steps.';
+      } else if (alertType === 'warning') {
+        subject = 'ANSYS AEC Credit Alert - Low Balance Warning';
+        actionText = '**HEADS UP:** Our balance will be running low after this usage. We may need to order more credits soon.';
+      } else {
+        subject = 'ANSYS AEC Usage Notification - Planned Simulation';
+        actionText = 'Just wanted to keep you informed of my planned usage.';
+      }
       const body = `Hi Natacha,
 
 I am planning to run ANSYS simulations and wanted to notify you about our credit situation.
@@ -957,9 +968,7 @@ ${softwareList}- Total Duration: ${weeks} weeks
 - Current Balance: ${Number(currentBalance).toLocaleString()} AEC
 - Remaining After Usage: ${Number(remaining).toLocaleString()} AEC
 ${alertType === 'critical' ? `- Shortfall: ${Number(plannedUsage - currentBalance).toLocaleString()} AEC\n` : ''}
-${alertType === 'critical'
-  ? '**ACTION NEEDED:** We need additional credits to proceed with this simulation. Please advise on next steps.'
-  : '**HEADS UP:** Our balance will be running low after this usage. We may need to order more credits soon.'}
+${actionText}
 
 Please let me know if you have any questions.
 
