@@ -260,8 +260,8 @@ h1 { font-size: 1rem; }
       <p style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px;">Auto-updates every 3 hours</p>
       <div style="margin-top: 16px; display: flex; gap: 12px; flex-wrap: wrap; justify-content: center;">
         <div style="padding: 10px 16px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; text-align: center;">
-          <span style="font-size: 0.6875rem; color: var(--text-secondary); display: block;">Current </span>
-          <span style="font-size: 0.875rem; font-weight: 600; color: var(--text-primary); display: block;" id="header">571.5 AEC</span>
+          <span style="font-size: 0.6875rem; color: var(--text-secondary); display: block;">Current Balance</span>
+          <span style="font-size: 0.875rem; font-weight: 600; color: var(--text-primary); display: block;" id="headerBalance">571.5 AEC</span>
         </div>
         <div style="padding: 10px 16px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; text-align: center;" id="historicalUploadSection">
           <span style="font-size: 0.6875rem; color: var(--text-secondary); display: block;">Historical Data</span>
@@ -524,12 +524,12 @@ h1 { font-size: 1rem; }
         <span class="collapse-icon collapsed" id="adminToolsIcon">▼</span>
       </div>
       <div class="master-section-content collapsed" id="adminToolsContent">
-        <!-- Previous Month Software Usage by User -->
+        <!-- Monthly Software Usage by User -->
         <div id="monthlyPieChartsSection" style="background: var(--bg-card); padding: 20px; border-radius: 12px; box-shadow: var(--shadow-sm); margin-bottom: 20px;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 12px;">
             <div>
               <h2 style="margin-bottom: 4px; font-size: 1rem; font-weight: 600; color: var(--accent-teal);">
-                📊 Previous Month Usage Report
+                📊 Monthly Usage Report
               </h2>
               <p style="color: var(--text-secondary); font-size: 0.875rem;">
                 Software usage breakdown by user for <strong id="monthlyReportMonth"></strong>
@@ -1667,43 +1667,68 @@ Natacha`;
     }
     let monthlyUserData = {};
     function generateMonthlyPieCharts() {
-      const today = new Date();
-      const previousMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-      const targetMonth = previousMonth.getMonth();
-      const targetYear = previousMonth.getFullYear();
-      const monthName = previousMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-      document.getElementById('monthlyReportMonth').textContent = monthName;
       if (!historicalData || historicalData.length === 0) {
         document.getElementById('monthlyPieChartsContainer').innerHTML =
           '<p style="color: var(--text-secondary); text-align: center;">No data available. Please upload historical CSV data.</p>';
         return;
       }
-      const monthlyData = historicalData.filter(row => {
-        const rowDate = new Date(row.Date || row['Start Time']);
-        return rowDate.getMonth() === targetMonth && rowDate.getFullYear() === targetYear;
+      
+      // Find the most recent complete month in the data
+      const monthsInData = {};
+      historicalData.forEach(row => {
+        const rowDate = parseDate(row['Start Time']);
+        if (rowDate) {
+          const key = `${rowDate.getFullYear()}-${String(rowDate.getMonth() + 1).padStart(2, '0')}`;
+          monthsInData[key] = (monthsInData[key] || 0) + 1;
+        }
       });
-      if (monthlyData.length === 0) {
+      
+      const sortedMonths = Object.keys(monthsInData).sort().reverse();
+      if (sortedMonths.length === 0) {
         document.getElementById('monthlyPieChartsContainer').innerHTML =
-          '<p style="color: var(--text-secondary); text-align: center;">No usage data found for previous month.</p>';
+          '<p style="color: var(--text-secondary); text-align: center;">No valid dates found in data.</p>';
         return;
       }
-      const userSoftwareHours = {};
-      const userTotalAEC = {};
-      monthlyData.forEach(row => {
-        const user = row.Username || 'Unknown';
-        const software = row.Product || row['Job Name'] || row.Software || 'Unknown';
-        const hours = parseFloat(row.Hours) || 0;
-        const cost = parseFloat(row.Cost) || 0;
-        if (!userSoftwareHours[user]) {
-          userSoftwareHours[user] = {};
-          userTotalAEC[user] = 0;
-        }
-        if (!userSoftwareHours[user][software]) {
-          userSoftwareHours[user][software] = 0;
-        }
-        userSoftwareHours[user][software] += hours;
-        userTotalAEC[user] += cost;
+      
+      // Use the most recent month with data
+      const targetMonthStr = sortedMonths[0];
+      const [targetYearStr, targetMonthNumStr] = targetMonthStr.split('-');
+      const targetYear = parseInt(targetYearStr);
+      const targetMonth = parseInt(targetMonthNumStr) - 1; // JS months are 0-indexed
+      
+      const monthDate = new Date(targetYear, targetMonth, 1);
+      const monthName = monthDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      document.getElementById('monthlyReportMonth').textContent = monthName;
+      
+      const monthlyData = historicalData.filter(row => {
+        const rowDate = parseDate(row['Start Time']);
+        if (!rowDate) return false;
+        return rowDate.getMonth() === targetMonth && rowDate.getFullYear() === targetYear;
       });
+      
+      if (monthlyData.length === 0) {
+        document.getElementById('monthlyPieChartsContainer').innerHTML =
+          `<p style="color: var(--text-secondary); text-align: center;">No usage data found for ${monthName}.</p>`;
+        return;
+      }
+      const userSoftwareAEC = {};
+      monthlyData.forEach(row => {
+        const user = row['Username'] || 'Unknown';
+        const software = row['Product'] || 'Unknown';
+        const cost = parseFloat(row['Cost']) || 0;
+        if (!userSoftwareAEC[user]) {
+          userSoftwareAEC[user] = {};
+        }
+        if (!userSoftwareAEC[user][software]) {
+          userSoftwareAEC[user][software] = 0;
+        }
+        userSoftwareAEC[user][software] += cost;
+      });
+      if (Object.keys(userSoftwareAEC).length === 0) {
+        document.getElementById('monthlyPieChartsContainer').innerHTML =
+          `<p style="color: var(--text-secondary); text-align: center;">Data found for ${monthName} but no user breakdown available.</p>`;
+        return;
+      }
       monthlyUserData = {
         month: monthName,
         users: {}
@@ -1722,12 +1747,10 @@ Natacha`;
         '#FFD60A',
         '#BF5AF2'
       ];
-      Object.keys(userSoftwareHours).sort().forEach((user, userIndex) => {
-        const softwareData = userSoftwareHours[user];
-        const totalHours = Object.values(softwareData).reduce((a, b) => a + b, 0);
-        const totalAEC = userTotalAEC[user];
+      Object.keys(userSoftwareAEC).sort().forEach((user, userIndex) => {
+        const softwareData = userSoftwareAEC[user];
+        const totalAEC = Object.values(softwareData).reduce((a, b) => a + b, 0);
         monthlyUserData.users[user] = {
-          totalHours: totalHours,
           totalAEC: totalAEC,
           software: softwareData
         };
@@ -1737,7 +1760,7 @@ Natacha`;
         header.style.cssText = 'margin-bottom: 12px;';
         header.innerHTML = `
           <h3 style="font-size: 0.875rem; font-weight: 600; margin-bottom: 4px; color: var(--text-primary);">${user}</h3>
-          <p style="font-size: 0.7rem; color: var(--text-secondary);">Total: ${totalHours.toFixed(1)} hours | ${totalAEC.toFixed(1)} AEC</p>
+          <p style="font-size: 0.7rem; color: var(--text-secondary);">Total: ${totalAEC.toFixed(1)} AEC</p>
         `;
         card.appendChild(header);
         const canvas = document.createElement('canvas');
@@ -1748,8 +1771,8 @@ Natacha`;
         const legend = document.createElement('div');
         legend.style.cssText = 'margin-top: 12px; display: flex; flex-wrap: wrap; gap: 4px 8px; font-size: 0.65rem;';
         sortedSoftware.forEach((software, index) => {
-          const hours = softwareData[software];
-          const percentage = ((hours / totalHours) * 100).toFixed(0);
+          const aec = softwareData[software];
+          const percentage = ((aec / totalAEC) * 100).toFixed(0);
           const color = colors[index % colors.length];
           const legendItem = document.createElement('div');
           legendItem.style.cssText = 'display: flex; align-items: center; gap: 4px;';
@@ -1787,8 +1810,8 @@ Natacha`;
                     label: function(context) {
                       const label = context.label || '';
                       const value = context.parsed || 0;
-                      const percentage = ((value / totalHours) * 100).toFixed(1);
-                      return `${label}: ${value.toFixed(1)}h (${percentage}%)`;
+                      const percentage = ((value / totalAEC) * 100).toFixed(1);
+                      return `${label}: ${value.toFixed(1)} AEC (${percentage}%)`;
                     }
                   }
                 }
@@ -1845,7 +1868,7 @@ Natacha`;
                 📤 ${user}@arete.com
               </p>
               <p style="margin: 8px 0 0 0; font-size: 0.8rem; color: var(--text-secondary);">
-                ${userData.totalHours.toFixed(1)} hours | ${userData.totalAEC.toFixed(1)} AEC
+                ${userData.totalAEC.toFixed(1)} AEC
               </p>
             </div>
             <div style="display: flex; gap: 12px; justify-content: flex-end;">
@@ -1905,20 +1928,23 @@ Natacha`;
       let softwareList = '';
       const sortedSoftware = Object.entries(userData.software)
         .sort((a, b) => b[1] - a[1]);
-      sortedSoftware.forEach(([software, hours]) => {
-        const percentage = ((hours / userData.totalHours) * 100).toFixed(1);
-        softwareList += `• ${software}: ${hours.toFixed(1)} hours (${percentage}%)\n`;
+      sortedSoftware.forEach(([software, aec]) => {
+        const percentage = ((aec / userData.totalAEC) * 100).toFixed(1);
+        softwareList += `• ${software}: ${aec.toFixed(1)} AEC (${percentage}%)\n`;
       });
       const body = `Hello ${username},
+
 This is your ANSYS usage summary for ${month}.
+
 USAGE SUMMARY
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Total Hours: ${userData.totalHours.toFixed(1)}
 Total Cost: ${userData.totalAEC.toFixed(1)} AEC ($${userData.totalAEC.toFixed(2)} USD)
+
 SOFTWARE BREAKDOWN
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ${softwareList}
 Please provide the breakdown and charge numbers for this usage.
+
 Thanks!`;
       return body;
     }
