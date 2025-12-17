@@ -2520,7 +2520,7 @@ Thanks,`;
                 document.getElementById(statusId).innerHTML = `<span style="color: var(--accent-success);">✓ Loaded: ${file.name}</span>`;
                 document.getElementById(sectionId).classList.add('loaded');
                 
-                if (historicalData.length > 0 && recentData.length > 0) {
+                if (historicalData.length > 0) {
                     setTimeout(() => {
                         document.getElementById('dashboardContent').classList.remove('hidden');
                         updateDashboard();
