@@ -352,7 +352,10 @@ h1 { font-size: 1rem; }
           <button class="remove-software-btn" onclick="removeSoftwareRow(this)" style="visibility: hidden;">✕</button>
         </div>
       </div>
-      <button class="add-software-btn" onclick="addSoftwareRow()">+ Add Another Software</button>
+      <div style="display: flex; gap: 8px;">
+        <button class="add-software-btn" onclick="addSoftwareRow()" style="flex: 1;">+ Add Another Software</button>
+        <button class="add-software-btn" onclick="clearCalculator()" style="background: var(--accent-danger); flex: 0 0 auto;">Clear</button>
+      </div>
       <div class="calculator-result">
         <div class="result-row">
           <span class="result-label">Total Credits Needed</span>
@@ -562,7 +565,7 @@ h1 { font-size: 1rem; }
     </div>
   </div>
   <script>
-    const INITIAL_BALANCE = 834.2;
+    const INITIAL_BALANCE = 603.9;
     const BALANCE_UPDATE_DATE = "December 17, 2025";
     const ACTIVE_USERS_THIS_WEEK = 0;
     const HISTORICAL_CSV_URL = "https://raw.githubusercontent.com/nataccccha/ansys-credit-tracking/refs/heads/main/data/historical.csv";
@@ -764,6 +767,75 @@ h1 { font-size: 1rem; }
     }
     function removeSoftwareRow(button) {
       button.closest('.software-row').remove();
+    }
+    function clearCalculator() {
+      const container = document.getElementById('softwareInputs');
+      container.innerHTML = `
+        <div class="software-row">
+          <select class="software-select">
+            <option value="">Select Software...</option>
+            <optgroup label="Pre/Post Processing">
+              <option value="blademodeler">BladeModeler (2 AEC/hour)</option>
+              <option value="cfd_preppost">CFD PrepPost (14 AEC/hour)</option>
+              <option value="designmodeler">DesignModeler (14 AEC/hour)</option>
+              <option value="electronics_preppost">Electronics Desktop PrepPost (14 AEC/hour)</option>
+              <option value="spaceclaim">SpaceClaim (14 AEC/hour)</option>
+            </optgroup>
+            <optgroup label="Solvers - Most Common">
+              <option value="discovery_enterprise">Discovery Enterprise (18 AEC/hour)</option>
+              <option value="mechanical_solver">Mechanical Enterprise Solver (28 AEC/hour)</option>
+              <option value="fluent">CFD Enterprise Solver (28 AEC/hour)</option>
+              <option value="electronics_solver">Electronics Enterprise Solver (28 AEC/hour)</option>
+              <option value="hfss_solver">HFSS Solver (28 AEC/hour)</option>
+              <option value="maxwell_solver">Maxwell Solver (28 AEC/hour)</option>
+              <option value="icepak_solver">Icepak Solver (28 AEC/hour)</option>
+              <option value="lsdyna">LS-DYNA (28 AEC/hour)</option>
+            </optgroup>
+            <optgroup label="Solvers - Other">
+              <option value="aim">AIM (28 AEC/hour)</option>
+              <option value="additive_suite">Additive Suite (39 AEC/hour)</option>
+              <option value="electronics_2d">Electronics Desktop 2D Solver (14 AEC/hour)</option>
+              <option value="hfss_sbr">HFSS SBR + Solver (28 AEC/hour)</option>
+              <option value="lumerical_solver">Lumerical Enterprise Solver (28 AEC/hour)</option>
+              <option value="motion_enterprise">Motion Enterprise (50 AEC/hour)</option>
+              <option value="motion_premium">Motion Premium (25 AEC/hour)</option>
+              <option value="motorcad_blackbox">Motor-CAD Blackbox (10 AEC/hour)</option>
+              <option value="motorcad_enterprise">Motor-CAD Enterprise (27 AEC/hour)</option>
+              <option value="ncode_designlife">nCode DesignLife Enterprise (39 AEC/hour)</option>
+              <option value="q3d_extractor">Q3D Extractor 3D Solver (28 AEC/hour)</option>
+              <option value="rf_option">RF Option (28 AEC/hour)</option>
+              <option value="rocky">Rocky (34 AEC/hour)</option>
+              <option value="sherlock">Sherlock (53 AEC/hour)</option>
+              <option value="siwave_psi">SIwave PSI Solver (28 AEC/hour)</option>
+              <option value="siwave_solver">SIwave Solver (28 AEC/hour)</option>
+              <option value="speos_enterprise_solver">Speos Enterprise Solver (46 AEC/hour)</option>
+              <option value="zemax">Zemax OpticStudio Enterprise (20 AEC/hour)</option>
+            </optgroup>
+            <optgroup label="Optimization">
+              <option value="cfd_ai">CFD AI+ (10 AEC/hour)</option>
+              <option value="designxplorer">DesignXplorer (7 AEC/hour)</option>
+              <option value="optimetrics">Optimetrics (7 AEC/hour)</option>
+              <option value="optislang_ai">optiSLang AI+ (16 AEC/hour)</option>
+              <option value="optislang_enterprise">optiSLang Enterprise (38 AEC/hour)</option>
+            </optgroup>
+            <optgroup label="Materials & Safety">
+              <option value="granta">GRANTA Materials Data for Simulation (33 AEC/hour)</option>
+              <option value="medini">medini analyze Enterprise (114 AEC/hour)</option>
+            </optgroup>
+            <optgroup label="Geometry Interfaces">
+              <option value="alinks">ALinks for EDA (7 AEC/hour)</option>
+              <option value="dso">Distributed Solve DSO (4 AEC/hour)</option>
+              <option value="geo_interface">Geometry Interfaces (4 AEC/hour)</option>
+            </optgroup>
+          </select>
+          <input type="number" class="hours-input" placeholder="Hours" min="0" step="0.5">
+          <input type="number" class="weeks-input" placeholder="Weeks" min="1" value="1" step="1">
+          <button class="remove-software-btn" onclick="removeSoftwareRow(this)" style="visibility: hidden;">✕</button>
+        </div>
+      `;
+      document.getElementById('totalCredits').textContent = '0.0 AEC';
+      document.getElementById('remainingCredits').textContent = settings.availableBalance.toLocaleString('en-US', {minimumFractionDigits: 1, maximumFractionDigits: 1}) + ' AEC';
+      document.getElementById('alertMessage').innerHTML = '';
     }
     function calculateUsage() {
       const rows = document.querySelectorAll('.software-row');
