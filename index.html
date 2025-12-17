@@ -1667,7 +1667,6 @@
                             <div class="stat-label">Recent Weekly Usage</div>
                             <div class="stat-value" id="recentWeekly" style="color: var(--accent-info);">0</div>
                             <div class="stat-subtext">AEC</div>
-                            <div class="stat-subtext" id="recentDaysOfData" style="font-size: 0.7rem; margin-top: 4px;"></div>
                             <div id="weeklyTrend"></div>
                         </div>
                         <div class="stat-card">
@@ -2589,27 +2588,6 @@ Thanks,`;
             document.getElementById('historicalAvg').textContent = historicalAvgMonthly.toFixed(1);
             if (hasRecentData) {
                 document.getElementById('recentWeekly').textContent = recentTotal.toFixed(1);
-                
-                // Calculate days of data in recent CSV
-                const recentDates = new Set();
-                recentData.forEach(row => {
-                    const dateStr = row['Start Time'] || row['End Time'];
-                    if (dateStr) {
-                        // Extract just the date part (YYYY-MM-DD)
-                        const datePart = dateStr.split(' ')[0];
-                        recentDates.add(datePart);
-                    }
-                });
-                const daysOfData = recentDates.size;
-                
-                // Display days of data with appropriate color
-                const daysElement = document.getElementById('recentDaysOfData');
-                if (daysOfData < 7) {
-                    const color = daysOfData <= 2 ? 'var(--accent-danger)' : 'var(--accent-warning)';
-                    daysElement.innerHTML = `<span style="color: ${color};">(${daysOfData} of 7 days)</span>`;
-                } else {
-                    daysElement.innerHTML = `<span style="color: var(--accent-success);">(${daysOfData} days)</span>`;
-                }
             } else {
                 document.getElementById('recentWeekly').textContent = '0';
                 document.getElementById('recentWeekly').parentElement.querySelector('.stat-subtext').innerHTML = '<span style="color: var(--accent-warning);">No recent data</span>';
@@ -3024,16 +3002,32 @@ Thanks,`;
                 return;
             }
 
-            // Recent table with comparison
+            // Calculate days of data per user from recentData
+            const userDays = {};
+            recentData.forEach(row => {
+                const user = row['Username'];
+                const dateStr = row['Start Time'] || row['End Time'];
+                if (user && dateStr) {
+                    if (!userDays[user]) {
+                        userDays[user] = new Set();
+                    }
+                    const datePart = dateStr.split(' ')[0];
+                    userDays[user].add(datePart);
+                }
+            });
+
+            // Recent table with comparison and daily average
             const recentUsers = Object.entries(recentByUser)
                 .map(([user, metrics]) => {
                     const historical = historicalByUser[user];
+                    const daysOfData = userDays[user] ? userDays[user].size : 1;
+                    const dailyAvg = metrics.total / daysOfData;
                     const projected = metrics.total * 4.33;
                     const change = historical 
                         ? ((projected - historical.avgMonthly) / historical.avgMonthly) * 100
                         : 999;
                     
-                    return { user, projected, change };
+                    return { user, projected, change, dailyAvg, daysOfData };
                 })
                 .sort((a, b) => b.projected - a.projected)
                 .slice(0, 10);
@@ -3044,18 +3038,22 @@ Thanks,`;
                         <tr>
                             <th>User</th>
                             <th style="text-align: right;">Recent Week</th>
-                            <th style="text-align: right;">Projected/Month</th>
+                            <th style="text-align: right;">Avg/Day</th>
+                            <th style="text-align: right;">Proj/Mo</th>
                             <th style="text-align: right;">vs Avg</th>
                         </tr>
                     </thead>
                     <tbody>
-                        ${recentUsers.map(({user, projected, change}) => {
+                        ${recentUsers.map(({user, projected, change, dailyAvg, daysOfData}) => {
                             const weeklyUsage = recentByUser[user].total;
+                            const projectedFromDaily = dailyAvg * 30.44;
+                            const showDailyTooltip = daysOfData < 5;
                             return `
                             <tr>
                                 <td style="font-weight: 600;">${user}</td>
                                 <td style="text-align: right; font-weight: 600; color: var(--text-secondary);">${weeklyUsage.toFixed(1)}</td>
-                                <td style="text-align: right; font-weight: 600; color: var(--accent-info);">${projected.toFixed(1)}</td>
+                                <td style="text-align: right; font-weight: 600; color: var(--accent-info);" title="${daysOfData} day${daysOfData > 1 ? 's' : ''} of data">${dailyAvg.toFixed(1)} <span style="font-size: 0.7rem; color: var(--text-secondary);">(${daysOfData}d)</span></td>
+                                <td style="text-align: right; font-weight: 600; color: var(--accent-warning);${showDailyTooltip ? ' cursor: help;' : ''}" ${showDailyTooltip ? `title="If daily avg continues: ${projectedFromDaily.toFixed(0)}/mo"` : ''}>${projected.toFixed(1)}</td>
                                 <td style="text-align: right; font-weight: 600; color: ${change > 20 ? 'var(--accent-danger)' : change < -20 ? 'var(--accent-success)' : 'var(--text-secondary)'};">
                                     ${change === 999 ? 'NEW' : (change > 0 ? '+' : '') + change.toFixed(0) + '%'}
                                 </td>
