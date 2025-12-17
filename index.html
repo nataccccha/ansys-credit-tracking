@@ -2312,17 +2312,20 @@ Thanks,`;
         // Update balance date from most recent data entry
         function updateBalanceDateFromData(data) {
             if (!data || data.length === 0) return;
-            
-            // Find the most recent date in the data
-            let mostRecentDate = null;
-            
+    
+            // Count unique users
+            const uniqueUsers = new Set();
             data.forEach(row => {
-                const endTime = row['End Time'] || row['Start Time'];
-                const date = parseDate(endTime);
-                if (date && (!mostRecentDate || date > mostRecentDate)) {
-                    mostRecentDate = date;
+                const username = row['Username'];
+                if (username) {
+                    uniqueUsers.add(username);
                 }
             });
+    
+    // Update active users count
+    const activeUsersCount = uniqueUsers.size;
+    document.getElementById('activeUsersNumber').textContent = activeUsersCount;
+}
             
             if (mostRecentDate) {
                 // Format the date
