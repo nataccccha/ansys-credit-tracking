@@ -2312,57 +2312,6 @@ Thanks,`;
         // Update balance date from most recent data entry
         function updateBalanceDateFromData(data) {
             if (!data || data.length === 0) return;
-    
-            // Count unique users
-            const uniqueUsers = new Set();
-            data.forEach(row => {
-                const username = row['Username'];
-                if (username) {
-                    uniqueUsers.add(username);
-                }
-            });
-    
-    // Update active users count
-    const activeUsersCount = uniqueUsers.size;
-    document.getElementById('activeUsersNumber').textContent = activeUsersCount;
-}
-            
-            if (mostRecentDate) {
-                // Format the date
-                const options = { year: 'numeric', month: 'long', day: 'numeric' };
-                const formattedDate = mostRecentDate.toLocaleDateString('en-US', options);
-                
-                // Update the display
-                const balanceDateElement = document.getElementById('balanceUpdateDate');
-                balanceDateElement.textContent = formattedDate;
-                
-                // Check if balance is more than a week old
-                const today = new Date();
-                const daysDifference = Math.floor((today - mostRecentDate) / (1000 * 60 * 60 * 24));
-                
-                if (daysDifference > 7) {
-                    balanceDateElement.style.color = 'var(--accent-danger)';
-                    balanceDateElement.style.fontWeight = '700';
-                    
-                    // Add warning icon
-                    const warningSpan = document.createElement('span');
-                    warningSpan.innerHTML = ' ⚠️';
-                    warningSpan.style.fontSize = '1rem';
-                    balanceDateElement.parentElement.appendChild(warningSpan);
-                    
-                    // Add warning message
-                    const warningMsg = document.createElement('div');
-                    warningMsg.style.marginTop = '8px';
-                    warningMsg.style.padding = '8px 12px';
-                    warningMsg.style.background = 'rgba(255, 59, 48, 0.12)';
-                    warningMsg.style.color = 'var(--accent-danger)';
-                    warningMsg.style.borderRadius = '6px';
-                    warningMsg.style.fontSize = '0.8125rem';
-                    warningMsg.style.fontWeight = '600';
-                    warningMsg.innerHTML = '⚠️ Balance is ' + daysDifference + ' days old. Please update the administrator.';
-                    balanceDateElement.parentElement.parentElement.appendChild(warningMsg);
-                }
-            }
             
             // Count unique users
             const uniqueUsers = new Set();
