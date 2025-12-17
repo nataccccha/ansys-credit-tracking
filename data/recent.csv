@@ -1,2 +1,34 @@
 Start Time,End Time,Product,Count,Hours,Cost,Currency,Username
-2025-12-16 21:23:11,2025-12-16 22:23:14,Ansys CFD Enterprise Solver,1,1,28,AEC,eduffield
+2025-12-10 12:34:17,2025-12-10 12:35:06,Ansys Discovery Enterprise,1,0.01,0.2,AEC,sgutteridge
+2025-12-10 12:34:20,2025-12-10 12:35:03,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge
+2025-12-10 12:30:13,2025-12-10 12:30:57,Ansys CFD Enterprise Solver,1,0.01,0.3,AEC,sgutteridge
+2025-12-10 12:31:53,2025-12-10 12:33:09,Ansys CFD Enterprise Solver,1,0.02,0.6,AEC,sgutteridge
+2025-12-10 12:35:32,2025-12-10 12:39:20,Ansys CFD Enterprise Solver,1,0.06,1.8,AEC,sgutteridge
+2025-12-10 12:45:37,2025-12-10 13:03:12,Ansys CFD Enterprise Solver,1,0.29,8.2,AEC,sgutteridge
+2025-12-11 11:37:23,2025-12-11 11:40:11,Ansys BladeModeler,1,0.05,0.1,AEC,sgutteridge
+2025-12-11 11:26:52,2025-12-11 11:28:08,Ansys Discovery Enterprise,1,0.02,0.4,AEC,sgutteridge
+2025-12-11 11:43:28,2025-12-11 11:56:16,Ansys CFD Enterprise Solver,1,0.21,6.0,AEC,sgutteridge
+2025-12-11 11:26:54,2025-12-11 11:28:06,Ansys BladeModeler,1,0.02,0.1,AEC,sgutteridge
+2025-12-11 11:32:03,2025-12-11 11:34:30,Ansys Discovery Enterprise,1,0.04,0.7,AEC,sgutteridge
+2025-12-11 11:56:50,2025-12-11 11:57:03,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge
+2025-12-11 11:56:53,2025-12-11 11:57:03,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge
+2025-12-11 11:23:23,2025-12-11 11:26:00,Ansys Discovery Enterprise,1,0.04,0.8,AEC,sgutteridge
+2025-12-11 11:23:26,2025-12-11 11:25:58,Ansys BladeModeler,1,0.04,0.1,AEC,sgutteridge
+2025-12-11 11:37:20,2025-12-11 11:40:13,Ansys Discovery Enterprise,1,0.05,0.9,AEC,sgutteridge
+2025-12-11 11:41:19,2025-12-11 11:41:27,Ansys BladeModeler,1,0.01,0.1,AEC,sgutteridge
+2025-12-11 11:32:06,2025-12-11 11:34:27,Ansys BladeModeler,1,0.04,0.1,AEC,sgutteridge
+2025-12-11 11:43:16,2025-12-11 11:43:21,Ansys CFD Enterprise Solver,1,0.01,0.1,AEC,sgutteridge
+2025-12-11 11:41:17,2025-12-11 11:41:27,Ansys Discovery Enterprise,1,0.01,0.1,AEC,sgutteridge
+2025-12-11 11:40:40,2025-12-11 11:43:26,Ansys CFD PrepPost,1,0.05,0.6,AEC,sgutteridge
+2025-12-11 11:58:07,2025-12-11 12:00:53,Ansys CFD PrepPost,1,0.05,0.6,AEC,sgutteridge
+2025-12-11 12:14:08,2025-12-11 12:14:57,Ansys Mechanical Enterprise Solver,1,0.01,0.4,AEC,sgutteridge
+2025-12-11 12:01:32,2025-12-11 12:13:36,Ansys CFD PrepPost,1,0.2,2.8,AEC,sgutteridge
+2025-12-11 11:57:10,2025-12-11 11:57:19,Ansys CFD PrepPost,1,0.01,0.1,AEC,sgutteridge
+2025-12-11 11:21:10,2025-12-11 11:23:12,Ansys Mechanical Enterprise PrepPost,1,0.03,0.5,AEC,sgutteridge
+2025-12-11 11:34:58,2025-12-11 11:37:14,Ansys Mechanical Enterprise PrepPost,1,0.04,0.5,AEC,sgutteridge
+2025-12-11 11:28:27,2025-12-11 11:30:54,Ansys Mechanical Enterprise PrepPost,1,0.04,0.6,AEC,sgutteridge
+2025-12-11 11:56:32,2025-12-11 12:19:01,Ansys Mechanical Enterprise PrepPost,1,0.38,5.2,AEC,sgutteridge
+2025-12-11 13:04:03,2025-12-11 13:07:02,Ansys Zemax OpticStudio Enterprise,1,0.05,1.0,AEC,tutley
+2025-12-11 15:32:41,2025-12-11 15:34:14,Ansys Zemax OpticStudio Enterprise,1,0.03,0.5,AEC,tutley
+2025-12-11 16:20:35,2025-12-11 16:55:21,Ansys Zemax OpticStudio Enterprise,1,0.58,11.6,AEC,tutley
+2025-12-16 21:23:11,2025-12-16 22:23:14,Ansys CFD Enterprise Solver,1,1.0,28.0,AEC,eduffield
