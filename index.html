@@ -1803,8 +1803,8 @@
         // CONFIGURATION - Update these values
         // ============================================
         const INITIAL_BALANCE = 834.2;  // Update this with current AEC balance
-        const BALANCE_UPDATE_DATE = "December 3, 2025";  // Fallback date (auto-detected from recent CSV data)
-        const ACTIVE_USERS_THIS_WEEK = 3;  // Fallback value (auto-detected from unique usernames in recent CSV)
+        const BALANCE_UPDATE_DATE = "December 17, 2025";  // Fallback date (auto-detected from recent CSV data)
+        const ACTIVE_USERS_THIS_WEEK = 0;  // Fallback value (auto-detected from unique usernames in recent CSV)
 
         // CSV File URLs - Update these with your hosted file locations
         const HISTORICAL_CSV_URL = "https://raw.githubusercontent.com/nataccccha/ansys-credit-tracking/refs/heads/main/data/historical.csv";
@@ -2246,7 +2246,7 @@ Thanks,`;
                 document.getElementById(dateRangeId).innerHTML = `Data: ${dateRange}`;
                 document.getElementById(sectionId).classList.add('loaded');
                 
-                if (historicalData.length > 0 && recentData.length > 0) {
+                if (historicalData.length > 0) {
                     setTimeout(() => {
                         document.getElementById('dashboardContent').classList.remove('hidden');
                         updateDashboard();
@@ -2571,6 +2571,7 @@ Thanks,`;
         }
 
         function updateDashboard() {
+            const hasRecentData = recentData.length > 0
             // Calculate recent metrics first
             const recentTotal = recentData.reduce((sum, row) => sum + parseFloat(row['Cost'] || 0), 0);
             const totalUsers = new Set(recentData.map(row => row['Username'])).size;
@@ -2633,7 +2634,12 @@ Thanks,`;
 
             // Update stats
             document.getElementById('historicalAvg').textContent = historicalAvgMonthly.toFixed(1);
-            document.getElementById('recentWeekly').textContent = recentTotal.toFixed(1);
+            if (hasRecentData) {
+                document.getElementById('recentWeekly').textContent = recentTotal.toFixed(1);
+            } else {
+                document.getElementById('recentWeekly').textContent = '0';
+                document.getElementById('recentWeekly').parentElement.querySelector('.stat-subtext').innerHTML = '<span style="color: var(--accent-warning);">No recent data</span>';
+                }
             document.getElementById('projectedMonthly').textContent = projectedMonthly.toFixed(1);
             document.getElementById('runwayMonths').textContent = runwayWeeks.toFixed(1);
 
@@ -2660,10 +2666,10 @@ Thanks,`;
 
             // Generate alerts with dynamic thresholds
             const alerts = generateAlerts(historicalByUser, recentByUser, historicalAvgMonthly, projectedMonthly);
-            renderAlerts(alerts);
+            renderAlerts(alerts, hasRecentData);
 
             // Render comparison tables
-            renderUserComparison(historicalByUser, recentByUser);
+            renderUserComparison(historicalByUser, recentByUser, hasRecentData);
 
             // Update purchase section
             const currentBalance = settings.availableBalance;
@@ -2963,9 +2969,12 @@ Thanks,`;
             });
         }
 
-        function renderAlerts(alerts) {
+        function renderAlerts(alerts, hasRecentData) {
             const alertsList = document.getElementById('alertsList');
-            
+            if (!hasRecentData) {
+                alertsList.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 40px;">📊 No recent usage data available.<br><span style="font-size: 0.9rem;">Upload recent data to see usage alerts.</span></p>';
+                return;
+            }
             if (alerts.length === 0) {
                 alertsList.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 40px;">✓ No alerts. All users are within safe consumption rates.</p>';
                 return;
@@ -3006,7 +3015,7 @@ Thanks,`;
             }).join('');
         }
 
-        function renderUserComparison(historicalByUser, recentByUser) {
+        function renderUserComparison(historicalByUser, recentByUser, hasRecentData) {
             // Historical table
             const historicalUsers = Object.entries(historicalByUser)
                 .sort((a, b) => b[1].avgMonthly - a[1].avgMonthly)
@@ -3031,6 +3040,15 @@ Thanks,`;
                 </table>
             `;
             document.getElementById('historicalUserTable').innerHTML = historicalHTML;
+            if (!hasRecentData || Object.keys(recentByUser).length === 0) {
+                document.getElementById('recentUserTable').innerHTML = `
+                    <p style="color: var(--text-secondary); text-align: center; padding: 40px;">
+                        No recent usage data available.<br>
+                        <span style="font-size: 0.9rem;">Upload recent data to see current usage patterns.</span>
+                    </p>
+                `;
+                return;
+            }
 
             // Recent table with comparison
             const recentUsers = Object.entries(recentByUser)
