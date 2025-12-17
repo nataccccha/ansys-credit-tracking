@@ -353,8 +353,8 @@ h1 { font-size: 1rem; }
           <button class="remove-software-btn" onclick="clearCalculator()" style="background: var(--accent-danger); visibility: visible;">Clear</button>
         </div>
       </div>
-      <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end;">
-        <button class="add-software-btn" onclick="addSoftwareRow()">+ Add Another Software</button>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <button class="add-software-btn" onclick="addSoftwareRow()" style="flex: 1;">+ Add Another Software</button>
       </div>
       <div class="calculator-result">
         <div class="result-row">
@@ -371,11 +371,11 @@ h1 { font-size: 1rem; }
         </div>
         <div id="alertMessage"></div>
       </div>
-      <div style="display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; justify-content: space-between;">
+      <div style="display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap;">
         <button class="add-software-btn" onclick="exportQuoteToPDF()" style="background: var(--accent-teal);">
           📄 Export as Quote
         </button>
-        <button class="add-software-btn" onclick="calculateUsage()">
+        <button class="add-software-btn" onclick="calculateUsage()" style="flex: 1;">
           Calculate
         </button>
       </div>
@@ -2090,7 +2090,7 @@ Thanks!`;
         yPos += rowHeight;
         doc.setTextColor(50, 50, 50);
         xPos = startX + 2;
-        doc.text(`${item.hours * item.weeks}`, xPos, rowTop + 7);
+        doc.text('1', xPos, rowTop + 7);
         xPos += colWidths[0];
         doc.text(`${item.software}`, xPos, rowTop + 7);
         xPos += colWidths[1];
