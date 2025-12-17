@@ -1744,9 +1744,10 @@ Natacha`;
         canvas.id = `pieChart-${userIndex}`;
         canvas.style.cssText = 'max-height: 180px;';
         card.appendChild(canvas);
+        const sortedSoftware = Object.keys(softwareData).sort((a, b) => softwareData[b] - softwareData[a]);
         const legend = document.createElement('div');
         legend.style.cssText = 'margin-top: 12px; display: flex; flex-wrap: wrap; gap: 4px 8px; font-size: 0.65rem;';
-        Object.keys(softwareData).sort((a, b) => softwareData[b] - softwareData[a]).forEach((software, index) => {
+        sortedSoftware.forEach((software, index) => {
           const hours = softwareData[software];
           const percentage = ((hours / totalHours) * 100).toFixed(0);
           const color = colors[index % colors.length];
@@ -1762,10 +1763,10 @@ Natacha`;
         container.appendChild(card);
         const ctx = canvas.getContext('2d');
         const chartData = {
-          labels: Object.keys(softwareData),
+          labels: sortedSoftware,
           datasets: [{
-            data: Object.values(softwareData),
-            backgroundColor: Object.keys(softwareData).map((_, i) => colors[i % colors.length]),
+            data: sortedSoftware.map(s => softwareData[s]),
+            backgroundColor: sortedSoftware.map((_, i) => colors[i % colors.length]),
             borderWidth: 2,
             borderColor: '#ffffff'
           }]
